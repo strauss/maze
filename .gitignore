@@ -1,0 +1,50 @@
+# --- IntelliJ IDEA ----------------------------------------------------
+.idea/
+*.iws
+*.iml
+*.ipr
+# Sonstige JetBrains-Umgebungen
+.idea_modules/
+# Lokale Run/Debug-Konfigurationen
+.idea/**/runConfigurations/
+
+# --- Gradle -----------------------------------------------------------
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+# Caches für Wrapper-Downloads
+**/gradle/wrapper/dists/
+
+# --- Kotlin/Java ------------------------------------------------------
+out/                     # IntelliJ Auto-Build Ordner
+*.class
+*.log
+
+# --- OS- & Tool-Spezielles -------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+# Linux
+*~
+
+# --- Weitere gängige Dateien/Ordner -----------------------------------
+# Lokale Settings, die nicht ins Repo gehören
+*.local
+*.conf.local
+*.env
+# Produkt - & Test-Reports
+reports/
+# IDE-Übergroße Index-Daten
+.idea/index
+.idea/sonarlint
+
+# --- Optional: test- & IDE-Output, wenn vorhanden ---------------------
+# .scan/              # Build-Scan-Output
+.kotlin/            # K2-Analyse-Cache
