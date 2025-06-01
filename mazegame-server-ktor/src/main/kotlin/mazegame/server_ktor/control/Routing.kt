@@ -3,6 +3,7 @@ package mazegame.server_ktor.control
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -47,8 +48,16 @@ fun Application.configureAuthentication() {
 
 fun Application.configureRouting() {
     routing {
+
+        staticResources("/static", "static")
+
         get("/index") {
             call.respond(ThymeleafContent("index", mapOf()))
+        }
+
+        // TODO: This has to be inside the bearer auth or protected by a cookie
+        get("/hello") {
+            call.respond(ThymeleafContent("hello", mapOf()))
         }
         
         authenticate(basicAuth) {

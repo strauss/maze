@@ -1,10 +1,11 @@
 rootProject.name = "mazegame"
 
-include("mazegame-server-ktor")   // weitere Module hier ergänzen
+include("mazegame-server-ktor")
+include("mazegame-web-ui")
 
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
-        mavenLocal()              // damit der alte Java-Client sofort gefunden wird
+        mavenLocal()
     }
 }

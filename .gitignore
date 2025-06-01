@@ -48,3 +48,6 @@ reports/
 # --- Optional: test- & IDE-Output, wenn vorhanden ---------------------
 # .scan/              # Build-Scan-Output
 .kotlin/            # K2-Analyse-Cache
+
+# generierte Web-UI-Bundles
+/mazegame-server-ktor/src/main/resources/static/mazegame-web-ui.js

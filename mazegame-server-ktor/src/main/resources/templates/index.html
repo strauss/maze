@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
     <head>
-    <title>Nothing</title>
+    <meta charset="UTF-8">
+    <title>MazeGame – Login</title>
+    <script src="/static/mazegame-web-ui.js" defer>
+        // import UiActions from '/static/mazegame-web-ui.js'
+        // document
+        //     .getElementById('loginButton')
+        //     .addEventListener('click', de.dreamcube.mazegame.web_ui.UiActions.onLoginClick)
+    </script>
+    <!-- Frontend-Bundle -->
     </head>
     <body>
-        <h1 th:text="'Hello Thymeleaf'"></h1>
+        <h1>Please log in (this time it has to work!)</h1>
+
+        <form id="loginForm">
+            <label>Username: <input id="username" required></label><br>
+            <label>Password: <input type="password" id="password" required></label><br>
+            <button id="loginButton" type="button" onClick="mazegameWebUi.de.dreamcube.mazegame.web_ui.UiActions.onLoginClick()">Login</button>
+        </form>
     </body>
 </html>

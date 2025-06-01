@@ -1,28 +1,42 @@
 [versions]
-kotlin   = "2.1.20"   # aus Parent-POM
-ktor     = "3.1.2"
-jackson  = "2.18.2"
-slf4j    = "2.0.9"
-logback  = "1.5.13"
-jwt      = "4.4.0"
+kotlin               = "2.1.20"   # aus Parent-POM
+ktor                 = "3.1.2"
+jackson              = "2.18.2"
+slf4j                = "2.0.9"
+logback              = "1.5.13"
+jwt                  = "4.4.0"
+kotlinxSerialization = "1.6.3"
+kotlinxHtml          = "0.12.0"
+kotlinxExtensions    = "1.0.1-pre.823"
+shadow               = "8.1.1"
+
+[plugins]
+kotlin-jvm           = { id = "org.jetbrains.kotlin.jvm",           version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+shadow-jar           = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 # --- Bibliotheken ------------------------------------------------------
 [libraries]
-ktor-server-core          = { module = "io.ktor:ktor-server-core-jvm",            version.ref = "ktor" }
-ktor-server-netty         = { module = "io.ktor:ktor-server-netty-jvm",           version.ref = "ktor" }
-ktor-server-config-yaml   = { module = "io.ktor:ktor-server-config-yaml-jvm",     version.ref = "ktor" }
-ktor-server-auth          = { module = "io.ktor:ktor-server-auth-jvm",            version.ref = "ktor" }
-ktor-server-content-neg   = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
-ktor-serialization-jackson= { module = "io.ktor:ktor-serialization-jackson-jvm",  version.ref = "ktor" }
-ktor-server-thymeleaf     = { module = "io.ktor:ktor-server-thymeleaf-jvm",       version.ref = "ktor" }
+ktor-server-core           = { module = "io.ktor:ktor-server-core-jvm",                             version.ref = "ktor" }
+ktor-server-netty          = { module = "io.ktor:ktor-server-netty-jvm",                            version.ref = "ktor" }
+ktor-server-config-yaml    = { module = "io.ktor:ktor-server-config-yaml-jvm",                      version.ref = "ktor" }
+ktor-server-auth           = { module = "io.ktor:ktor-server-auth-jvm",                             version.ref = "ktor" }
+ktor-server-content-neg    = { module = "io.ktor:ktor-server-content-negotiation-jvm",              version.ref = "ktor" }
+ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson-jvm",                   version.ref = "ktor" }
+ktor-server-thymeleaf      = { module = "io.ktor:ktor-server-thymeleaf-jvm",                        version.ref = "ktor" }
 
-slf4j-api                 = { module = "org.slf4j:slf4j-api",      version.ref = "slf4j" }
-logback-classic           = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-jwt                       = { module = "com.auth0:java-jwt",       version.ref = "jwt" }
-jackson-dataformat-yaml   = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
-jackson-module-kotlin     = { module = "com.fasterxml.jackson.module:jackson-module-kotlin",       version.ref = "jackson" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json",         version.ref = "kotlinxSerialization" }
+kotlinx-html               = { module = "org.jetbrains.kotlinx:kotlinx-html",                       version.ref = "kotlinxHtml" }
+kotlinx-extensions         = { module = "org.jetbrains.kotlin-wrappers:kotlin-extensions",          version.ref = "kotlinxExtensions" }
+
+slf4j-api                  = { module = "org.slf4j:slf4j-api",                                      version.ref = "slf4j" }
+logback-classic            = { module = "ch.qos.logback:logback-classic",                           version.ref = "logback" }
+jwt                        = { module = "com.auth0:java-jwt",                                       version.ref = "jwt" }
+jackson-dataformat-yaml    = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-module-kotlin      = { module = "com.fasterxml.jackson.module:jackson-module-kotlin",       version.ref = "jackson" }
 
 # --- Test-Libs (auskommentiert – bei Bedarf aktivieren) ----------------
-junit-jupiter             = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.8.2" }
+junit-jupiter              = { module = "org.junit.jupiter:junit-jupiter-engine",                   version = "5.8.2" }
 # mockito-core              = { module = "org.mockito:mockito-core",               version = "5.6.0" }
 # mockito-junit             = { module = "org.mockito:mockito-junit-jupiter",      version = "4.8.1" }

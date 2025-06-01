@@ -1,4 +1,8 @@
-plugins { `java-platform` }
+plugins {
+    `java-platform`
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+}
 
 group   = "de.dreamcube"
 version = "1.0-SNAPSHOT"
