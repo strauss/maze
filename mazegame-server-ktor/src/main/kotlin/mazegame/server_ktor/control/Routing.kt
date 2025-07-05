@@ -3,13 +3,14 @@ package mazegame.server_ktor.control
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.http.content.staticResources
+import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
 import io.ktor.util.*
 import mazegame.server_ktor.config.MazeServerConfigurationDto
+import mazegame.server_ktor.contest.ContestConfiguration
 import mazegame.server_ktor.maze.BaitType
 
 private const val basicAuth: String = "basic"
@@ -59,7 +60,7 @@ fun Application.configureRouting() {
         get("/hello") {
             call.respond(ThymeleafContent("hello", mapOf()))
         }
-        
+
         authenticate(basicAuth) {
             post("/login") {
                 val user: UserIdPrincipal? = call.principal<UserIdPrincipal>()
@@ -155,6 +156,22 @@ fun Application.configureRouting() {
                 val serverId: Int = call.getIntParameter(pathServerId) ?: return@post
                 val putBaitCommand: PutBaitCommandDto = call.receive<PutBaitCommandDto>()
                 ServerController.putBait(call, serverId, putBaitCommand)
+            }
+
+            get("/server/{$pathServerId}/contest") {
+                val serverId: Int = call.getIntParameter(pathServerId) ?: return@get
+                ServerController.getContestInformation(call, serverId)
+            }
+
+            post("/server/{$pathServerId}/contest") {
+                val serverId: Int = call.getIntParameter(pathServerId) ?: return@post
+                val contestConfiguration: ContestConfiguration = call.receiveNullable() ?: ContestConfiguration()
+                ServerController.startContest(call, serverId, contestConfiguration)
+            }
+
+            delete("/server/{$pathServerId}/contest") {
+                val serverId: Int = call.getIntParameter(pathServerId) ?: return@delete
+                ServerController.stopContest(call, serverId)
             }
 
             get("server") {

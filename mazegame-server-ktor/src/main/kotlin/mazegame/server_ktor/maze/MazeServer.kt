@@ -6,6 +6,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import mazegame.server_ktor.config.MazeServerConfigurationDto
+import mazegame.server_ktor.contest.ContestConfiguration
+import mazegame.server_ktor.contest.ContestController
 import mazegame.server_ktor.maze.commands.control.GoCommand
 import mazegame.server_ktor.maze.commands.control.OccupationResult
 import mazegame.server_ktor.maze.game_events.GameEventControl
@@ -165,6 +167,11 @@ class MazeServer(
      * Handles the frenzy bot logic.
      */
     internal val frenzyHandler: FrenzyHandler = FrenzyHandler(this)
+
+    /**
+     * Controller for a running contest.
+     */
+    internal var contestController: ContestController? = null
 
     init {
         val mzg: MazeGenerator = WallBasedMazeGenerator()
@@ -749,5 +756,18 @@ class MazeServer(
             } while (serverSideClient.clientId <= 0)
         }
         return null
+    }
+
+    internal fun contestRunning(): Boolean = contestController?.contestRunning ?: false
+
+    internal suspend fun stopContest() = contestController?.stop()
+
+    internal fun startContest(configuration: ContestConfiguration): Boolean {
+        if (contestRunning()) {
+            return false
+        }
+        contestController = ContestController(this, scope, configuration)
+        contestController?.start()
+        return true
     }
 }

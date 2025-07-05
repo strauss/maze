@@ -9,6 +9,7 @@ import mazegame.server_ktor.config.ConnectionDto
 import mazegame.server_ktor.config.GameDto
 import mazegame.server_ktor.config.MazeGeneratorConfigurationDto
 import mazegame.server_ktor.config.MazeServerConfigurationDto
+import mazegame.server_ktor.contest.ContestConfiguration
 import mazegame.server_ktor.maze.BaitType
 import mazegame.server_ktor.maze.ClientConnection
 import mazegame.server_ktor.maze.MazeServer
@@ -334,4 +335,48 @@ object ServerController {
         server.commandExecutor.addCommand(KillCommand(server, clientConnection))
         call.respond(HttpStatusCode.NoContent)
     }
+
+    /**
+     * Retrieves contest information if there is any.
+     */
+    suspend fun getContestInformation(call: ApplicationCall, serverId: Int) {
+        val server: MazeServer = getMazeServer(call, serverId) ?: return
+        val contestConfiguration: ContestConfiguration? = server.contestController?.configuration
+        if (contestConfiguration == null) {
+            return call.respond(HttpStatusCode.NotFound, "No contest found.")
+        }
+        call.respond(HttpStatusCode.OK, contestConfiguration)
+    }
+
+    /**
+     * Starts a new contest if no contest is already running.
+     */
+    suspend fun startContest(call: ApplicationCall, serverId: Int, contestConfiguration: ContestConfiguration) {
+        val server: MazeServer = getMazeServer(call, serverId) ?: return
+        if (server.contestRunning()) {
+            return call.respond(
+                HttpStatusCode.PreconditionFailed,
+                "Contest is already running. You have to wait until it is over or stop it manually."
+            )
+        }
+        val success = server.startContest(contestConfiguration)
+        if (success) {
+            call.respond(HttpStatusCode.NoContent)
+        } else {
+            call.respond(HttpStatusCode.InternalServerError, "Contest failed to start.")
+        }
+    }
+
+    /**
+     * Stops a running contest.
+     */
+    suspend fun stopContest(call: ApplicationCall, serverId: Int) {
+        val server: MazeServer = getMazeServer(call, serverId) ?: return
+        if (!server.contestRunning()) {
+            return call.respond(HttpStatusCode.PreconditionFailed, "Contest is not started (yet).")
+        }
+        server.stopContest()
+        call.respond(HttpStatusCode.NoContent)
+    }
+
 }

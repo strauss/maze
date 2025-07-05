@@ -18,8 +18,7 @@ class ClientConnection(
     private val server: MazeServer,
     private val parentScope: CoroutineScope,
     private val socket: Socket
-) :
-    CoroutineScope by CoroutineScope(parentScope.coroutineContext + SupervisorJob()) {
+) : CoroutineScope by CoroutineScope(parentScope.coroutineContext + SupervisorJob()) {
 
     companion object {
         private val LOGGER = LoggerFactory.getLogger(ClientConnection::class.java)
