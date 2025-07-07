@@ -19,7 +19,7 @@ import kotlin.random.Random
  * from an array list was eliminated.
  * </p>
  */
-class WallBasedMazeGenerator(seed: Long? = null) : MazeGenerator {
+class WallBasedMazeGenerator(val templateFillStartPoints: Boolean, seed: Long? = null) : MazeGenerator {
 
     private val rng = Random(seed ?: System.currentTimeMillis())
 
@@ -68,15 +68,15 @@ class WallBasedMazeGenerator(seed: Long? = null) : MazeGenerator {
             }
         }
 
-        val potentialWalls: RandomBuffer<Point>
+        val potentialWalls: RandomBuffer<Point> = RandomBuffer()
 
-        if (templateStartPositions.isNotEmpty()) {
+        if (templateStartPositions.isNotEmpty()){
             // If the template contains start positions, we take those.
-            potentialWalls = RandomBuffer(templateStartPositions.size)
             potentialWalls.addAll(templateStartPositions)
-        } else {
-            // otherwise we generate our own
+        }
 
+        if(potentialWalls.empty || templateFillStartPoints) {
+            // if we have no potential walls or want to add more of them randomly, we add random potential wall positions
             // analyze the maze for positions that can become starting positions (all path fields that are surrounded by other path fields)
             val possibleStartPositions = RandomBuffer<Point>(random = rng)
             for (y in 0..<height) {
@@ -89,8 +89,8 @@ class WallBasedMazeGenerator(seed: Long? = null) : MazeGenerator {
             }
 
             // approx. 5% of all cells become starting positions
-            val initialPositionCount = possibleStartPositions.size / 20
-            potentialWalls = RandomBuffer(initialPositionCount, rng)
+            // we have to substract the already defined ones we might got from a template file
+            val initialPositionCount = (possibleStartPositions.size / 20) - potentialWalls.size
             for (i in 0..<initialPositionCount) {
                 val nextPossible = possibleStartPositions.next()
                 maze[nextPossible.x, nextPossible.y] = Maze.POSSIBLE

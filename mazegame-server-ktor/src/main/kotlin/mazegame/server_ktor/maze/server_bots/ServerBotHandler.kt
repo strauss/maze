@@ -55,8 +55,10 @@ abstract class ServerBotHandler(protected val mazeServer: MazeServer) {
      * Despawns the bot if it is spawned.
      */
     internal suspend fun despawn() {
-        mazeServer.getClientConnection(client?.clientId)?.stop()
-        mutex.withLock { client = null }
+        mutex.withLock {
+            client?.terminate()
+            client = null
+        }
         postDespawn()
     }
 

@@ -4,7 +4,7 @@ import mazegame.server_ktor.maze.GameSpeed
 import mazegame.server_ktor.maze.generator.GeneratorMode
 
 data class ConnectionDto(val port: Int = 0, val maxClients: Int = 20, val loginTimeout: Long = 30_000L, val instantFlush: Boolean = false)
-data class GeneratorParametersDto(val width: Int = 40, val height: Int = 30, val mapFile: String? = null)
+data class GeneratorParametersDto(val width: Int = 40, val height: Int = 30, val mapFile: String? = null, val templateFillStartPoints: Boolean = false)
 data class MazeGeneratorConfigurationDto(
     val generatorMode: GeneratorMode = GeneratorMode.RANDOM,
     val generatorParameters: GeneratorParametersDto = GeneratorParametersDto()

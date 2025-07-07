@@ -4,15 +4,15 @@ enum class ContestEventType {
     START, REPORT, SPAWN_FRENZY, DESPAWN_FRENZY, STOP
 }
 
-data class ContestEvent(val type: ContestEventType, val delayInMilliseconds: Long)
+data class ContestEvent(val type: ContestEventType, val delayInMinutes: Int)
 
 private fun defaultAdditionalEventList(durationInMinutes: Int): List<ContestEvent> {
     val thirdDurationInMinutes = durationInMinutes / 3
     return listOf(
         // after first third
-        ContestEvent(ContestEventType.SPAWN_FRENZY, thirdDurationInMinutes * 60_000L),
+        ContestEvent(ContestEventType.SPAWN_FRENZY, thirdDurationInMinutes),
         // after second third
-        ContestEvent(ContestEventType.DESPAWN_FRENZY, thirdDurationInMinutes * 2 * 60_000L)
+        ContestEvent(ContestEventType.DESPAWN_FRENZY, thirdDurationInMinutes * 2)
     )
 }
 

@@ -44,7 +44,7 @@ class ContestController(
         val now = System.currentTimeMillis()
         val duration: String = (now - contestStartedAt).milliseconds.toString()
         server.sendToAllPlayers(createServerInfoMessage("Contest is being cancelled after $duration."))
-        events.send(ContestEvent(ContestEventType.STOP, 0L))
+        events.send(ContestEvent(ContestEventType.STOP, 0))
     }
 
     private fun Int.toMilliseconds(): Long = this * 60_000L
@@ -54,12 +54,12 @@ class ContestController(
      */
     private suspend fun initEvents() {
         // start and stop events
-        events.send(ContestEvent(ContestEventType.START, 0L))
-        events.send(ContestEvent(ContestEventType.STOP, configuration.durationInMinutes.toMilliseconds()))
+        events.send(ContestEvent(ContestEventType.START, 0))
+        events.send(ContestEvent(ContestEventType.STOP, configuration.durationInMinutes))
         // Report events
         var currentMinute = configuration.statusReportIntervalInMinutes
         while (currentMinute < configuration.durationInMinutes) {
-            events.send(ContestEvent(ContestEventType.REPORT, currentMinute.toMilliseconds()))
+            events.send(ContestEvent(ContestEventType.REPORT, currentMinute))
             currentMinute += configuration.statusReportIntervalInMinutes
         }
         // Additional events
@@ -69,10 +69,14 @@ class ContestController(
     private fun processEvents(): Job = launch {
         for (event: ContestEvent in events) {
             launch {
-                delay(event.delayInMilliseconds)
+                delay(event.delayInMinutes.toMilliseconds())
                 event.processNow()
             }
         }
+    }
+
+    internal suspend fun intermediateReport() {
+        events.send(ContestEvent(ContestEventType.REPORT, 0))
     }
 
     private suspend fun ContestEvent.processNow() {
@@ -103,10 +107,12 @@ class ContestController(
     private suspend fun report() {
         if (contestRunning) {
             val now = System.currentTimeMillis()
-            val running: String = (now - contestStartedAt).milliseconds.toString()
-            val remaining: String = (contestStartedAt + configuration.durationInMinutes.toMilliseconds() - now).milliseconds.toString()
-            server.sendToAllPlayers(createServerInfoMessage("Contest is running for $running.").thereIsMore())
-            server.sendToAllPlayers(createServerInfoMessage("Contest will run for another $remaining."))
+            val running: Long = ((now - contestStartedAt) / 1000L) * 1000L
+            val remaining: Long = configuration.durationInMinutes.toMilliseconds() - running
+            val runningString: String = running.milliseconds.toString()
+            val remainingString: String = remaining.milliseconds.toString()
+            server.sendToAllPlayers(createServerInfoMessage("Contest is running for $runningString.").thereIsMore())
+            server.sendToAllPlayers(createServerInfoMessage("Contest will run for another $remainingString."))
         } else {
             LOGGER.error("No report: $CONTEST_OVER_OR_NOT_STARTED_MESSAGE")
         }
@@ -142,8 +148,7 @@ class ContestController(
             position += 1
         }
         server.sendToAllPlayers(createServerInfoMessage("The winner is: ${topList.first().nick}"))
-//        eventJob.join()
-        cancel()
+        eventJob.cancel()
         server.contestController = null
     }
 

@@ -174,6 +174,11 @@ fun Application.configureRouting() {
                 ServerController.stopContest(call, serverId)
             }
 
+            post("/server/{$pathServerId}/contest/report") {
+                val serverId: Int = call.getIntParameter(pathServerId) ?: return@post
+                ServerController.triggerReport(call, serverId)
+            }
+
             get("server") {
                 ServerController.getactiveServerIds(call)
             }

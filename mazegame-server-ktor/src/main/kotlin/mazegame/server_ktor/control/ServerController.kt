@@ -361,7 +361,7 @@ object ServerController {
         }
         val success = server.startContest(contestConfiguration)
         if (success) {
-            call.respond(HttpStatusCode.NoContent)
+            call.respond(HttpStatusCode.Accepted)
         } else {
             call.respond(HttpStatusCode.InternalServerError, "Contest failed to start.")
         }
@@ -376,7 +376,20 @@ object ServerController {
             return call.respond(HttpStatusCode.PreconditionFailed, "Contest is not started (yet).")
         }
         server.stopContest()
-        call.respond(HttpStatusCode.NoContent)
+        server.contestController?.stop()
+        call.respond(HttpStatusCode.Accepted)
+    }
+
+    /**
+     * Triggers a contest report for connected clients.
+     */
+    suspend fun triggerReport(call: ApplicationCall, serverId: Int) {
+        val server: MazeServer = getMazeServer(call, serverId) ?: return
+        if(!server.contestRunning()) {
+            return call.respond(HttpStatusCode.PreconditionFailed, "Contest is not running.")
+        }
+        server.contestController?.intermediateReport()
+        call.respond(HttpStatusCode.Accepted)
     }
 
 }

@@ -174,7 +174,7 @@ class MazeServer(
     internal var contestController: ContestController? = null
 
     init {
-        val mzg: MazeGenerator = WallBasedMazeGenerator()
+        val mzg: MazeGenerator = WallBasedMazeGenerator(serverConfiguration.maze.generatorParameters.templateFillStartPoints)
         maze = mzg.generateMazeFromConfiguration(serverConfiguration.maze)
         positionProvider = PositionProvider(maze)
         LOGGER.info("Maze dimension: ${maze.width} x ${maze.height}")
