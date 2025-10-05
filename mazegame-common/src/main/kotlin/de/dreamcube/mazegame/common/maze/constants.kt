@@ -1,4 +1,4 @@
-package de.dreamcube.mazegame.server.maze
+package de.dreamcube.mazegame.common.maze
 
 const val COMMAND_AND_MESSAGE_SEPARATOR: String = ";"
 const val PROTOCOL_VERSION: Int = 1

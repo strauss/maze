@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.server.maze.server_bots
 
-import de.dreamcube.mazegame.server.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.ErrorCode
 import mazegame.client.MazeClient
 import mazegame.client.strategy.Strategy
 import mazegame.client.strategy.SurpriseBot

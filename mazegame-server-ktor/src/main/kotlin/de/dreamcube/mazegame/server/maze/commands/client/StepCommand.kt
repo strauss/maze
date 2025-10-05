@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
+import de.dreamcube.mazegame.common.maze.ErrorCode
 import de.dreamcube.mazegame.common.maze.Message
 import de.dreamcube.mazegame.server.maze.*
 import de.dreamcube.mazegame.server.maze.game_events.BaitCollectedEvent

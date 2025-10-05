@@ -1,7 +1,11 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
+import de.dreamcube.mazegame.common.maze.ErrorCode
 import de.dreamcube.mazegame.common.maze.Message
-import de.dreamcube.mazegame.server.maze.*
+import de.dreamcube.mazegame.server.maze.ClientConnection
+import de.dreamcube.mazegame.server.maze.MazeServer
+import de.dreamcube.mazegame.server.maze.ServerPlayer
+import de.dreamcube.mazegame.server.maze.createPlayerPositionTurnMessage
 
 class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :
     ClientCommand(mazeServer, clientConnection) {

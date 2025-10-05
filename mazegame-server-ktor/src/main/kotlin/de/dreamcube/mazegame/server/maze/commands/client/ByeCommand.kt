@@ -1,7 +1,7 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
+import de.dreamcube.mazegame.common.maze.ErrorCode
 import de.dreamcube.mazegame.server.maze.ClientConnection
-import de.dreamcube.mazegame.server.maze.ErrorCode
 import de.dreamcube.mazegame.server.maze.MazeServer
 
 

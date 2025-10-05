@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.server.maze
 
 import de.dreamcube.mazegame.common.maze.CommandExecutor
+import de.dreamcube.mazegame.common.maze.ErrorCode
 import de.dreamcube.mazegame.common.maze.Message
 import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
@@ -207,7 +208,8 @@ class MazeServer(
             commandExecutor.start()
             gameEventControl.start()
             try {
-                serverSocket = aSocket(ActorSelectorManager(Dispatchers.IO)).tcp().bind(port = port)
+                val selector = SelectorManager(Dispatchers.IO)
+                serverSocket = aSocket(selector).tcp().bind(port = port)
                 serverMap[port] = this@MazeServer
                 LOGGER.info("Maze server started, listening on $port")
                 result.complete(Unit)

@@ -23,6 +23,8 @@ dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.logback.classic)
 
+    implementation(projects.mazegameCommon)
+
     // Tests
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)

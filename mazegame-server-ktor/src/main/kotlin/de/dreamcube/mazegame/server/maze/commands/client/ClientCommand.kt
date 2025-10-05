@@ -1,12 +1,16 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
-import de.dreamcube.mazegame.server.maze.*
+import de.dreamcube.mazegame.common.maze.COMMAND_AND_MESSAGE_SEPARATOR
+import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.server.maze.ClientConnection
+import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.commands.ServerSideCommand
+import de.dreamcube.mazegame.server.maze.createInfoMessage
 
 
 /**
  * A command represents a received message from a client. The preconditions are checked in the constructor (init...) and the errorCode is set
- * accordingly. The [execute] functions checks the error code and only continues, if the [errorCode] is [ErrorCode.OK]. Every command has to implement
+ * accordingly. The [execute] functions checks the error code and only continues, if the [errorCode] is [de.dreamcube.mazegame.common.maze.ErrorCode.OK]. Every command has to implement
  * the [internalExecute] function, which is called by [execute].
  */
 abstract class ClientCommand(mazeServer: MazeServer, val clientConnection: ClientConnection) : ServerSideCommand(mazeServer) {

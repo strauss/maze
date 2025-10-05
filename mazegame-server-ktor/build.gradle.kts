@@ -32,7 +32,6 @@ dependencies {
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.jackson.module.kotlin)
 
-    // --- Abhängigkeit auf common
     implementation(projects.mazegameCommon)
 
     // --- Abhängigkeit auf alten Client --------------------------------

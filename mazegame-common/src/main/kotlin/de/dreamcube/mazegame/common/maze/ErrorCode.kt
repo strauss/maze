@@ -1,4 +1,4 @@
-package de.dreamcube.mazegame.server.maze
+package de.dreamcube.mazegame.common.maze
 
 enum class ErrorCode(val code: Int) {
     OK(0),

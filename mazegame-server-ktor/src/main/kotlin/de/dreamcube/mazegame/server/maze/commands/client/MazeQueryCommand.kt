@@ -1,6 +1,10 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
-import de.dreamcube.mazegame.server.maze.*
+import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.server.maze.ClientChatControl
+import de.dreamcube.mazegame.server.maze.ClientConnection
+import de.dreamcube.mazegame.server.maze.MazeServer
+import de.dreamcube.mazegame.server.maze.createServerInfoMessage
 
 class MazeQueryCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :
     ClientCommand(mazeServer, clientConnection) {
