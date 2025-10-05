@@ -1,5 +1,7 @@
 package mazegame.server_ktor.maze
 
+import de.dreamcube.mazegame.common.maze.CommandExecutor
+import de.dreamcube.mazegame.common.maze.Message
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import kotlinx.coroutines.*
@@ -135,7 +137,7 @@ class MazeServer(
     /**
      * This object is responsible for executing the commands that are received by all clients.
      */
-    val commandExecutor = ServerCommandExecutor(scope)
+    val commandExecutor = CommandExecutor(scope)
 
     /**
      * The maze (only walls and paths, no other objects).

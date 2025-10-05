@@ -1,5 +1,6 @@
 package mazegame.server_ktor.maze.commands.client
 
+import de.dreamcube.mazegame.common.maze.Message
 import mazegame.server_ktor.maze.*
 
 class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :

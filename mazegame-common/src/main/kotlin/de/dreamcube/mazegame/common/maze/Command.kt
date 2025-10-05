@@ -1,4 +1,4 @@
-package mazegame.server_ktor.maze.commands
+package de.dreamcube.mazegame.common.maze
 
 /**
  * Interface for executing commands.

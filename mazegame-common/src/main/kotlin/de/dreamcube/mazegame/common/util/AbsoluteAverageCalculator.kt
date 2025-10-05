@@ -1,4 +1,4 @@
-package mazegame.server_ktor.maze.delay_compensation
+package de.dreamcube.mazegame.common.util
 
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger

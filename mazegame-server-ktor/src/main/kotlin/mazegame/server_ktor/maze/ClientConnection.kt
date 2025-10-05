@@ -1,5 +1,6 @@
 package mazegame.server_ktor.maze
 
+import de.dreamcube.mazegame.common.maze.Message
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*

@@ -1,5 +1,6 @@
 package mazegame.server_ktor.maze
 
+import de.dreamcube.mazegame.common.maze.Message
 import mazegame.server_ktor.maze.ClientChatControl.Companion.NEW_TOKEN_PERIOD
 import java.util.concurrent.atomic.AtomicInteger
 

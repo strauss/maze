@@ -1,7 +1,7 @@
 package mazegame.server_ktor.maze.commands.game
 
+import de.dreamcube.mazegame.common.maze.Message
 import mazegame.server_ktor.maze.MazeServer
-import mazegame.server_ktor.maze.Message
 import mazegame.server_ktor.maze.commands.ServerSideCommand
 import mazegame.server_ktor.maze.createEmptyLastMessage
 import mazegame.server_ktor.maze.createServerInfoMessage

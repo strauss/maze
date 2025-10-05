@@ -1,13 +1,8 @@
-import org.jetbrains.kotlin.gradle.dsl.JsModuleKind
-
 plugins {
     kotlin("multiplatform")
     // optional: Kotlin-Serialization für gemeinsame DTOs
     alias(libs.plugins.kotlin.serialization)
 }
-
-group = "de.dreamcube"
-version = "1.0-SNAPSHOT"
 
 kotlin {
     /* ------- Browser-Target (JS IR) ------------------------------ */
@@ -50,11 +45,14 @@ tasks.register<Copy>("copyToServer") {
 
 //    from(layout.buildDirectory.dir("dist"))
     // 2. Quelle = genau das Output-Verzeichnis dieses Tasks
-    from(tasks.named("jsBrowserProductionWebpack")
-        .map { it.outputs.files }) { include("mazegame-web-ui.js") }
+    from(
+        tasks.named("jsBrowserProductionWebpack")
+            .map { it.outputs.files }) { include("mazegame-web-ui.js") }
 
-    into(project(":mazegame-server-ktor").layout.projectDirectory
-        .dir("src/main/resources/static"))
+    into(
+        project(":mazegame-server-ktor").layout.projectDirectory
+            .dir("src/main/resources/static")
+    )
 }
 project(":mazegame-server-ktor").tasks.named("processResources") {
     dependsOn(":mazegame-web-ui:copyToServer")

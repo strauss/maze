@@ -1,4 +1,4 @@
-package mazegame.server_ktor.maze.delay_compensation
+package de.dreamcube.mazegame.common.util
 
 /**
  * Interface for defining a class that is capable of calculating average values for number values.

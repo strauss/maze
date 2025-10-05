@@ -6,9 +6,6 @@ plugins {
     alias(libs.plugins.shadow.jar)
 }
 
-group   = "de.dreamcube"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
     mavenLocal()   // zieht den alten Java-Client aus der lokalen Maven-Repo
@@ -34,6 +31,9 @@ dependencies {
     // --- Jackson (YAML & Kotlin-Module) --------------------------------
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.jackson.module.kotlin)
+
+    // --- Abhängigkeit auf common
+    implementation(projects.mazegameCommon)
 
     // --- Abhängigkeit auf alten Client --------------------------------
     implementation("mazegame:client:1.0-SNAPSHOT")   // kommt aus mavenLocal() oder Repo

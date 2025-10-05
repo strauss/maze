@@ -1,8 +1,12 @@
 package mazegame.server_ktor.maze.commands.game
 
+import de.dreamcube.mazegame.common.maze.Message
 import kotlinx.coroutines.sync.withLock
-import mazegame.server_ktor.maze.*
+import mazegame.server_ktor.maze.BaitType
+import mazegame.server_ktor.maze.MazeServer
 import mazegame.server_ktor.maze.commands.ServerSideCommand
+import mazegame.server_ktor.maze.createEmptyLastMessage
+import mazegame.server_ktor.maze.createServerInfoMessage
 
 class TransformBaitsCommand(mazeServer: MazeServer, val baitType: BaitType, val causingPlayerId: Int? = null) : ServerSideCommand(mazeServer) {
     override suspend fun execute() {

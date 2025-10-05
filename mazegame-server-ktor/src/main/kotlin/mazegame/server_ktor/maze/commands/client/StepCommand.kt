@@ -1,5 +1,6 @@
 package mazegame.server_ktor.maze.commands.client
 
+import de.dreamcube.mazegame.common.maze.Message
 import mazegame.server_ktor.maze.*
 import mazegame.server_ktor.maze.game_events.BaitCollectedEvent
 import mazegame.server_ktor.maze.game_events.GameEvent

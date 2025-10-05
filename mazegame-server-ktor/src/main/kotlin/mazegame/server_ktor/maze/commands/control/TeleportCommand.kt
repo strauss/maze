@@ -1,10 +1,10 @@
 package mazegame.server_ktor.maze.commands.control
 
+import de.dreamcube.mazegame.common.maze.Command
+import de.dreamcube.mazegame.common.maze.Message
 import kotlinx.coroutines.CompletableDeferred
 import mazegame.server_ktor.maze.ClientConnection
 import mazegame.server_ktor.maze.MazeServer
-import mazegame.server_ktor.maze.Message
-import mazegame.server_ktor.maze.commands.Command
 import mazegame.server_ktor.maze.createServerInfoMessage
 
 class TeleportCommand(val mazeServer: MazeServer, val clientConnection: ClientConnection, val newX: Int, val newY: Int) : Command {

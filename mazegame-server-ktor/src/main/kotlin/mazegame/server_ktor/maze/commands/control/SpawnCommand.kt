@@ -1,10 +1,10 @@
 package mazegame.server_ktor.maze.commands.control
 
+import de.dreamcube.mazegame.common.maze.Command
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import mazegame.server_ktor.maze.ClientConnection
 import mazegame.server_ktor.maze.MazeServer
-import mazegame.server_ktor.maze.commands.Command
 
 class SpawnCommand(val mazeServer: MazeServer, val nick: String) : Command {
     val reply: CompletableDeferred<ClientConnection?> = CompletableDeferred()

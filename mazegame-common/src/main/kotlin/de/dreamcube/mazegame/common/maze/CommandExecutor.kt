@@ -1,4 +1,4 @@
-package mazegame.server_ktor.maze
+package de.dreamcube.mazegame.common.maze
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -6,17 +6,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import mazegame.server_ktor.maze.commands.Command
 import org.slf4j.LoggerFactory
 
-class ServerCommandExecutor(private val parentScope: CoroutineScope) :
+class CommandExecutor(private val parentScope: CoroutineScope) :
     CoroutineScope by CoroutineScope(parentScope.coroutineContext + SupervisorJob()) {
 
     companion object {
-        private val LOGGER = LoggerFactory.getLogger(ServerCommandExecutor::class.java)
+        private val LOGGER = LoggerFactory.getLogger(CommandExecutor::class.java)
     }
 
-    private val commandChannel = Channel<Command>(Channel.UNLIMITED)
+    private val commandChannel = Channel<Command>(Channel.Factory.UNLIMITED)
 
     /**
      * This mutex ensures that only one command is executed at a time.

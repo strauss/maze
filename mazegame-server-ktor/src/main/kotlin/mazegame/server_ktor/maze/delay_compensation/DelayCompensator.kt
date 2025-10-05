@@ -1,5 +1,7 @@
 package mazegame.server_ktor.maze.delay_compensation
 
+import de.dreamcube.mazegame.common.util.AverageCalculator
+import de.dreamcube.mazegame.common.util.SimpleMovingAverageCalculator
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import mazegame.server_ktor.maze.ClientConnection
