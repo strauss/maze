@@ -1,0 +1,15 @@
+package de.dreamcube.mazegame.server.maze
+
+enum class ErrorCode(val code: Int) {
+    OK(0),
+    WRONG_PARAMETER_VALUE(450),
+    TOO_MANY_CLIENTS(451),
+    DUPLICATE_NICK(452),
+    WALL_CRASH(453),
+    ACTION_WITHOUT_READY(454),
+    ALREADY_LOGGED_IN(455),
+    COMMAND_BEFORE_LOGIN(456),
+    LOGIN_TIMEOUT(457),
+    UNKNOWN_COMMAND(500),
+    PARAMETER_COUNT_INCORRECT(501)
+}

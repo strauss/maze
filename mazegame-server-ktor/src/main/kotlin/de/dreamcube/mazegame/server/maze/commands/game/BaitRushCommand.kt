@@ -1,0 +1,25 @@
+package de.dreamcube.mazegame.server.maze.commands.game
+
+import de.dreamcube.mazegame.common.maze.Message
+import de.dreamcube.mazegame.server.maze.MazeServer
+import de.dreamcube.mazegame.server.maze.commands.ServerSideCommand
+import de.dreamcube.mazegame.server.maze.createEmptyLastMessage
+import de.dreamcube.mazegame.server.maze.createServerInfoMessage
+
+class BaitRushCommand(mazeServer: MazeServer, val causingPlayerId: Int? = null) : ServerSideCommand(mazeServer) {
+    override suspend fun execute() {
+        val baseBaitCount: Int = mazeServer.baseBaitCount
+        val desiredBaitCount: Int = mazeServer.desiredBaitCount.get()
+        if (baseBaitCount == desiredBaitCount) {
+            mazeServer.desiredBaitCount.set(baseBaitCount * 2)
+            val messages: List<Message> = buildList {
+                addAll(mazeServer.replaceBaits())
+                val causingPlayerNick: String = mazeServer.getClientConnection(causingPlayerId)?.nick ?: "someone"
+                add(createServerInfoMessage("Nice one! It seems $causingPlayerNick stepped on an invisible pressure plate and caused more baits to spawn ... at least temporarily."))
+                add(createEmptyLastMessage())
+            }
+            mazeServer.desiredBaitCount.set(baseBaitCount)
+            mazeServer.sendToAllPlayers(*messages.toTypedArray())
+        }
+    }
+}
