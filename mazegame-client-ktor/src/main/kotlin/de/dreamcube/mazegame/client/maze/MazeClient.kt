@@ -1,7 +1,7 @@
 package de.dreamcube.mazegame.client.maze
 
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
-import de.dreamcube.mazegame.common.maze.Command
+import de.dreamcube.mazegame.client.maze.commands.ServerCommandParser
 import de.dreamcube.mazegame.common.maze.CommandExecutor
 import de.dreamcube.mazegame.common.maze.Message
 import de.dreamcube.mazegame.common.maze.PROTOCOL_VERSION
@@ -11,6 +11,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.io.IOException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -58,20 +59,37 @@ class MazeClient(
      */
     val commandExecutor = CommandExecutor(scope)
 
+    /**
+     * The command Parser.
+     */
+    val commandParser = ServerCommandParser(scope, this@MazeClient, commandExecutor)
+
     lateinit var readJob: Job
     lateinit var writeJob: Job
+
+    private lateinit var maze: Maze
+
+    val selector = SelectorManager(Dispatchers.IO)
 
     fun start(): Deferred<Unit> {
         val result = CompletableDeferred<Unit>()
         scope.launch {
-            val selector = SelectorManager(Dispatchers.IO)
-            socket = aSocket(selector).tcp().connect(clientConfiguration.serverAddress, clientConfiguration.serverPort)
+            try {
+                socket = aSocket(selector).tcp().connect(clientConfiguration.serverAddress, clientConfiguration.serverPort)
+            } catch (ex: IOException) {
+                LOGGER.error("Connection error: ${ex.message}", ex)
+                result.completeExceptionally(ex)
+                return@launch
+            }
             writeJob = launch { writeLoop() }
+            commandExecutor.start()
+            commandParser.start()
             readJob = launch { readLoop(scope) }
             status = ConnectionStatus.CONNECTED
 
             readJob.join()
             stop()
+            result.complete(Unit)
         }
         return result
     }
@@ -80,14 +98,18 @@ class MazeClient(
         if (status == ConnectionStatus.DEAD) {
             return
         }
-        status = ConnectionStatus.DYING
-        // TODO: perform protocol specific stuff
-        outgoingMessages.close()
-        writeJob.join()
-        scope.cancel()
-        status = ConnectionStatus.DEAD
-        LOGGER.debug("Connection closed: '{}'", socket.remoteAddress)
-        socket.close()
+        try {
+            status = ConnectionStatus.DYING
+            // TODO: perform protocol specific stuff
+            outgoingMessages.close()
+            writeJob.join()
+            scope.cancel()
+        } finally {
+            status = ConnectionStatus.DEAD
+            LOGGER.debug("Connection closed: '{}'", socket.remoteAddress)
+            socket.close()
+            selector.close()
+        }
     }
 
     private suspend fun readLoop(scope: CoroutineScope) {
@@ -96,8 +118,7 @@ class MazeClient(
             while (scope.isActive) {
                 val line = input.readUTF8Line() ?: break
                 LOGGER.debug("Received line: '{}'", line)
-                val command: Command = TODO("Create command with read line")
-                commandExecutor.addCommand(command)
+                commandParser.receive(line)
             }
         } catch (_: ClosedByteChannelException) {
             // do nothing
@@ -143,9 +164,9 @@ class MazeClient(
         }
     }
 
-    suspend fun initializeMaze(width: Int, height: Int, mazeLines: List<String>) {
+    fun initializeMaze(width: Int, height: Int, mazeLines: List<String>) {
         if (status == ConnectionStatus.LOGGED_IN) {
-            // TODO: parse maze to internal structure
+            maze = Maze(width, height, mazeLines)
             status = ConnectionStatus.SPECTATING
         }
     }

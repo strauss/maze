@@ -39,13 +39,34 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
             val command: String = commandWithParameters[0]
             try {
                 when (command) {
-                    // TODO: Ready first
-                    "PPOS" -> TODO()
-                    "RDY." -> TODO()
-                    "BPOS" -> TODO()
-                    "INFO" -> TODO()
-                    "JOIN" -> TODO()
-                    "LEAV" -> TODO()
+                    "PPOS" -> {
+                        finalizeMazeCommand()
+                    }
+
+                    "RDY." -> {
+                        finalizeMazeCommand()
+                    }
+
+                    "BPOS" -> {
+                        finalizeMazeCommand()
+                    }
+
+                    "PSCO" -> {
+                        finalizeMazeCommand()
+                    }
+
+                    "INFO" -> {
+                        finalizeMazeCommand()
+                    }
+
+                    "JOIN" -> {
+                        finalizeMazeCommand()
+                    }
+
+                    "LEAV" -> {
+                        finalizeMazeCommand()
+                    }
+
                     "MSRV" -> {
                         finalizeMazeCommand()
                         commandExecutor.addCommand(ProtocolVersionCommand(mazeClient, commandWithParameters))
@@ -58,7 +79,9 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "MAZE" -> prepareMazeCommand(commandWithParameters)
 
-                    "QUIT" -> TODO()
+                    "QUIT" -> {
+                        finalizeMazeCommand()
+                    }
 
                     else -> appendMazeCommand(commandWithParameters)
                 }
