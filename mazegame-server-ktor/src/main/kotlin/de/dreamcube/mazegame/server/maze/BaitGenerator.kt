@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.maze.BaitType
 import kotlinx.coroutines.sync.withLock
 import kotlin.random.Random
 

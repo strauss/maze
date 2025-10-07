@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.server.maze.game_events
 
-import de.dreamcube.mazegame.server.maze.BaitType
+import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.commands.control.PutBaitCommand
 import de.dreamcube.mazegame.server.maze.commands.game.BaitRushCommand

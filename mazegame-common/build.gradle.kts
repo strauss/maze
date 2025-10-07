@@ -14,6 +14,8 @@ dependencies {
     implementation(libs.ktor.network)
     implementation(libs.ktor.utils)
 
+    implementation(libs.jackson.module.kotlin)
+
     // Logging
     implementation(libs.slf4j.api)
     implementation(libs.logback.classic)

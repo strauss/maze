@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.CommandExecutor
 import de.dreamcube.mazegame.common.maze.ErrorCode
 import de.dreamcube.mazegame.common.maze.Message

@@ -1,8 +1,8 @@
 package de.dreamcube.mazegame.server.maze.commands.control
 
+import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.Command
 import de.dreamcube.mazegame.common.maze.Message
-import de.dreamcube.mazegame.server.maze.BaitType
 import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.createServerInfoMessage
 import kotlinx.coroutines.CompletableDeferred

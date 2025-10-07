@@ -1,11 +1,11 @@
 package de.dreamcube.mazegame.server.control
 
+import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.server.config.ConnectionDto
 import de.dreamcube.mazegame.server.config.GameDto
 import de.dreamcube.mazegame.server.config.MazeGeneratorConfigurationDto
 import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
-import de.dreamcube.mazegame.server.maze.BaitType
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.ServerPlayer

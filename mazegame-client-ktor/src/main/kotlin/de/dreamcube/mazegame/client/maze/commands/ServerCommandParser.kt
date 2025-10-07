@@ -49,6 +49,7 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "BPOS" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(BaitPosCommand(mazeClient, commandWithParameters))
                     }
 
                     "PSCO" -> {

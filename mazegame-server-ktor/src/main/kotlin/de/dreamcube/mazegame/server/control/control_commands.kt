@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.server.control
 
-import de.dreamcube.mazegame.server.maze.BaitType
+import de.dreamcube.mazegame.common.maze.BaitType
 
 
 data class TeleportCommandDto(val id: Int, val x: Int, val y: Int)

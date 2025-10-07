@@ -1,8 +1,8 @@
 package de.dreamcube.mazegame.server.control
 
+import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
-import de.dreamcube.mazegame.server.maze.BaitType
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

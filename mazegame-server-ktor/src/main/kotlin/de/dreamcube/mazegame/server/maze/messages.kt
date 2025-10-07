@@ -1,9 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
-import de.dreamcube.mazegame.common.maze.COMMAND_AND_MESSAGE_SEPARATOR
-import de.dreamcube.mazegame.common.maze.ErrorCode
-import de.dreamcube.mazegame.common.maze.Message
-import de.dreamcube.mazegame.common.maze.PROTOCOL_VERSION
+import de.dreamcube.mazegame.common.maze.*
 import de.dreamcube.mazegame.server.maze.commands.client.ChatCommand
 
 internal fun String.asMessage() = Message(this)

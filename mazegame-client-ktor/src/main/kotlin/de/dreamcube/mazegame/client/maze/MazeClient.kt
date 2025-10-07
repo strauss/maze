@@ -19,18 +19,18 @@ import org.slf4j.LoggerFactory
  * Central maze client class.
  */
 class MazeClient(
-    val clientConfiguration: MazeClientConfigurationDto,
-    internal val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    internal val clientConfiguration: MazeClientConfigurationDto,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 ) {
     companion object {
         private const val NO_ID: Int = -1
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeClient::class.java)
     }
 
-    private val serverAddress
+    val serverAddress
         get() = clientConfiguration.serverAddress
 
-    private val serverPort
+    val serverPort
         get() = clientConfiguration.serverPort
 
     /**
@@ -42,6 +42,7 @@ class MazeClient(
      * The current status of the connection.
      */
     var status: ConnectionStatus = ConnectionStatus.UNKNOWN
+        private set
 
     /**
      * The id from the server.
@@ -52,26 +53,27 @@ class MazeClient(
     /**
      * Channel for outgoing messages.
      */
-    val outgoingMessages = Channel<Message>(Channel.UNLIMITED)
+    private val outgoingMessages = Channel<Message>(Channel.UNLIMITED)
 
     /**
      * The client command executor.
      */
-    val commandExecutor = CommandExecutor(scope)
+    private val commandExecutor = CommandExecutor(scope)
 
     /**
      * The command Parser.
      */
-    val commandParser = ServerCommandParser(scope, this@MazeClient, commandExecutor)
+    private val commandParser = ServerCommandParser(scope, this@MazeClient, commandExecutor)
 
-    lateinit var readJob: Job
-    lateinit var writeJob: Job
+    private lateinit var readJob: Job
+    private lateinit var writeJob: Job
 
     private lateinit var maze: Maze
+    internal val baits = BaitCollection()
 
-    val selector = SelectorManager(Dispatchers.IO)
+    private val selector = SelectorManager(Dispatchers.IO)
 
-    fun start(): Deferred<Unit> {
+    internal fun start(): Deferred<Unit> {
         val result = CompletableDeferred<Unit>()
         scope.launch {
             try {
@@ -142,7 +144,7 @@ class MazeClient(
         }
     }
 
-    suspend fun sendMessage(message: Message) {
+    internal suspend fun sendMessage(message: Message) {
         try {
             outgoingMessages.send(message)
         } catch (_: ClosedSendChannelException) {
@@ -150,13 +152,13 @@ class MazeClient(
         }
     }
 
-    suspend fun connect(serverProtocolVersion: Int) {
+    internal suspend fun connect(serverProtocolVersion: Int) {
         if (serverProtocolVersion == PROTOCOL_VERSION) {
             sendMessage(createHelloMessage(clientConfiguration.displayName))
         }
     }
 
-    suspend fun loggedIn(id: Int) {
+    internal suspend fun loggedIn(id: Int) {
         if (status == ConnectionStatus.CONNECTED && id > 0) {
             this.id = id
             status = ConnectionStatus.LOGGED_IN
@@ -164,11 +166,25 @@ class MazeClient(
         }
     }
 
-    fun initializeMaze(width: Int, height: Int, mazeLines: List<String>) {
+    internal fun initializeMaze(width: Int, height: Int, mazeLines: List<String>) {
         if (status == ConnectionStatus.LOGGED_IN) {
             maze = Maze(width, height, mazeLines)
             status = ConnectionStatus.SPECTATING
         }
+    }
+
+    /**
+     * Gets a thread- and coroutine-safe snapshot of all [Bait]s. This function is intended for Kotlin callers.
+     */
+    suspend fun getBaitsAsync(): List<Bait> {
+        return baits.elements()
+    }
+
+    /**
+     * Gets a thread- and coroutine-safe snapshot of all [Bait]s. This function/method is intended for Java callers.
+     */
+    fun getBaitsBlocking(): List<Bait> {
+        return runBlocking { baits.elements() }
     }
 
     enum class ConnectionStatus() {
