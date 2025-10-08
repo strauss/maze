@@ -1,9 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
-import de.dreamcube.mazegame.common.maze.BaitType
-import de.dreamcube.mazegame.common.maze.CommandExecutor
-import de.dreamcube.mazegame.common.maze.ErrorCode
-import de.dreamcube.mazegame.common.maze.Message
+import de.dreamcube.mazegame.common.maze.*
 import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import de.dreamcube.mazegame.server.contest.ContestController
@@ -229,7 +226,7 @@ class MazeServer(
                     // check if we have space left
                     val relevantClientCount = getRelevantClientCount()
                     if (relevantClientCount >= serverConfiguration.connection.maxClients) {
-                        clientConnection.sendMessage(createInfoMessage(ErrorCode.TOO_MANY_CLIENTS))
+                        clientConnection.sendMessage(createErrorInfoMessage(InfoCode.TOO_MANY_CLIENTS))
                         clientConnection.stop()
                     } else {
                         // let them in
@@ -237,7 +234,7 @@ class MazeServer(
                         // if they do not log in properly in the time limit, we throw them out again
                         delay(serverConfiguration.connection.loginTimeout)
                         if (!clientConnection.wasEverLoggedIn && !clientConnection.loggedIn()) {
-                            clientConnection.sendMessage(createInfoMessage(ErrorCode.LOGIN_TIMEOUT))
+                            clientConnection.sendMessage(createErrorInfoMessage(InfoCode.LOGIN_TIMEOUT))
                             clientConnection.stop()
                         }
                     }
@@ -326,7 +323,7 @@ class MazeServer(
             val messagesForAll: Array<Message> = buildList {
                 val removed: ClientConnection? = clientConnectionMutex.withLock { clientConnectionsById.remove(id) }
                 if (removed != null && !removed.spectator) {
-                    val player: ServerPlayer = removed.player
+                    val player: Player = removed.player
                     releasePlayerPosition(player)
                     add(createPlayerPositionVanishMessage(player).thereIsMore())
                     add(createLeaveMessage(id).thereIsMore())
@@ -351,7 +348,7 @@ class MazeServer(
     /**
      * Spawns a [player] at the given [position].
      */
-    internal suspend fun initPlayerPosition(player: ServerPlayer, position: Position) {
+    internal suspend fun initPlayerPosition(player: Player, position: Position) {
         player.x = position.x
         player.y = position.y
         if (position != Position.spectatorPosition) {
@@ -362,21 +359,21 @@ class MazeServer(
     /**
      * Removes a [player] from their position. It is mainly used, when the player disconnects from the game.
      */
-    internal suspend fun releasePlayerPosition(player: ServerPlayer) {
+    internal suspend fun releasePlayerPosition(player: Player) {
         maze.releasePosition(player.x, player.y)
     }
 
     /**
      * Moves or turns a [player].
      */
-    suspend fun changePlayerPosition(player: ServerPlayer, newPosition: Position, viewDirection: ViewDirection) {
+    suspend fun changePlayerPosition(player: Player, newPosition: Position, viewDirection: ViewDirection) {
         changePlayerPosition(player, newPosition.x, newPosition.y, viewDirection)
     }
 
     /**
      * Moves or turns a [player].
      */
-    suspend fun changePlayerPosition(player: ServerPlayer, x: Int, y: Int, viewDirection: ViewDirection) {
+    suspend fun changePlayerPosition(player: Player, x: Int, y: Int, viewDirection: ViewDirection) {
         maze.move(player.x, player.y, x, y)
         player.x = x
         player.y = y
@@ -386,7 +383,7 @@ class MazeServer(
     /**
      * Teleports a [player] to a random position.
      */
-    suspend fun teleportPlayerRandomly(player: ServerPlayer, causingId: Int? = null): Message {
+    suspend fun teleportPlayerRandomly(player: Player, causingId: Int? = null): Message {
         val newPosition: Position = positionProvider.randomPositionForTeleport()
         val newDirection: ViewDirection = ViewDirection.random()
         changePlayerPosition(player, newPosition, newDirection)
@@ -400,7 +397,7 @@ class MazeServer(
     /**
      * Teleports the given [player] to the position given by [newX] and [newY], if this is possible.
      */
-    suspend fun teleportPlayer(player: ServerPlayer, newX: Int, newY: Int): Pair<OccupationResult, Message?> =
+    suspend fun teleportPlayer(player: Player, newX: Int, newY: Int): Pair<OccupationResult, Message?> =
         withUnoccupiedPosition(newX, newY) {
             changePlayerPosition(player, newX, newY, player.viewDirection)
             OccupationResult.SUCCESS to createPlayerTeleportMessage(player)
@@ -446,11 +443,11 @@ class MazeServer(
             clientConnectionMutex.withLock {
                 for (currentConnection: ClientConnection in clientConnectionsById.values) {
                     if (currentConnection.startAsSpectator ||
-                        (currentConnection != targetConnection && currentConnection.status != ClientConnectionStatus.PLAYING)
+                        (currentConnection != targetConnection && currentConnection.status != ConnectionStatus.PLAYING)
                     ) {
                         continue
                     }
-                    val currentPlayer: ServerPlayer = currentConnection.player
+                    val currentPlayer: Player = currentConnection.player
                     add(createJoinMessage(currentPlayer).thereIsMore())
                     add(createPlayerPositionAppearMessage(currentPlayer).thereIsMore())
                     add(createPlayerScoreChangedMessage(currentPlayer).thereIsMore())
@@ -499,7 +496,7 @@ class MazeServer(
         val playingPlayerConnections: List<ClientConnection> = buildList {
             clientConnectionMutex.withLock {
                 for (currentConnection: ClientConnection in clientConnectionsById.values) {
-                    if (currentConnection.status == ClientConnectionStatus.PLAYING || currentConnection.status == ClientConnectionStatus.SPECTATING) {
+                    if (currentConnection.status == ConnectionStatus.PLAYING || currentConnection.status == ConnectionStatus.SPECTATING) {
                         add(currentConnection)
                     }
                 }
@@ -676,7 +673,7 @@ class MazeServer(
     /**
      * Searches for the player at the given position ([x], [y]), if such a player exists.
      */
-    suspend fun getPlayerAt(x: Int, y: Int): ServerPlayer? {
+    suspend fun getPlayerAt(x: Int, y: Int): Player? {
         clientConnectionMutex.withLock {
             for (currentClientConnection: ClientConnection in clientConnectionsById.values) {
                 val currentPlayer = currentClientConnection.player

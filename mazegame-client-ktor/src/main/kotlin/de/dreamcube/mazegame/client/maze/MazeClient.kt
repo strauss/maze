@@ -3,6 +3,7 @@ package de.dreamcube.mazegame.client.maze
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.commands.ServerCommandParser
 import de.dreamcube.mazegame.common.maze.CommandExecutor
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.Message
 import de.dreamcube.mazegame.common.maze.PROTOCOL_VERSION
 import io.ktor.network.selector.*
@@ -70,6 +71,7 @@ class MazeClient(
 
     private lateinit var maze: Maze
     internal val baits = BaitCollection()
+    internal val players = PlayerCollection()
 
     private val selector = SelectorManager(Dispatchers.IO)
 
@@ -187,7 +189,18 @@ class MazeClient(
         return runBlocking { baits.elements() }
     }
 
-    enum class ConnectionStatus() {
-        UNKNOWN, CONNECTED, LOGGED_IN, SPECTATING, PLAYING, DYING, DEAD
+    /**
+     * Gets a thread- and coroutine-safe snapshot of all players as list of [PlayerSnapshot]. This function is intended for Kotlin callers.
+     */
+    suspend fun getPlayerSnapshotsAsync(): List<PlayerSnapshot> {
+        return players.elements()
     }
+
+    /**
+     * Gets a thread- and coroutine-safe snapshot of all players as list of [PlayerSnapshot]. This function/method is intended for Java callers.
+     */
+    fun getPlayerSnapshotsBlocking(): List<PlayerSnapshot> {
+        return runBlocking { players.elements() }
+    }
+
 }

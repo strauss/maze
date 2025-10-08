@@ -62,10 +62,12 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "JOIN" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(JoinCommand(mazeClient, commandWithParameters))
                     }
 
                     "LEAV" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(LeaveCommand(mazeClient, commandWithParameters))
                     }
 
                     "MSRV" -> {

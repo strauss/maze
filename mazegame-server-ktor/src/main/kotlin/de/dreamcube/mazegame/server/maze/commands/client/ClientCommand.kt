@@ -1,29 +1,29 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.COMMAND_AND_MESSAGE_SEPARATOR
-import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.commands.ServerSideCommand
-import de.dreamcube.mazegame.server.maze.createInfoMessage
+import de.dreamcube.mazegame.server.maze.createErrorInfoMessage
 
 
 /**
  * A command represents a received message from a client. The preconditions are checked in the constructor (init...) and the errorCode is set
- * accordingly. The [execute] functions checks the error code and only continues, if the [errorCode] is [de.dreamcube.mazegame.common.maze.ErrorCode.OK]. Every command has to implement
+ * accordingly. The [execute] functions checks the error code and only continues, if the [errorCode] is [de.dreamcube.mazegame.common.maze.InfoCode.OK]. Every command has to implement
  * the [internalExecute] function, which is called by [execute].
  */
 abstract class ClientCommand(mazeServer: MazeServer, val clientConnection: ClientConnection) : ServerSideCommand(mazeServer) {
 
-    var errorCode = ErrorCode.OK
+    var errorCode = InfoCode.OK
         protected set
 
     val okay
-        get() = errorCode == ErrorCode.OK
+        get() = errorCode == InfoCode.OK
 
     protected fun checkLoggedIn() {
         if (!clientConnection.loggedIn()) {
-            errorCode = ErrorCode.COMMAND_BEFORE_LOGIN
+            errorCode = InfoCode.COMMAND_BEFORE_LOGIN
         }
     }
 
@@ -32,10 +32,10 @@ abstract class ClientCommand(mazeServer: MazeServer, val clientConnection: Clien
             internalExecute()
             // If something went wrong during execution, we send an error message according to the error code
             if (!okay) {
-                clientConnection.sendMessage(createInfoMessage(errorCode))
+                clientConnection.sendMessage(createErrorInfoMessage(errorCode))
             }
         } else {
-            clientConnection.sendMessage(createInfoMessage(errorCode))
+            clientConnection.sendMessage(createErrorInfoMessage(errorCode))
         }
     }
 
@@ -47,7 +47,7 @@ abstract class ClientCommand(mazeServer: MazeServer, val clientConnection: Clien
 
 class UnknownCommand(clientConnection: ClientConnection, mazeServer: MazeServer) : ClientCommand(mazeServer, clientConnection) {
     init {
-        errorCode = ErrorCode.UNKNOWN_COMMAND
+        errorCode = InfoCode.UNKNOWN_COMMAND
     }
 
     override suspend fun internalExecute() {

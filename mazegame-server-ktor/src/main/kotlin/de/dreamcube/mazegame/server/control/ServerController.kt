@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.server.control
 
 import de.dreamcube.mazegame.common.maze.BaitType
+import de.dreamcube.mazegame.common.maze.Player
 import de.dreamcube.mazegame.server.config.ConnectionDto
 import de.dreamcube.mazegame.server.config.GameDto
 import de.dreamcube.mazegame.server.config.MazeGeneratorConfigurationDto
@@ -8,7 +9,6 @@ import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
-import de.dreamcube.mazegame.server.maze.ServerPlayer
 import de.dreamcube.mazegame.server.maze.commands.control.*
 import de.dreamcube.mazegame.server.maze.commands.game.BaitRushCommand
 import de.dreamcube.mazegame.server.maze.commands.game.TransformBaitsCommand
@@ -260,7 +260,7 @@ object ServerController {
      * Extracts the information about a sigle player.
      */
     private suspend fun extractPlayerInformation(connection: ClientConnection): PlayerInformationDto {
-        val player: ServerPlayer = connection.player
+        val player: Player = connection.player
         val totalPlayTimeMs: Long = player.totalPlayTime
         val totalPlayTime = PlayTimeDto(totalPlayTimeMs, totalPlayTimeMs.milliseconds.toString())
         val currentPlayTimeMs: Long = player.currentPlayTime

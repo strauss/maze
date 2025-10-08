@@ -1,5 +1,7 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.maze.ViewDirection
+import de.dreamcube.mazegame.server.maze.Maze.Companion.PATH
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*

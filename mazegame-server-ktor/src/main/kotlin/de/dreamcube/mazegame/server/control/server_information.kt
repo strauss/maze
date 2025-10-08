@@ -35,7 +35,7 @@ data class PlayerInformationDto(
     val delayOffset: Long,
     val totalPlayTime: PlayTimeDto,
     val currentPlayTime: PlayTimeDto,
-    val currentPointsPerMinute: Int,
+    val currentPointsPerMinute: Double,
     val spectator: Boolean
 )
 

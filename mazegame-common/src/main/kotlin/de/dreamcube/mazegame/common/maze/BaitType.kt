@@ -18,10 +18,10 @@ enum class BaitType(
         @JsonCreator
         fun byName(name: String): BaitType {
             return when (name) {
-                "food" -> FOOD
-                "coffee" -> COFFEE
-                "gem" -> GEM
-                "trap" -> TRAP
+                FOOD.baitName -> FOOD
+                COFFEE.baitName -> COFFEE
+                GEM.baitName -> GEM
+                TRAP.baitName -> TRAP
                 else -> throw IllegalArgumentException("Incorrect bait name: $name")
             }
         }

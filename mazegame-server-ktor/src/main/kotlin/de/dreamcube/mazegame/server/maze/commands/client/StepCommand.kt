@@ -1,8 +1,6 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
-import de.dreamcube.mazegame.common.maze.BaitType
-import de.dreamcube.mazegame.common.maze.ErrorCode
-import de.dreamcube.mazegame.common.maze.Message
+import de.dreamcube.mazegame.common.maze.*
 import de.dreamcube.mazegame.server.maze.*
 import de.dreamcube.mazegame.server.maze.game_events.BaitCollectedEvent
 import de.dreamcube.mazegame.server.maze.game_events.GameEvent
@@ -19,10 +17,10 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
 
     init {
         if (commandWithParameters.size != 1) {
-            errorCode = ErrorCode.WRONG_PARAMETER_VALUE
+            errorCode = InfoCode.WRONG_PARAMETER_VALUE
         } else @Suppress("kotlin:S6518") // WTF? you serious?
         if (!clientConnection.isReady.get()) {
-            errorCode = ErrorCode.ACTION_WITHOUT_READY
+            errorCode = InfoCode.ACTION_WITHOUT_READY
         }
         checkLoggedIn()
     }
@@ -34,9 +32,9 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
         }
         val messagesForAll: MutableList<Message> = ArrayList()
         var gameEvent: GameEvent? = null
-        val player: ServerPlayer = clientConnection.player
+        val player: Player = clientConnection.player
         if (!mazeServer.maze.isWalkable(player.x, player.y, player.viewDirection)) {
-            errorCode = ErrorCode.WALL_CRASH
+            errorCode = InfoCode.WALL_CRASH
             return
         }
         var nX: Int = player.x
@@ -76,7 +74,7 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                     messagesForAll.addAll(newBaitMessages)
                 }
             } else {
-                val otherPlayer: ServerPlayer? = mazeServer.getPlayerAt(nX, nY)
+                val otherPlayer: Player? = mazeServer.getPlayerAt(nX, nY)
                 if (otherPlayer != null) {
                     // teleportation on collision
                     gameEvent = PlayerCollisionEvent(player, otherPlayer, nX, nY)

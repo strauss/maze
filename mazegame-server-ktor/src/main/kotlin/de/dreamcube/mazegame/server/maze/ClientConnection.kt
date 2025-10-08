@@ -1,7 +1,9 @@
 package de.dreamcube.mazegame.server.maze
 
-import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.Message
+import de.dreamcube.mazegame.common.maze.Player
 import de.dreamcube.mazegame.server.maze.commands.client.createCommand
 import de.dreamcube.mazegame.server.maze.delay_compensation.DelayCompensator
 import de.dreamcube.mazegame.server.maze.server_bots.ServerSideClient
@@ -65,7 +67,7 @@ class ClientConnection(
     /**
      * The current status of the client connection.
      */
-    var status: ClientConnectionStatus = ClientConnectionStatus.UNKNOWN
+    var status: ConnectionStatus = ConnectionStatus.UNKNOWN
         private set
 
     /**
@@ -93,7 +95,7 @@ class ClientConnection(
     /**
      * The player object associated with this client connection.
      */
-    var player: ServerPlayer = ServerPlayer(-1, "")
+    var player: Player = Player(-1, "")
 
     /**
      * The server-sided client that is associated with this client connection.
@@ -137,7 +139,7 @@ class ClientConnection(
     fun start() = launch(start = CoroutineStart.UNDISPATCHED) {
         writeJob = launch { writeLoop() }
         readJob = launch { readLoop() }
-        status = ClientConnectionStatus.CONNECTED
+        status = ConnectionStatus.CONNECTED
 
         readJob.join()
         stop()
@@ -147,13 +149,13 @@ class ClientConnection(
      * Stops this client connection.
      */
     suspend fun stop() {
-        if (status == ClientConnectionStatus.DEAD) {
+        if (status == ConnectionStatus.DEAD) {
             return
         }
-        if (status == ClientConnectionStatus.PLAYING) {
+        if (status == ConnectionStatus.PLAYING) {
             server.activePlayers.decrementAndGet()
         }
-        status = ClientConnectionStatus.DYING
+        status = ConnectionStatus.DYING
         server.removeClient(id)
         if (writeJob.isActive) {
             sendMessage(createQuitMessage())
@@ -164,7 +166,7 @@ class ClientConnection(
         outgoing.close()
         writeJob.join()
         cancel()
-        status = ClientConnectionStatus.DEAD
+        status = ConnectionStatus.DEAD
         LOGGER.debug("Connection closed: '{}'", socket.remoteAddress)
         socket.close()
     }
@@ -222,18 +224,18 @@ class ClientConnection(
     /**
      * Indicates the login status of the client.
      */
-    fun loggedIn(): Boolean = status >= ClientConnectionStatus.LOGGED_IN && status <= ClientConnectionStatus.PLAYING
+    fun loggedIn(): Boolean = status >= ConnectionStatus.LOGGED_IN && status <= ConnectionStatus.PLAYING
 
     /**
      * Sets the client connection to the login status if it is not already logged in.
      */
     suspend fun login(id: Int, nick: String) {
-        if (status == ClientConnectionStatus.CONNECTED) {
+        if (status == ConnectionStatus.CONNECTED) {
             wasEverLoggedIn = true
-            status = ClientConnectionStatus.LOGGED_IN
-            this.player = ServerPlayer(id, nick)
+            status = ConnectionStatus.LOGGED_IN
+            this.player = Player(id, nick)
         } else {
-            sendMessage(createInfoMessage(ErrorCode.ALREADY_LOGGED_IN))
+            sendMessage(createErrorInfoMessage(InfoCode.ALREADY_LOGGED_IN))
         }
     }
 
@@ -248,11 +250,11 @@ class ClientConnection(
     }
 
     /**
-     * Sets the client connection into the status [ClientConnectionStatus.PLAYING] if it is logged in.
+     * Sets the client connection into the status [ConnectionStatus.PLAYING] if it is logged in.
      */
     fun play() {
-        if (status == ClientConnectionStatus.LOGGED_IN || status == ClientConnectionStatus.SPECTATING) {
-            status = ClientConnectionStatus.PLAYING
+        if (status == ConnectionStatus.LOGGED_IN || status == ConnectionStatus.SPECTATING) {
+            status = ConnectionStatus.PLAYING
             spectator = false
             player.resetScore() // sets score to zero (which is redundant here), and sets the start play timestamp to now (which is why we call it)
             server.activePlayers.incrementAndGet()
@@ -260,15 +262,15 @@ class ClientConnection(
     }
 
     /**
-     * Sets the client connection into the status [ClientConnectionStatus.SPECTATING] if it is logged in.
+     * Sets the client connection into the status [ConnectionStatus.SPECTATING] if it is logged in.
      */
     fun spectate() {
         val previousStatus = status
-        if (previousStatus == ClientConnectionStatus.LOGGED_IN || previousStatus == ClientConnectionStatus.PLAYING) {
-            status = ClientConnectionStatus.SPECTATING
+        if (previousStatus == ConnectionStatus.LOGGED_IN || previousStatus == ConnectionStatus.PLAYING) {
+            status = ConnectionStatus.SPECTATING
             spectator = true
         }
-        if (previousStatus == ClientConnectionStatus.PLAYING) {
+        if (previousStatus == ConnectionStatus.PLAYING) {
             server.activePlayers.decrementAndGet()
         }
     }
@@ -278,7 +280,7 @@ class ClientConnection(
      */
     suspend fun ready() {
         isReady.set(true)
-        if (status != ClientConnectionStatus.PLAYING) {
+        if (status != ConnectionStatus.PLAYING) {
             return
         }
         if (performDelayCompensation) {
@@ -309,9 +311,3 @@ class ClientConnection(
     }
 }
 
-/**
- * Enum class for the client connection state.
- */
-enum class ClientConnectionStatus() {
-    UNKNOWN, CONNECTED, LOGGED_IN, SPECTATING, PLAYING, DYING, DEAD
-}

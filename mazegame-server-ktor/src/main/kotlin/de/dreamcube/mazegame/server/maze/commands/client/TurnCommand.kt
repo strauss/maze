@@ -1,10 +1,10 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
-import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.Message
+import de.dreamcube.mazegame.common.maze.Player
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
-import de.dreamcube.mazegame.server.maze.ServerPlayer
 import de.dreamcube.mazegame.server.maze.createPlayerPositionTurnMessage
 
 class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :
@@ -14,11 +14,11 @@ class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
     init {
         if (commandWithParameters.size != 2) {
             rawDirection = ""
-            errorCode = ErrorCode.WRONG_PARAMETER_VALUE
+            errorCode = InfoCode.WRONG_PARAMETER_VALUE
         } else @Suppress("kotlin:S6518") // WTF? you serious?
         if (!clientConnection.isReady.get()) {
             rawDirection = ""
-            errorCode = ErrorCode.ACTION_WITHOUT_READY
+            errorCode = InfoCode.ACTION_WITHOUT_READY
         } else {
             rawDirection = commandWithParameters[1]
         }
@@ -31,7 +31,7 @@ class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
             return
         }
         val messageToAll: Message
-        val player: ServerPlayer = clientConnection.player
+        val player: Player = clientConnection.player
         when (rawDirection) {
             "r" -> {
                 player.viewDirection = player.viewDirection.turnRight()
@@ -44,7 +44,7 @@ class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
             }
 
             else -> {
-                errorCode = ErrorCode.WRONG_PARAMETER_VALUE
+                errorCode = InfoCode.WRONG_PARAMETER_VALUE
                 return
             }
         }

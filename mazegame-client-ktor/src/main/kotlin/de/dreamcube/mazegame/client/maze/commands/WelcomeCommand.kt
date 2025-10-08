@@ -3,7 +3,7 @@ package de.dreamcube.mazegame.client.maze.commands
 import de.dreamcube.mazegame.client.maze.MazeClient
 
 class WelcomeCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
-    val id: Int
+    private val id: Int
 
     init {
         if (commandWithParameters.size < 2) {

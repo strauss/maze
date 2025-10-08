@@ -1,7 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
 import de.dreamcube.mazegame.common.maze.*
-import de.dreamcube.mazegame.server.maze.commands.client.ChatCommand
 
 internal fun String.asMessage() = Message(this)
 
@@ -17,7 +16,7 @@ fun createWelcomeMessage(id: Int) = listOf("WELC", id.toString())
 fun createMazeHeaderMessage(width: Int, height: Int) = listOf("MAZE", width.toString(), height.toString())
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createJoinMessage(player: ServerPlayer) = listOf("JOIN", player.id.toString(), player.nick)
+fun createJoinMessage(player: Player) = listOf("JOIN", player.id.toString(), player.nick)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createLeaveMessage(id: Int) = listOf("LEAV", id.toString())
@@ -27,39 +26,39 @@ fun createLeaveMessage(id: Int) = listOf("LEAV", id.toString())
 fun createQuitMessage() = "QUIT".asMessage()
 
 // Info messages
-fun createInfoMessage(errorCode: ErrorCode) = listOf("INFO", errorCode.code)
+fun createErrorInfoMessage(errorCode: InfoCode) = listOf("INFO", errorCode.code)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createServerInfoMessage(message: String) = listOf("INFO", ChatCommand.SERVER_MESSAGE_CODE, message)
+fun createServerInfoMessage(message: String) = listOf("INFO", InfoCode.SERVER_MESSAGE.code, message)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createClientInfoMessage(message: String, sourceId: Int) = listOf("INFO", ChatCommand.CLIENT_MESSAGE_CODE, message, sourceId)
+fun createClientInfoMessage(message: String, sourceId: Int) = listOf("INFO", InfoCode.CLIENT_MESSAGE.code, message, sourceId)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createClientWhisperInfoMessage(message: String, sourceId: Int) = listOf("INFO", ChatCommand.CLIENT_WHISPER_CODE, message, sourceId)
+fun createClientWhisperInfoMessage(message: String, sourceId: Int) = listOf("INFO", InfoCode.CLIENT_WHISPER.code, message, sourceId)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 
 // Player position and score messages
-private fun createPlayerPositionChangeMessage(player: ServerPlayer, reason: PlayerPositionChange): String =
+private fun createPlayerPositionChangeMessage(player: Player, reason: PlayerPositionChange): String =
     listOf("PPOS", player.id.toString(), player.x.toString(), player.y.toString(), player.viewDirection.shortName, reason.shortName)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR)
 
-fun createPlayerPositionAppearMessage(player: ServerPlayer) = createPlayerPositionChangeMessage(player, PlayerPositionChange.APPEAR).asMessage()
-fun createPlayerPositionVanishMessage(player: ServerPlayer) = createPlayerPositionChangeMessage(player, PlayerPositionChange.VANISH).asMessage()
-fun createPlayerPositionTurnMessage(player: ServerPlayer) = createPlayerPositionChangeMessage(player, PlayerPositionChange.TURN).asMessage()
-fun createPlayerPositionStepMessage(player: ServerPlayer) = createPlayerPositionChangeMessage(player, PlayerPositionChange.MOVE).asMessage()
-fun createPlayerTeleportMessage(player: ServerPlayer) = createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT).asMessage()
+fun createPlayerPositionAppearMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.APPEAR).asMessage()
+fun createPlayerPositionVanishMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.VANISH).asMessage()
+fun createPlayerPositionTurnMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.TURN).asMessage()
+fun createPlayerPositionStepMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.MOVE).asMessage()
+fun createPlayerTeleportMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT).asMessage()
 
-fun createPlayerTeleportByTrapMessage(player: ServerPlayer) =
+fun createPlayerTeleportByTrapMessage(player: Player) =
     listOf(createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT), TeleportType.TRAP.shortName)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createPlayerTeleportByCollisionMessage(player: ServerPlayer, otherPlayerId: Int) =
+fun createPlayerTeleportByCollisionMessage(player: Player, otherPlayerId: Int) =
     listOf(createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT), TeleportType.COLLISION.shortName, otherPlayerId.toString())
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createPlayerScoreChangedMessage(player: ServerPlayer) = listOf("PSCO", player.id.toString(), player.score)
+fun createPlayerScoreChangedMessage(player: Player) = listOf("PSCO", player.id.toString(), player.score)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 

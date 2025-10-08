@@ -1,8 +1,8 @@
 package de.dreamcube.mazegame.server.contest
 
-import de.dreamcube.mazegame.server.maze.ClientConnectionStatus
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import de.dreamcube.mazegame.common.maze.Player
 import de.dreamcube.mazegame.server.maze.MazeServer
-import de.dreamcube.mazegame.server.maze.ServerPlayer
 import de.dreamcube.mazegame.server.maze.commands.control.ClearCommand
 import de.dreamcube.mazegame.server.maze.commands.control.GoCommand
 import de.dreamcube.mazegame.server.maze.commands.control.StopCommand
@@ -136,8 +136,8 @@ class ContestController(
 
     private suspend fun stopContest() {
         server.commandExecutor.addCommand(StopCommand(server, true))
-        val topList: List<ServerPlayer> = server.getAllPlayingPlayerConnections().asSequence()
-            .filter { it.status == ClientConnectionStatus.PLAYING }
+        val topList: List<Player> = server.getAllPlayingPlayerConnections().asSequence()
+            .filter { it.status == ConnectionStatus.PLAYING }
             .map { it.player }
             .sortedByDescending { it.score }
             .take(configuration.statusPositions)

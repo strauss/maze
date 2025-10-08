@@ -7,10 +7,10 @@ import de.dreamcube.mazegame.common.maze.BaitType
 
 class BaitPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
-    val x: Int
-    val y: Int
-    val type: BaitType
-    val reason: BaitPositionChange
+    private val x: Int
+    private val y: Int
+    private val type: BaitType
+    private val reason: BaitPositionChange
 
     init {
         if (commandWithParameters.size < 5) {

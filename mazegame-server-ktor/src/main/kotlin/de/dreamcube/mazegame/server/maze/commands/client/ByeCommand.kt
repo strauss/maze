@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
-import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
 
@@ -10,7 +10,7 @@ class ByeCommand(clientConnection: ClientConnection, mazeServer: MazeServer, com
 
     init {
         if (commandWithParameters.size > 1) {
-            errorCode = ErrorCode.PARAMETER_COUNT_INCORRECT
+            errorCode = InfoCode.PARAMETER_COUNT_INCORRECT
         }
         checkLoggedIn()
     }

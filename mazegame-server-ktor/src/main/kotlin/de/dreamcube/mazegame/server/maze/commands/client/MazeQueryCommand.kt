@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
-import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.server.maze.ClientChatControl
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
@@ -11,7 +11,7 @@ class MazeQueryCommand(clientConnection: ClientConnection, mazeServer: MazeServe
 
     init {
         if (commandWithParameters.size != 1) {
-            errorCode = ErrorCode.WRONG_PARAMETER_VALUE
+            errorCode = InfoCode.WRONG_PARAMETER_VALUE
         }
         checkLoggedIn()
     }

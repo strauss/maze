@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.server.maze.server_bots
 
-import de.dreamcube.mazegame.common.maze.ErrorCode
+import de.dreamcube.mazegame.common.maze.InfoCode
 import mazegame.client.MazeClient
 import mazegame.client.strategy.Strategy
 import mazegame.client.strategy.SurpriseBot
@@ -29,7 +29,7 @@ class LegacyClientWrapper(val legacyClient: MazeClient) : ServerSideClient {
     companion object {
 
         private val LOGIN_FAILED_CODES: Set<Int> =
-            setOf(ErrorCode.LOGIN_TIMEOUT.code, ErrorCode.TOO_MANY_CLIENTS.code, ErrorCode.UNKNOWN_COMMAND.code, 999)
+            setOf(InfoCode.LOGIN_TIMEOUT.code, InfoCode.TOO_MANY_CLIENTS.code, InfoCode.UNKNOWN_COMMAND.code, 999)
 
         init {
             Strategy.addStrategies()
