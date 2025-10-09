@@ -17,6 +17,7 @@ class Player(
     score: Int = 0,
     val loginTime: Long = System.currentTimeMillis(),
     var playStartTime: Long = System.currentTimeMillis(),
+    moveCounter: Int = 0
 ) {
     var score: Int = score
         set(value) {
@@ -29,11 +30,15 @@ class Player(
             }
         }
 
+    var moveCounter: Int = moveCounter
+        private set
+
     /**
      * Resets the score. It is mainly used on the server side, but can also be used on the client side, if the score is set to 0.
      */
     fun resetScore() {
         score = 0
+        moveCounter = 0
         playStartTime = System.currentTimeMillis()
     }
 
@@ -57,6 +62,19 @@ class Player(
             val minutes: Double = currentPlayTime.toDouble() / (60_000.0)
             return round((score.toDouble() / minutes) * 100.0) / 100.0
         }
+
+    /**
+     * Average time per move for the current play time.
+     */
+    val moveTime: Double
+        get() = if (moveCounter > 0) round(currentPlayTime.toDouble() * 100.0 / moveCounter.toDouble()) / 100.0 else Double.NaN
+
+    /**
+     * Increases the internal move counter by 1.
+     */
+    fun incrementMoveCounter() {
+        moveCounter += 1
+    }
 }
 
 /**
@@ -87,7 +105,7 @@ enum class ViewDirection(val shortName: String) {
             EAST.shortName -> EAST
             SOUTH.shortName -> SOUTH
             WEST.shortName -> WEST
-            else -> TODO("ERROR")
+            else -> throw IllegalArgumentException("Incorrect view direction: $shortName")
         }
     }
 
@@ -108,7 +126,7 @@ enum class ViewDirection(val shortName: String) {
         }
 }
 
-enum class PlayerPositionChange(val shortName: String) {
+enum class PlayerPositionChangeReason(val shortName: String) {
     TELEPORT("tel"),
     APPEAR("app"),
     VANISH("van"),
@@ -116,13 +134,13 @@ enum class PlayerPositionChange(val shortName: String) {
     TURN("trn");
 
     companion object {
-        fun fromShortName(shortName: String): PlayerPositionChange = when (shortName) {
+        fun fromShortName(shortName: String): PlayerPositionChangeReason = when (shortName) {
             MOVE.shortName -> MOVE
             TURN.shortName -> TURN
             TELEPORT.shortName -> TELEPORT
             APPEAR.shortName -> APPEAR
             VANISH.shortName -> VANISH
-            else -> TODO("ERROR")
+            else -> throw IllegalArgumentException("Incorrect player position change reason: $shortName")
         }
     }
 }
@@ -135,7 +153,7 @@ enum class TeleportType(val shortName: String) {
         fun fromShortName(shortName: String): TeleportType = when (shortName) {
             TRAP.shortName -> TRAP
             COLLISION.shortName -> COLLISION
-            else -> TODO("ERROR")
+            else -> throw IllegalArgumentException("Incorrect teleport type: $shortName")
         }
     }
 }

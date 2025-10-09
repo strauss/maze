@@ -35,11 +35,13 @@ class TurnCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
         when (rawDirection) {
             "r" -> {
                 player.viewDirection = player.viewDirection.turnRight()
+                player.incrementMoveCounter()
                 messageToAll = createPlayerPositionTurnMessage(player)
             }
 
             "l" -> {
                 player.viewDirection = player.viewDirection.turnLeft()
+                player.incrementMoveCounter()
                 messageToAll = createPlayerPositionTurnMessage(player)
             }
 

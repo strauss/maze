@@ -274,6 +274,7 @@ object ServerController {
             totalPlayTime,
             currentPlayTime,
             player.pointsPerMinute,
+            player.moveTime,
             connection.spectator
         )
         return playerInformation

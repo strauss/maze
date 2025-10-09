@@ -66,6 +66,7 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                 } else {
                     // step forward
                     mazeServer.changePlayerPosition(player, nX, nY, dir)
+                    player.incrementMoveCounter()
                     messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
                 }
                 // replace consumed bait
@@ -84,12 +85,14 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                     LOGGER.warn("Cell was marked as 'occupied', but it wasn't: ($nX : $nY). Will perform step command anyway.")
                     // step forward
                     mazeServer.changePlayerPosition(player, nX, nY, dir)
+                    player.incrementMoveCounter()
                     messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
                 }
             }
         } else {
             // step forward
             mazeServer.changePlayerPosition(player, nX, nY, dir)
+            player.incrementMoveCounter()
             messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
         }
         if (messagesForAll.isNotEmpty()) {

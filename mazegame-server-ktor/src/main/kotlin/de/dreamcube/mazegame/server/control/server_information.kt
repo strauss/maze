@@ -36,6 +36,7 @@ data class PlayerInformationDto(
     val totalPlayTime: PlayTimeDto,
     val currentPlayTime: PlayTimeDto,
     val currentPointsPerMinute: Double,
+    val currentAvgMoveTimeInMs: Double,
     val spectator: Boolean
 )
 

@@ -1,6 +1,8 @@
 package de.dreamcube.mazegame.client.maze
 
 import de.dreamcube.mazegame.common.maze.Player
+import de.dreamcube.mazegame.common.maze.PlayerPositionChangeReason
+import de.dreamcube.mazegame.common.maze.ViewDirection
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -8,6 +10,11 @@ import kotlinx.coroutines.sync.withLock
  * A collection of [Player]s.
  */
 class PlayerCollection {
+
+    companion object {
+        private val MOVE_REASONS: Set<PlayerPositionChangeReason> = setOf(PlayerPositionChangeReason.MOVE, PlayerPositionChangeReason.TURN)
+    }
+
     /**
      * [Mutex] for thread- ... coroutine-safety
      */
@@ -54,6 +61,46 @@ class PlayerCollection {
     internal suspend fun getPlayerSnapshot(playerId: Int): PlayerSnapshot? {
         playerMutex.withLock {
             return getPlayerViewById(playerId)?.let { PlayerSnapshot(it) }
+        }
+    }
+
+    /**
+     * Changes the [Player]'s position according to the given coordinates ([newX] and [newY]) and the [newViewDirection]. A [Pair] consisting of the
+     * [PlayerSnapshot] before the change and the [PlayerSnapshot] after the change is returned. If the [Player] with the given [playerId] does not
+     * exist, null is returned. If the reason is either a STEP or TURN, the [Player]'s move counter is increased for calculating the ms/move.
+     */
+    internal suspend fun changePlayerPosition(
+        playerId: Int,
+        newX: Int,
+        newY: Int,
+        newViewDirection: ViewDirection,
+        reason: PlayerPositionChangeReason
+    ): Pair<PlayerSnapshot, PlayerSnapshot>? {
+        playerMutex.withLock {
+            val player: Player = playerIdToPlayerMap[playerId] ?: return null
+            val playerView = PlayerView(player)
+            val oldSnapshot = PlayerSnapshot(playerView)
+            player.x = newX
+            player.y = newY
+            player.viewDirection = newViewDirection
+            if (reason in MOVE_REASONS) {
+                player.incrementMoveCounter()
+            }
+            val newSnapshot = PlayerSnapshot(playerView)
+            return Pair(oldSnapshot, newSnapshot)
+        }
+    }
+
+    /**
+     * Changes the [Player]'s score to the given [newScore]. Returns the old score. Returns null, if no player with [playerId] exists in the
+     * collection.
+     */
+    internal suspend fun changePlayerScore(playerId: Int, newScore: Int): Int? {
+        playerMutex.withLock {
+            val player: Player = playerIdToPlayerMap[playerId] ?: return null
+            val oldScore = player.score
+            player.score = newScore
+            return oldScore
         }
     }
 

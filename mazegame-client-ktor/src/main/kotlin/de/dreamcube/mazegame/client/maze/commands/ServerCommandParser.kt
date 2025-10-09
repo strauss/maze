@@ -42,6 +42,7 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
                 when (command) {
                     "PPOS" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(PlayerPosCommand(mazeClient, commandWithParameters))
                     }
 
                     "RDY." -> {
@@ -55,6 +56,7 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "PSCO" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(PlayerScoreCommand(mazeClient, commandWithParameters))
                     }
 
                     "INFO" -> {

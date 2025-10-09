@@ -40,22 +40,22 @@ fun createClientWhisperInfoMessage(message: String, sourceId: Int) = listOf("INF
 
 
 // Player position and score messages
-private fun createPlayerPositionChangeMessage(player: Player, reason: PlayerPositionChange): String =
+private fun createPlayerPositionChangeMessage(player: Player, reason: PlayerPositionChangeReason): String =
     listOf("PPOS", player.id.toString(), player.x.toString(), player.y.toString(), player.viewDirection.shortName, reason.shortName)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR)
 
-fun createPlayerPositionAppearMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.APPEAR).asMessage()
-fun createPlayerPositionVanishMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.VANISH).asMessage()
-fun createPlayerPositionTurnMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.TURN).asMessage()
-fun createPlayerPositionStepMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.MOVE).asMessage()
-fun createPlayerTeleportMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT).asMessage()
+fun createPlayerPositionAppearMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.APPEAR).asMessage()
+fun createPlayerPositionVanishMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.VANISH).asMessage()
+fun createPlayerPositionTurnMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TURN).asMessage()
+fun createPlayerPositionStepMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.MOVE).asMessage()
+fun createPlayerTeleportMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT).asMessage()
 
 fun createPlayerTeleportByTrapMessage(player: Player) =
-    listOf(createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT), TeleportType.TRAP.shortName)
+    listOf(createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT), TeleportType.TRAP.shortName)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createPlayerTeleportByCollisionMessage(player: Player, otherPlayerId: Int) =
-    listOf(createPlayerPositionChangeMessage(player, PlayerPositionChange.TELEPORT), TeleportType.COLLISION.shortName, otherPlayerId.toString())
+    listOf(createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT), TeleportType.COLLISION.shortName, otherPlayerId.toString())
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createPlayerScoreChangedMessage(player: Player) = listOf("PSCO", player.id.toString(), player.score)
