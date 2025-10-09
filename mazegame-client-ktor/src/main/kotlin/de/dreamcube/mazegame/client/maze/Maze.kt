@@ -67,14 +67,10 @@ class Maze(val width: Int, val height: Int, lines: List<String>) {
     private val rightSet = BitSet()
 
     init {
-        if (width < 1 || height < 1) {
-            TODO("ERROR")
-        }
+        check(width >= 1 && height >= 1) { "Maze dimensions too small." }
         var y = 0
         for (currentLine: String in lines) {
-            if (currentLine.trim().length != width) {
-                TODO("ERROR")
-            }
+            check(currentLine.length == width) { "Maze line should have length of $width but has length ${currentLine.length}." }
             var x = 0
             for (c: Char in currentLine) {
                 this[x, y] = FieldValue.getByChar(c)
@@ -82,9 +78,7 @@ class Maze(val width: Int, val height: Int, lines: List<String>) {
             }
             y += 1
         }
-        if (y != height) {
-            TODO("ERROR")
-        }
+        check(y == height) { "Received $y maze lines but expected $height." }
     }
 
     private operator fun set(x: Int, y: Int, value: FieldValue) {

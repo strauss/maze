@@ -11,18 +11,25 @@ class BaitPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>
     private val y: Int
     private val type: BaitType
     private val reason: BaitPositionChange
+    override val okay: Boolean
 
     init {
         if (commandWithParameters.size < 5) {
-            TODO("ERROR")
+            x = -1
+            y = -1
+            type = BaitType.TRAP
+            reason = BaitPositionChange.GENERATED
+            okay = false
+        } else {
+            x = commandWithParameters[1].toInt()
+            y = commandWithParameters[2].toInt()
+            type = BaitType.byName(commandWithParameters[3])
+            reason = BaitPositionChange.byName(commandWithParameters[4])
+            okay = true
         }
-        x = commandWithParameters[1].toInt()
-        y = commandWithParameters[2].toInt()
-        type = BaitType.byName(commandWithParameters[3])
-        reason = BaitPositionChange.byName(commandWithParameters[4])
     }
 
-    override suspend fun execute() {
+    override suspend fun internalExecute() {
         when (reason) {
             BaitPositionChange.COLLECTED -> {
                 mazeClient.baits.getBait(x, y)?.let { bait: Bait ->

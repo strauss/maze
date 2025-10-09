@@ -4,15 +4,19 @@ import de.dreamcube.mazegame.client.maze.MazeClient
 
 class ProtocolVersionCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
     private val protocolVersion: Int
+    override val okay: Boolean
 
     init {
         if (commandWithParameters.size < 2) {
-            TODO("ERROR")
+            protocolVersion = -1
+            okay = false
+        } else {
+            protocolVersion = commandWithParameters[1].toInt()
+            okay = true
         }
-        protocolVersion = commandWithParameters[1].toInt()
     }
 
-    override suspend fun execute() {
+    override suspend fun internalExecute() {
         mazeClient.connect(protocolVersion)
     }
 }

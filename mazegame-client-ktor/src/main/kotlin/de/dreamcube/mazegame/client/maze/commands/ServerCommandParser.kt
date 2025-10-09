@@ -16,11 +16,11 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
         private val LOGGER = LoggerFactory.getLogger(ServerCommandParser::class.java)
 
         private enum class InternalParserState {
-            NORMAL, MAZE
+            NO_MAZE, RECEIVING_MAZE, RECEIVED_MAZE
         }
     }
 
-    private var internalState = InternalParserState.NORMAL
+    private var internalState = InternalParserState.NO_MAZE
     private val inputChannel = Channel<String>(Channel.Factory.UNLIMITED)
     private var width = 0
     private var height = 0
@@ -34,7 +34,8 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
         for (rawCommand in inputChannel) {
             val commandWithParameters: List<String> = rawCommand.split(COMMAND_AND_MESSAGE_SEPARATOR)
             if (commandWithParameters.isEmpty()) {
-                TODO("Error")
+                LOGGER.error("Received empty command ... ignoring!")
+                continue
             }
             val command: String = commandWithParameters[0]
             try {
@@ -88,42 +89,32 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     else -> appendMazeCommand(commandWithParameters)
                 }
-            } catch (_: Exception) {
-                TODO("ERROR")
+            } catch (ex: Exception) {
+                LOGGER.error("An error occurred while parsing the command '$rawCommand' ... ignoring!", ex)
             }
         }
     }
 
     private fun prepareMazeCommand(commandWithParameters: List<String>) {
-        if (internalState == InternalParserState.MAZE) {
-            TODO("ERROR")
-        }
-        if (commandWithParameters.size < 3) {
-            TODO("ERROR")
-        }
+        check(internalState == InternalParserState.NO_MAZE) { "Received MAZE command while in state $internalState." }
+        check(commandWithParameters.size >= 3) { "Malformed MAZE command detected!" }
         width = commandWithParameters[1].toInt()
         height = commandWithParameters[2].toInt()
-        internalState = InternalParserState.MAZE
+        internalState = InternalParserState.RECEIVING_MAZE
     }
 
     private fun appendMazeCommand(commandWithParameters: List<String>) {
-        if (internalState == InternalParserState.NORMAL) {
-            TODO("ERROR")
-        }
-        if (commandWithParameters.size != 1) {
-            TODO("ERROR")
-        }
+        check(internalState == InternalParserState.RECEIVING_MAZE) { "Received maze line while in state $internalState." }
+        check(commandWithParameters.size == 1) { "Received line was not a maze line." }
         mazeLines.add(commandWithParameters[0].trim())
     }
 
     private suspend fun finalizeMazeCommand() {
-        if (internalState == InternalParserState.MAZE) {
+        if (internalState == InternalParserState.RECEIVING_MAZE) {
             val mazeCommand = MazeCommand(mazeClient, width, height, ArrayList<String>(mazeLines))
             mazeLines.clear()
-            width = 0
-            height = 0
             commandExecutor.addCommand(mazeCommand)
-            internalState = InternalParserState.NORMAL
+            internalState = InternalParserState.RECEIVED_MAZE
         }
     }
 }
