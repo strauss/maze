@@ -47,6 +47,7 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "RDY." -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(ReadyCommand(mazeClient))
                     }
 
                     "BPOS" -> {
@@ -61,6 +62,7 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "INFO" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(InfoCommand(mazeClient, commandWithParameters))
                     }
 
                     "JOIN" -> {

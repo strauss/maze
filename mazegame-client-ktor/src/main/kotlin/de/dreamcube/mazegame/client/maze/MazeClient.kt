@@ -205,6 +205,15 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    internal fun onReady() {
+        if (status == ConnectionStatus.SPECTATING) {
+            status = ConnectionStatus.PLAYING
+        }
+        if (status == ConnectionStatus.PLAYING) {
+            // TODO: call strategy
+        }
+    }
+
     /**
      * Gets a thread- and coroutine-safe snapshot of all [Bait]s. This function is intended for Kotlin callers.
      */

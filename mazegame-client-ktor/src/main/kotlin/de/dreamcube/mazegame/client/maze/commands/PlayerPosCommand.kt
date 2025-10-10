@@ -34,9 +34,9 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
             y = commandWithParameters[3].toInt()
             viewDirection = ViewDirection.fromShortName(commandWithParameters[4])
             reason = PlayerPositionChangeReason.fromShortName(commandWithParameters[5])
-            teleportType = if (reason == PlayerPositionChangeReason.TELEPORT && commandWithParameters.size >= 7)
+            teleportType = if (reason == PlayerPositionChangeReason.TELEPORT && commandWithParameters.size > 6)
                 TeleportType.fromShortName(commandWithParameters[6]) else null
-            otherPlayerId = if (teleportType != null && commandWithParameters.size >= 8)
+            otherPlayerId = if (teleportType != null && commandWithParameters.size > 7)
                 commandWithParameters[7].toInt() else null
             okay = true
         }
