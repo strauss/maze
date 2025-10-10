@@ -16,6 +16,6 @@ class ByeCommand(clientConnection: ClientConnection, mazeServer: MazeServer, com
     }
 
     override suspend fun internalExecute() {
-        clientConnection.stop()
+        clientConnection.stop(false)
     }
 }

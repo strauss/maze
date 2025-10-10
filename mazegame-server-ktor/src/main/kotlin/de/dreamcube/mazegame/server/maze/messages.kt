@@ -23,7 +23,15 @@ fun createLeaveMessage(id: Int) = listOf("LEAV", id.toString())
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 // Logout stuff
+/**
+ * Logout confirmation.
+ */
 fun createQuitMessage() = "QUIT".asMessage()
+
+/**
+ * Server-side termination of the connection.
+ */
+fun createTermMessage() = "TERM".asMessage()
 
 // Info messages
 fun createErrorInfoMessage(errorCode: InfoCode) = listOf("INFO", errorCode.code)

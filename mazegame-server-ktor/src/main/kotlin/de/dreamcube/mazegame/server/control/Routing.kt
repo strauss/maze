@@ -6,11 +6,9 @@ import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.thymeleaf.*
 import io.ktor.util.*
 
 private const val basicAuth: String = "basic"
@@ -50,6 +48,7 @@ fun Application.configureAuthentication() {
 fun Application.configureRouting() {
     routing {
 
+        /* TODO: this does not work properly yet and is therefore deactivated
         staticResources("/static", "static")
 
         get("/index") {
@@ -60,7 +59,7 @@ fun Application.configureRouting() {
         get("/hello") {
             call.respond(ThymeleafContent("hello", mapOf()))
         }
-
+        */
         authenticate(basicAuth) {
             post("/login") {
                 val user: UserIdPrincipal? = call.principal<UserIdPrincipal>()

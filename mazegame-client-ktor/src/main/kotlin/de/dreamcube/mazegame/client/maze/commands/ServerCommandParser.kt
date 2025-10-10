@@ -85,8 +85,14 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "MAZE" -> prepareMazeCommand(commandWithParameters)
 
+                    "TERM" -> {
+                        finalizeMazeCommand()
+                        commandExecutor.addCommand(TermCommand(mazeClient))
+                    }
+
                     "QUIT" -> {
                         finalizeMazeCommand()
+                        commandExecutor.addCommand(QuitCommand(mazeClient))
                     }
 
                     else -> appendMazeCommand(commandWithParameters)

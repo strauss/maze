@@ -12,14 +12,16 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.io.IOException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.concurrent.CompletableFuture
 
 /**
  * Central maze client class.
  */
-class MazeClient(
+class MazeClient @JvmOverloads constructor(
     internal val clientConfiguration: MazeClientConfigurationDto,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 ) {
@@ -75,11 +77,20 @@ class MazeClient(
 
     private val selector = SelectorManager(Dispatchers.IO)
 
-    internal fun start(): Deferred<Unit> {
+    /**
+     * Starts the client ... Java edition.
+     */
+    @Suppress("kotlin:S6508") // This function is intended for Java callers and therefore requires Void instead of Unit
+    fun startAndWait(): CompletableFuture<Void> = start().asCompletableFuture().thenApply { null }
+
+    /**
+     * Starts the client ... Kotlin edition.
+     */
+    fun start(): Deferred<Unit> {
         val result = CompletableDeferred<Unit>()
         scope.launch {
             try {
-                socket = aSocket(selector).tcp().connect(clientConfiguration.serverAddress, clientConfiguration.serverPort)
+                socket = aSocket(selector).tcp().connect(serverAddress, serverPort)
             } catch (ex: IOException) {
                 LOGGER.error("Connection error: ${ex.message}", ex)
                 result.completeExceptionally(ex)
@@ -92,25 +103,44 @@ class MazeClient(
             status = ConnectionStatus.CONNECTED
 
             readJob.join()
-            stop()
+            stop(true)
             result.complete(Unit)
         }
         return result
     }
 
-    private suspend fun stop() {
-        if (status == ConnectionStatus.DEAD) {
+    /**
+     * Function for logging out of the game.
+     */
+    suspend fun logout() {
+        LOGGER.info("Logging out...")
+        sendMessage(createByeMessage())
+    }
+
+    /**
+     * Function for logging out of the game ... Java style.
+     */
+    fun logoutBlocking() {
+        runBlocking { logout() }
+    }
+
+    internal suspend fun stop(clientSide: Boolean) {
+        if (status == ConnectionStatus.DEAD || status == ConnectionStatus.DYING) {
             return
         }
         try {
             status = ConnectionStatus.DYING
-            // TODO: perform protocol specific stuff
+            if (clientSide) {
+                LOGGER.info("Terminating the connection...")
+            } else {
+                LOGGER.warn("The server terminated the connection!")
+            }
             outgoingMessages.close()
             writeJob.join()
             scope.cancel()
         } finally {
             status = ConnectionStatus.DEAD
-            LOGGER.debug("Connection closed: '{}'", socket.remoteAddress)
+            LOGGER.info("Connection closed: '{}'", socket.remoteAddress)
             socket.close()
             selector.close()
         }

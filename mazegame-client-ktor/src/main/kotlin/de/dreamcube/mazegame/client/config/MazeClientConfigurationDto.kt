@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.client.config
 
-class MazeClientConfigurationDto(
+class MazeClientConfigurationDto @JvmOverloads constructor(
     val serverAddress: String,
     val serverPort: Int,
     val strategyName: String,

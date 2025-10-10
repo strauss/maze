@@ -148,7 +148,7 @@ class ClientConnection(
     /**
      * Stops this client connection.
      */
-    suspend fun stop() {
+    suspend fun stop(serverSideStop: Boolean = true) {
         if (status == ConnectionStatus.DEAD) {
             return
         }
@@ -158,9 +158,16 @@ class ClientConnection(
         status = ConnectionStatus.DYING
         server.removeClient(id)
         if (writeJob.isActive) {
-            sendMessage(createQuitMessage())
-            if (wasEverLoggedIn) {
-                LOGGER.info("Client with id '$id' and nick '$nick' successfully logged out.")
+            if (serverSideStop) {
+                sendMessage(createTermMessage())
+                if (wasEverLoggedIn) {
+                    LOGGER.info("Client with id '$id' and nick '$nick' was successfully logged out by the server.")
+                }
+            } else {
+                sendMessage(createQuitMessage())
+                if (wasEverLoggedIn) {
+                    LOGGER.info("Client with id '$id' and nick '$nick' successfully sent a BYE! command and was logged out from the server.")
+                }
             }
         }
         outgoing.close()

@@ -11,3 +11,6 @@ fun createEmptyLastMessage() = "".asMessage()
 fun createHelloMessage(nick: String) = listOf("HELO", nick).joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createRequestMazeMessage() = "MAZ?".asMessage()
+
+// Logout stuff
+fun createByeMessage() = "BYE!".asMessage()
