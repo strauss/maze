@@ -35,7 +35,7 @@ class BaitPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>
                 mazeClient.baits.getBait(x, y)?.let { bait: Bait ->
                     val success: Boolean = mazeClient.baits.removeBait(bait)
                     if (success) {
-                        // TODO: send event
+                        mazeClient.eventHandler.fireBaitVanished(bait)
                     }
                 }
             }
@@ -44,7 +44,7 @@ class BaitPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>
                 val bait = Bait(type, x, y)
                 val success: Boolean = mazeClient.baits.addBait(bait)
                 if (success) {
-                    // TODO: send event
+                    mazeClient.eventHandler.fireBaitAppeared(bait)
                 }
             }
         }

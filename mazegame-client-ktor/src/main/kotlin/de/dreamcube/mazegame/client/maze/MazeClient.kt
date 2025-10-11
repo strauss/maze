@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.client.maze
 
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.commands.ServerCommandParser
+import de.dreamcube.mazegame.client.maze.events.EventHandler
 import de.dreamcube.mazegame.common.maze.CommandExecutor
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.Message
@@ -67,6 +68,11 @@ class MazeClient @JvmOverloads constructor(
      * The command Parser.
      */
     private val commandParser = ServerCommandParser(scope, this@MazeClient, commandExecutor)
+
+    /**
+     * The event handler. Each client has its own, or it would get very messy.
+     */
+    internal val eventHandler = EventHandler()
 
     private lateinit var readJob: Job
     private lateinit var writeJob: Job

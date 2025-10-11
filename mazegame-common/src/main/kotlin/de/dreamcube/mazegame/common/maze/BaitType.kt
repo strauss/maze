@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.common.maze
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
+import kotlin.math.abs
 
 enum class BaitType(
     @get:JsonValue
@@ -33,6 +34,16 @@ enum class BaitType(
                 'g' -> GEM
                 't' -> TRAP
                 else -> throw IllegalArgumentException("Incorrect bait character: $baitChar")
+            }
+        }
+
+        fun byScore(score: Int): BaitType? {
+            return when (abs(score)) {
+                FOOD.score -> FOOD
+                COFFEE.score -> COFFEE
+                GEM.score -> GEM
+                -TRAP.score -> TRAP
+                else -> null
             }
         }
     }

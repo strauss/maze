@@ -35,79 +35,28 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
     override suspend fun internalExecute() {
         when (infoCode) {
             InfoCode.SERVER_MESSAGE -> {
-                LOGGER.info("Server: $message")
-                // TODO: fire server chat event
+                if (message != null) {
+                    mazeClient.eventHandler.fireServerInfo(message)
+                } else {
+                    LOGGER.warn("Received empty server message.")
+                }
             }
 
-            InfoCode.CLIENT_MESSAGE -> {
+            InfoCode.CLIENT_MESSAGE, InfoCode.CLIENT_WHISPER -> {
                 val sourcePlayerNick: String = getSourcePlayerNick()
-                LOGGER.info("$sourcePlayerNick: $message")
-                // TODO: fire client chat event
+                if (sourcePlayerId != null && message != null) {
+                    mazeClient.eventHandler.firePlayerChat(sourcePlayerId, sourcePlayerNick, message, infoCode == InfoCode.CLIENT_WHISPER)
+                } else {
+                    LOGGER.warn("Received invalid client message (something is null) with source player id '$sourcePlayerId', nick '$sourcePlayerNick' and message '$message'.")
+                }
             }
 
-            InfoCode.CLIENT_WHISPER -> {
-                val sourcePlayerNick: String = getSourcePlayerNick()
-                LOGGER.info("$sourcePlayerNick(whisper): $message")
-                // TODO: fire client whisper event
-            }
-
-            InfoCode.WRONG_PARAMETER_VALUE -> {
-                LOGGER.warn("$infoNumber: Wrong parameter value")
-                // TODO: fire warning event
-            }
-
-            InfoCode.TOO_MANY_CLIENTS -> {
-                LOGGER.warn("$infoNumber: Server full (too many clients)")
-                // TODO: fire warning event
-            }
-
-            InfoCode.DUPLICATE_NICK -> {
-                LOGGER.warn("$infoNumber: Duplicate/Invalid nick")
-                // TODO: fire warning event
-            }
-
-            InfoCode.WALL_CRASH -> {
-                LOGGER.warn("$infoNumber: Tried to step into a wall")
-                // TODO: fire warning event
-            }
-
-            InfoCode.ACTION_WITHOUT_READY -> {
-                LOGGER.warn("$infoNumber: Did not wait for RDY.")
-                // TODO: fire warning event
-            }
-
-            InfoCode.ALREADY_LOGGED_IN -> {
-                LOGGER.warn("$infoNumber: Already logged in")
-                // TODO: fire warning event
-            }
-
-            InfoCode.COMMAND_BEFORE_LOGIN -> {
-                LOGGER.warn("$infoNumber: Not logged in")
-                // TODO: fire warning event
-            }
-
-            InfoCode.LOGIN_TIMEOUT -> {
-                LOGGER.error("$infoNumber: Login timed out")
-                // TODO: fire error event
-            }
-
-            InfoCode.UNKNOWN_COMMAND -> {
-                LOGGER.error("$infoNumber: The server did not understand our last command")
-                // TODO: fire error event
-            }
-
-            InfoCode.PARAMETER_COUNT_INCORRECT -> {
-                LOGGER.error("$infoNumber: Incorrect number of parameters")
-                // TODO: fire error event
-            }
-
-            InfoCode.COMPLETELY_UNKNOWN -> {
-                LOGGER.error("$infoNumber: We do not know this error code")
-                // TODO: fire error event
+            InfoCode.OK -> {
+                // just ignore it
             }
 
             else -> {
-                // nothing
+                mazeClient.eventHandler.fireServerError(infoCode)
             }
         }
     }
@@ -115,7 +64,7 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
     private suspend fun getSourcePlayerNick(): String {
         val sourcePlayerNick: String = sourcePlayerId?.let {
             mazeClient.players.getPlayerSnapshot(it)?.nick
-        } ?: "<unknown>"
+        } ?: "<${sourcePlayerId ?: "unknown"}>"
         return sourcePlayerNick
     }
 }

@@ -1,0 +1,108 @@
+package de.dreamcube.mazegame.client.maze.events
+
+import de.dreamcube.mazegame.client.maze.Bait
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
+import de.dreamcube.mazegame.common.maze.InfoCode
+import de.dreamcube.mazegame.common.maze.TeleportType
+
+sealed interface EventListener
+
+/**
+ * This listener interface handles bait related events.
+ */
+interface BaitEventListener : EventListener {
+    /**
+     * This function is called, whenever the server reports that a bait appeared.
+     */
+    fun onBaitAppeared(bait: Bait)
+
+    /**
+     * This function is called, whenever the serverreports that a bait has vanished.
+     */
+    fun onBaitVanished(bait: Bait)
+}
+
+/**
+ * This listener interface handles the login status of the other players.
+ */
+interface PlayerConnectionListener : EventListener {
+    /**
+     * This function is called when the server reports, that a new player joined the game.
+     */
+    fun onPlayerLogin(playerId: Int, nick: String)
+
+    /**
+     * This function is called, when the server reports, that a player left the game.
+     */
+    fun onPlayerLogout(playerId: Int)
+}
+
+/**
+ * This listener interface handles the position changes of all players (including the own player).
+ */
+interface PlayerMovementListener : EventListener {
+    /**
+     * This function is called, when a player position is communicated for the first time. It happens shortly after joining.
+     */
+    fun onPlayerAppear(player: PlayerSnapshot)
+
+    /**
+     * This function is called, when a player is about to leave the game. It happens right before leaving.
+     */
+    fun onPlayerVanish(player: PlayerSnapshot)
+
+    /**
+     * This function is called, when a player successfully performed a step move.
+     */
+    fun onPlayerStep(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot)
+
+    /**
+     * This function is called, when a player successfully performed a turn move.
+     */
+    fun onPlayerTurn(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot)
+
+    /**
+     * This function is called, when a player was teleported.
+     */
+    fun onPlayerTeleport(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?)
+}
+
+/**
+ * This listener interface handles score changes.
+ */
+interface ScoreChangeListener : EventListener {
+    /**
+     * This function is called, when a player's score changed from [oldScore] to [newScore].
+     */
+    fun onScoreChange(playerId: Int, oldScore: Int, newScore: Int)
+}
+
+/**
+ * This listener interface handles (chat) messages that are intended for being displayed in the console or on the UI.
+ */
+interface ChatInfoListener : EventListener {
+    /**
+     * This function is called, when the client itself wants to display something.
+     */
+    fun onClientInfo(message: String)
+
+    /**
+     * This function is called, when the server wants to display something.
+     */
+    fun onServerInfo(message: String)
+
+    /**
+     * This function is called, when another player wants to chat. If it is a [whisper]ed, message, the flag tells so.
+     */
+    fun onPlayerChat(playerId: Int, playerNick: String, message: String, whisper: Boolean)
+}
+
+/**
+ * This listener interface handles errors sent by the server.
+ */
+interface ErrorInfoListener : EventListener {
+    /**
+     * This function is called, when the server sends an error-related [infoCode].
+     */
+    fun onServerError(infoCode: InfoCode)
+}

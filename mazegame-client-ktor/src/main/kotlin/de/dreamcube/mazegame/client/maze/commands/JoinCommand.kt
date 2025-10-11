@@ -25,7 +25,7 @@ class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
         val newPlayer = Player(playerId, nick)
         val success: Boolean = mazeClient.players.addPlayer(newPlayer)
         if (success) {
-            // TODO: send event
+            mazeClient.eventHandler.firePlayerLogin(playerId, nick)
         }
     }
 }

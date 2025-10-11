@@ -20,7 +20,7 @@ class LeaveCommand(mazeClient: MazeClient, commandWithParameters: List<String>) 
     override suspend fun internalExecute() {
         val success: Boolean = mazeClient.players.removePlayerById(playerId)
         if (success) {
-            // TODO: send event
+            mazeClient.eventHandler.firePlayerLogout(playerId)
         }
     }
 }

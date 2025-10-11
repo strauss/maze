@@ -14,7 +14,6 @@ class QuitCommand(mazeClient: MazeClient) : ClientSideCommand(mazeClient) {
     override suspend fun internalExecute() {
         // Indicates a connection termination from the client-side (response to BYE! command)
         LOGGER.info("Server confirmed logout.")
-        // TODO: fire an event
     }
 
 }

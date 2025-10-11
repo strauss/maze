@@ -45,7 +45,19 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
     override suspend fun internalExecute() {
         mazeClient.players.changePlayerPosition(id, x, y, viewDirection, reason)?.let {
             val (oldSnapshot: PlayerSnapshot, newSnapshot: PlayerSnapshot) = it
-            // TODO: send event based on reason
+            when (reason) {
+                PlayerPositionChangeReason.MOVE -> mazeClient.eventHandler.firePlayerStep(oldSnapshot, newSnapshot)
+                PlayerPositionChangeReason.TURN -> mazeClient.eventHandler.firePlayerTurn(oldSnapshot, newSnapshot)
+                PlayerPositionChangeReason.TELEPORT -> mazeClient.eventHandler.firePlayerTeleport(
+                    oldSnapshot,
+                    newSnapshot,
+                    teleportType,
+                    otherPlayerId
+                )
+
+                PlayerPositionChangeReason.APPEAR -> mazeClient.eventHandler.firePlayerAppear(newSnapshot)
+                PlayerPositionChangeReason.VANISH -> mazeClient.eventHandler.firePlayerVanish(oldSnapshot)
+            }
         }
 
     }

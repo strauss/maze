@@ -22,7 +22,7 @@ class PlayerScoreCommand(mazeClient: MazeClient, commandWithParameters: List<Str
 
     override suspend fun internalExecute() {
         mazeClient.players.changePlayerScore(playerId, score)?.let { oldScore: Int ->
-            // TODO: create and send score change event including the old score
+            mazeClient.eventHandler.fireScoreChange(playerId, oldScore, score)
         }
     }
 

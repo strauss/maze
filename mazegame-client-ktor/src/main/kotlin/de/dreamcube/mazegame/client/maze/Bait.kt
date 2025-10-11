@@ -5,7 +5,7 @@ import de.dreamcube.mazegame.common.maze.BaitType
 /**
  * Simple data class representing a [Bait] of a specific [BaitType] at a unique position represented by [x] and [y].
  */
-data class Bait(var type: BaitType, val x: Int, val y: Int) {
+data class Bait(val type: BaitType, val x: Int, val y: Int) {
 
     /**
      * The [id] of the [Bait] (used for internal storage).

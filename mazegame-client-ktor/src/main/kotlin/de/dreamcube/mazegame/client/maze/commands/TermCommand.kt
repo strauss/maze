@@ -8,7 +8,6 @@ class TermCommand(mazeClient: MazeClient) : ClientSideCommand(mazeClient) {
     override suspend fun internalExecute() {
         // Indicates a connection termination from the server-side
         mazeClient.stop(false)
-        // TODO: fire an event
     }
 
 }
