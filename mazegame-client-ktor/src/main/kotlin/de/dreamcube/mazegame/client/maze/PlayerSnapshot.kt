@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.client.maze
 
+import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.ViewDirection
 
 /**
@@ -15,4 +16,7 @@ class PlayerSnapshot(val view: PlayerView) {
     val totalPlayTime: Long = view.totalPlayTime
     val currentPlayTime: Long = view.currentPlayTime
     val pointsPerMinute: Double = view.pointsPerMinute
+    val moveTime: Double = view.moveTime
+    val position: PlayerPosition
+        get() = PlayerPosition(x, y, viewDirection)
 }

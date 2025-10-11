@@ -28,4 +28,6 @@ class PlayerView(private val player: Player) {
         get() = player.currentPlayTime
     val pointsPerMinute: Double
         get() = player.pointsPerMinute
+    val moveTime: Double
+        get() = player.moveTime
 }

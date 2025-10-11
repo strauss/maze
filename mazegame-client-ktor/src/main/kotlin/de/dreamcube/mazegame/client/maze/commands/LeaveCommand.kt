@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.client.maze.commands
 
 import de.dreamcube.mazegame.client.maze.MazeClient
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 
 class LeaveCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
@@ -18,9 +19,7 @@ class LeaveCommand(mazeClient: MazeClient, commandWithParameters: List<String>) 
     }
 
     override suspend fun internalExecute() {
-        val success: Boolean = mazeClient.players.removePlayerById(playerId)
-        if (success) {
-            mazeClient.eventHandler.firePlayerLogout(playerId)
-        }
+        val removedPlayer: PlayerSnapshot? = mazeClient.players.removePlayerById(playerId)
+        removedPlayer?.let { player -> mazeClient.eventHandler.firePlayerLogout(player) }
     }
 }

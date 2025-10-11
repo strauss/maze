@@ -3,6 +3,7 @@ package de.dreamcube.mazegame.client.maze.events
 import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.common.maze.InfoCode
+import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
 
 sealed interface EventListener
@@ -34,7 +35,7 @@ interface PlayerConnectionListener : EventListener {
     /**
      * This function is called, when the server reports, that a player left the game.
      */
-    fun onPlayerLogout(playerId: Int)
+    fun onPlayerLogout(playerSnapshot: PlayerSnapshot)
 }
 
 /**
@@ -44,27 +45,27 @@ interface PlayerMovementListener : EventListener {
     /**
      * This function is called, when a player position is communicated for the first time. It happens shortly after joining.
      */
-    fun onPlayerAppear(player: PlayerSnapshot)
+    fun onPlayerAppear(playerSnapshot: PlayerSnapshot)
 
     /**
      * This function is called, when a player is about to leave the game. It happens right before leaving.
      */
-    fun onPlayerVanish(player: PlayerSnapshot)
+    fun onPlayerVanish(playerSnapshot: PlayerSnapshot)
 
     /**
      * This function is called, when a player successfully performed a step move.
      */
-    fun onPlayerStep(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot)
+    fun onPlayerStep(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot)
 
     /**
      * This function is called, when a player successfully performed a turn move.
      */
-    fun onPlayerTurn(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot)
+    fun onPlayerTurn(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot)
 
     /**
      * This function is called, when a player was teleported.
      */
-    fun onPlayerTeleport(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?)
+    fun onPlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?)
 }
 
 /**
@@ -72,9 +73,9 @@ interface PlayerMovementListener : EventListener {
  */
 interface ScoreChangeListener : EventListener {
     /**
-     * This function is called, when a player's score changed from [oldScore] to [newScore].
+     * This function is called, when a player's score changed. The new score is contained in the [newPlayerSnapshot].
      */
-    fun onScoreChange(playerId: Int, oldScore: Int, newScore: Int)
+    fun onScoreChange(oldScore: Int, newPlayerSnapshot: PlayerSnapshot)
 }
 
 /**

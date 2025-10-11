@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.client.maze.commands
 
 import de.dreamcube.mazegame.client.maze.MazeClient
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 
 class PlayerScoreCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
@@ -21,8 +22,8 @@ class PlayerScoreCommand(mazeClient: MazeClient, commandWithParameters: List<Str
     }
 
     override suspend fun internalExecute() {
-        mazeClient.players.changePlayerScore(playerId, score)?.let { oldScore: Int ->
-            mazeClient.eventHandler.fireScoreChange(playerId, oldScore, score)
+        mazeClient.players.changePlayerScore(playerId, score)?.let { (oldScore, playerSnapshot): Pair<Int, PlayerSnapshot> ->
+            mazeClient.eventHandler.fireScoreChange(oldScore, playerSnapshot)
         }
     }
 

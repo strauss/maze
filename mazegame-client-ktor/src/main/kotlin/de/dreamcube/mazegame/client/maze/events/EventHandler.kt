@@ -3,6 +3,7 @@ package de.dreamcube.mazegame.client.maze.events
 import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.common.maze.InfoCode
+import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
 import java.util.*
 
@@ -88,45 +89,45 @@ class EventHandler {
         }
     }
 
-    fun firePlayerLogout(playerId: Int) {
+    fun firePlayerLogout(playerSnapshot: PlayerSnapshot) {
         for (listener in playerConnectionListeners) {
-            listener.onPlayerLogout(playerId)
+            listener.onPlayerLogout(playerSnapshot)
         }
     }
 
-    fun firePlayerAppear(player: PlayerSnapshot) {
+    fun firePlayerAppear(playerSnapshot: PlayerSnapshot) {
         for (listener in playerMovementListeners) {
-            listener.onPlayerAppear(player)
+            listener.onPlayerAppear(playerSnapshot)
         }
     }
 
-    fun firePlayerVanish(player: PlayerSnapshot) {
+    fun firePlayerVanish(playerSnapshot: PlayerSnapshot) {
         for (listener in playerMovementListeners) {
-            listener.onPlayerVanish(player)
+            listener.onPlayerVanish(playerSnapshot)
         }
     }
 
-    fun firePlayerStep(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot) {
+    fun firePlayerStep(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot) {
         for (listener in playerMovementListeners) {
-            listener.onPlayerStep(oldPosition, newPosition)
+            listener.onPlayerStep(oldPosition, newPlayerSnapshot)
         }
     }
 
-    fun firePlayerTurn(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot) {
+    fun firePlayerTurn(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot) {
         for (listener in playerMovementListeners) {
-            listener.onPlayerTurn(oldPosition, newPosition)
+            listener.onPlayerTurn(oldPosition, newPlayerSnapshot)
         }
     }
 
-    fun firePlayerTeleport(oldPosition: PlayerSnapshot, newPosition: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?) {
+    fun firePlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?) {
         for (listener in playerMovementListeners) {
-            listener.onPlayerTeleport(oldPosition, newPosition, teleportType, otherPlayerId)
+            listener.onPlayerTeleport(oldPosition, newPlayerSnapshot, teleportType, otherPlayerId)
         }
     }
 
-    fun fireScoreChange(playerId: Int, oldScore: Int, newScore: Int) {
+    fun fireScoreChange(oldScore: Int, newPlayerSnapshot: PlayerSnapshot) {
         for (listener in scoreChangeListeners) {
-            listener.onScoreChange(playerId, oldScore, newScore)
+            listener.onScoreChange(oldScore, newPlayerSnapshot)
         }
     }
 

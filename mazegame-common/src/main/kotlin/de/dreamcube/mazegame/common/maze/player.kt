@@ -157,3 +157,8 @@ enum class TeleportType(val shortName: String) {
         }
     }
 }
+
+/**
+ * Simple data class representing the position of a player and its viewDirection but without everything else.
+ */
+data class PlayerPosition(val x: Int, val y: Int, val viewDirection: ViewDirection)

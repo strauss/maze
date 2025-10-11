@@ -46,10 +46,10 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
         mazeClient.players.changePlayerPosition(id, x, y, viewDirection, reason)?.let {
             val (oldSnapshot: PlayerSnapshot, newSnapshot: PlayerSnapshot) = it
             when (reason) {
-                PlayerPositionChangeReason.MOVE -> mazeClient.eventHandler.firePlayerStep(oldSnapshot, newSnapshot)
-                PlayerPositionChangeReason.TURN -> mazeClient.eventHandler.firePlayerTurn(oldSnapshot, newSnapshot)
+                PlayerPositionChangeReason.MOVE -> mazeClient.eventHandler.firePlayerStep(oldSnapshot.position, newSnapshot)
+                PlayerPositionChangeReason.TURN -> mazeClient.eventHandler.firePlayerTurn(oldSnapshot.position, newSnapshot)
                 PlayerPositionChangeReason.TELEPORT -> mazeClient.eventHandler.firePlayerTeleport(
-                    oldSnapshot,
+                    oldSnapshot.position,
                     newSnapshot,
                     teleportType,
                     otherPlayerId

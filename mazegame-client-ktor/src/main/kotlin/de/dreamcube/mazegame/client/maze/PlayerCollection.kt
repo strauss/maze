@@ -41,9 +41,10 @@ class PlayerCollection {
     /**
      * Removes the [Player] with the given [playerId]. It should only be called whenever a player vanishes.
      */
-    internal suspend fun removePlayerById(playerId: Int): Boolean {
+    internal suspend fun removePlayerById(playerId: Int): PlayerSnapshot? {
         playerMutex.withLock {
-            return playerIdToPlayerMap.remove(playerId) != null
+            val removedPlayer: Player? = playerIdToPlayerMap.remove(playerId)
+            return removedPlayer?.let { player -> PlayerSnapshot(PlayerView(player)) }
         }
     }
 
@@ -95,12 +96,13 @@ class PlayerCollection {
      * Changes the [Player]'s score to the given [newScore]. Returns the old score. Returns null, if no player with [playerId] exists in the
      * collection.
      */
-    internal suspend fun changePlayerScore(playerId: Int, newScore: Int): Int? {
+    internal suspend fun changePlayerScore(playerId: Int, newScore: Int): Pair<Int, PlayerSnapshot>? {
         playerMutex.withLock {
             val player: Player = playerIdToPlayerMap[playerId] ?: return null
             val oldScore = player.score
             player.score = newScore
-            return oldScore
+            val newSnapshot = PlayerSnapshot(PlayerView(player))
+            return Pair(oldScore, newSnapshot)
         }
     }
 
