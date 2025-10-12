@@ -16,7 +16,7 @@ fun main() {
     // Bot-Strategien laden
     Strategy.scanAndAddStrategiesBlocking()
     LOGGER.info("Found strategies: ${Strategy.getStrategyNamesBlocking()}")
-    val strategyName = "aimless"
+    val strategyName = "trapeater"
     val config = MazeClientConfigurationDto("localhost", 12345, strategyName)
 
     val mazeClient = MazeClient(config)

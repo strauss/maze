@@ -161,4 +161,20 @@ enum class TeleportType(val shortName: String) {
 /**
  * Simple data class representing the position of a player and its viewDirection but without everything else.
  */
-data class PlayerPosition(val x: Int, val y: Int, val viewDirection: ViewDirection)
+data class PlayerPosition(val x: Int, val y: Int, val viewDirection: ViewDirection) {
+    fun whenRight(): PlayerPosition = PlayerPosition(x, y, viewDirection.turnRight())
+    fun whenLeft(): PlayerPosition = PlayerPosition(x, y, viewDirection.turnLeft())
+    fun whenStep(): PlayerPosition {
+        val newX = when (viewDirection) {
+            ViewDirection.NORTH, ViewDirection.SOUTH -> x
+            ViewDirection.EAST -> x + 1
+            ViewDirection.WEST -> x - 1
+        }
+        val newY = when (viewDirection) {
+            ViewDirection.NORTH -> y - 1
+            ViewDirection.EAST, ViewDirection.WEST -> y
+            ViewDirection.SOUTH -> y + 1
+        }
+        return PlayerPosition(newX, newY, viewDirection)
+    }
+}

@@ -92,6 +92,8 @@ class MazeClient @JvmOverloads constructor(
     lateinit var ownPlayer: PlayerView
     private val ownPlayerInitialized: Boolean
         get() = this::ownPlayer.isInitialized
+    val ownPlayerSnapshot: PlayerSnapshot
+        get() = PlayerSnapshot(ownPlayer)
 
     private val selector = SelectorManager(Dispatchers.IO)
 
