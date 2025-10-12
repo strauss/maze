@@ -80,4 +80,4 @@ fun createBaitCollectedMessage(bait: ServerBait) = createBaitPositionChangeMessa
 
 
 // Ready message
-fun createReadyMessage() = "RDY.".asMessage()
+fun createReadyMessage(gameSpeed: GameSpeed) = listOf("RDY.", gameSpeed.delay.toString()).joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()

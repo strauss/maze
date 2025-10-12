@@ -59,10 +59,10 @@ class MazeClient @JvmOverloads constructor(
         private set
 
     /**
-     * The current game speed ... can be changed by the server (soon)
+     * The current game speed ... can be changed by the server. 150 is the historical default game speed.
      */
     var gameSpeed: Int = 150
-        private set
+        internal set
 
     /**
      * Channel for outgoing messages.
@@ -89,8 +89,9 @@ class MazeClient @JvmOverloads constructor(
 
     internal val baits = BaitCollection()
     internal val players = PlayerCollection()
-    val ownPlayer: PlayerView?
-        get() = players.getPlayerViewById(id)
+    lateinit var ownPlayer: PlayerView
+    private val ownPlayerInitialized: Boolean
+        get() = this::ownPlayer.isInitialized
 
     private val selector = SelectorManager(Dispatchers.IO)
 
@@ -158,12 +159,12 @@ class MazeClient @JvmOverloads constructor(
             }
             outgoingMessages.close()
             writeJob.join()
-            scope.cancel()
         } finally {
             status = ConnectionStatus.DEAD
             LOGGER.info("Connection closed: '{}'", socket.remoteAddress)
             socket.close()
             selector.close()
+            scope.cancel()
         }
     }
 
@@ -207,8 +208,13 @@ class MazeClient @JvmOverloads constructor(
 
     internal suspend fun connect(serverProtocolVersion: Int) {
         if (serverProtocolVersion == PROTOCOL_VERSION) {
-            sendMessage(createHelloMessage(clientConfiguration.displayName))
+            internalConnect()
         }
+    }
+
+    internal suspend fun internalConnect(iteration: Int = 0) {
+        val nameSuffix = if (iteration == 0) "" else iteration.toString()
+        sendMessage(createHelloMessage("${clientConfiguration.displayName}$nameSuffix"))
     }
 
     internal suspend fun loggedIn(id: Int) {
@@ -228,6 +234,10 @@ class MazeClient @JvmOverloads constructor(
 
     internal suspend fun onReady() {
         if (status == ConnectionStatus.SPECTATING) {
+            if (!ownPlayerInitialized) {
+                LOGGER.error("Own player did not join the game: leaving the game again!")
+                return logout()
+            }
             status = ConnectionStatus.PLAYING
         }
         if (status == ConnectionStatus.PLAYING) {

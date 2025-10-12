@@ -15,8 +15,16 @@ object HeadlessPlayerConnectionLogger : PlayerConnectionListener {
 
     val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerConnectionLogger::class.java)
 
-    override fun onPlayerLogin(playerId: Int, nick: String) {
+    override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
+        val nick = playerSnapshot.nick
+        val playerId = playerSnapshot.id
         LOGGER.info("Player '$nick ($playerId)' logged in.")
+    }
+
+    override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
+        val nick = playerSnapshot.nick
+        val playerId = playerSnapshot.id
+        LOGGER.info("The own player '$nick ($playerId)' finally logged in.")
     }
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {

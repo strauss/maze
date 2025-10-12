@@ -47,7 +47,13 @@ interface PlayerConnectionListener : EventListener {
     /**
      * This function is called when the server reports, that a new player joined the game.
      */
-    fun onPlayerLogin(playerId: Int, nick: String)
+    fun onPlayerLogin(playerSnapshot: PlayerSnapshot)
+
+    /**
+     * This function is called when the server reports, that the "own" player joined the game. This function is called in addition to [onPlayerLogin].
+     * It is useful for some strategies to obtain basic information about the player object of the own player.
+     */
+    fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot)
 
     /**
      * This function is called, when the server reports, that a player left the game.

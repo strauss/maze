@@ -1,6 +1,8 @@
 package de.dreamcube.mazegame.client.maze.commands
 
 import de.dreamcube.mazegame.client.maze.MazeClient
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
+import de.dreamcube.mazegame.client.maze.PlayerView
 import de.dreamcube.mazegame.common.maze.Player
 
 class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
@@ -25,7 +27,13 @@ class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
         val newPlayer = Player(playerId, nick)
         val success: Boolean = mazeClient.players.addPlayer(newPlayer)
         if (success) {
-            mazeClient.eventHandler.firePlayerLogin(playerId, nick)
+            val newPlayerView = PlayerView(newPlayer)
+            val newPlayerSnapshot = PlayerSnapshot(newPlayerView)
+            mazeClient.eventHandler.firePlayerLogin(newPlayerSnapshot)
+            if (playerId == mazeClient.id) {
+                mazeClient.ownPlayer = newPlayerView
+                mazeClient.eventHandler.fireOwnPlayerLogin(newPlayerSnapshot)
+            }
         }
     }
 }

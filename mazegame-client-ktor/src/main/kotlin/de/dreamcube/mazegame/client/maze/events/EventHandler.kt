@@ -96,9 +96,15 @@ class EventHandler {
         }
     }
 
-    fun firePlayerLogin(playerId: Int, nick: String) {
+    fun firePlayerLogin(playerSnapshot: PlayerSnapshot) {
         for (listener in playerConnectionListeners) {
-            listener.onPlayerLogin(playerId, nick)
+            listener.onPlayerLogin(playerSnapshot)
+        }
+    }
+
+    fun fireOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
+        for (listener in playerConnectionListeners) {
+            listener.onOwnPlayerLogin(playerSnapshot)
         }
     }
 

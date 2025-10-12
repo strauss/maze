@@ -21,6 +21,8 @@ fun main() {
 
     val mazeClient = MazeClient(config)
     mazeClient.eventHandler.addEventListener(HeadlessChatDisplay)
+    mazeClient.eventHandler.addEventListener(HeadlessErrorDisplay)
+    mazeClient.eventHandler.addEventListener(HeadlessErrorHandler(mazeClient))
     mazeClient.eventHandler.addEventListener(HeadlessPlayerConnectionLogger)
     mazeClient.eventHandler.addEventListener(HeadlessPlayerScoreLogger)
 
@@ -34,9 +36,6 @@ fun main() {
             }
             start.await()
         }
-        mazeClient.eventHandler.removeEventListener(HeadlessChatDisplay)
-        mazeClient.eventHandler.removeEventListener(HeadlessPlayerConnectionLogger)
-        mazeClient.eventHandler.removeEventListener(HeadlessPlayerScoreLogger)
     } catch (ex: Exception) {
         LOGGER.error("Error while starting the client: ${ex.message}", ex)
     }

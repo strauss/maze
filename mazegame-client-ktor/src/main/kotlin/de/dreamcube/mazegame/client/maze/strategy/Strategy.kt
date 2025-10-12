@@ -31,7 +31,7 @@ import kotlin.math.max
  * - [PlayerMovementListener] for events related to players changing position (including appearing and vanishing from the map)
  * - [ScoreChangeListener] for score-related events
  * - [ChatInfoListener] for chat messages, including whispers (allows for bots to talk with each other)
- * - [ErrorInfoListener] for server error messages (e.g., allows for reacting on wall crashes, like in [PassiveStrategy])
+ * - [ErrorInfoListener] for server error messages (e.g., allows for reacting on wall crashes, like in [Aimless])
  *
  * The strategy is automatically registered for all relevant event listeners when the client is initialized.
  * See [EventHandler.addEventListener] for details.
@@ -120,7 +120,7 @@ abstract class Strategy : NoEventListener {
         // call strategy
         val move: Move = getNextMove()
         if (move == Move.DO_NOTHING) {
-            val waitFor = max(mazeClient.gameSpeed, mazeClient.ownPlayer?.moveTime?.toInt() ?: 10)
+            val waitFor = max(mazeClient.gameSpeed, mazeClient.ownPlayer.moveTime.toInt())
             mazeClient.scope.launch {
                 delay(waitFor.toLong())
                 makeNextMove()
