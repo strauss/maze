@@ -13,6 +13,7 @@ import java.util.*
 class EventHandler {
 
     // All the lists separated by listener types
+    private val mazeEventListeners: MutableList<MazeEventListener> = LinkedList()
     private val baitEventListeners: MutableList<BaitEventListener> = LinkedList()
     private val playerConnectionListeners: MutableList<PlayerConnectionListener> = LinkedList()
     private val playerMovementListeners: MutableList<PlayerMovementListener> = LinkedList()
@@ -25,6 +26,9 @@ class EventHandler {
      */
     fun addEventListener(listener: EventListener) {
         // Feel the power of smart casts :-)
+        if (listener is MazeEventListener) {
+            mazeEventListeners.add(listener)
+        }
         if (listener is BaitEventListener) {
             baitEventListeners.add(listener)
         }
@@ -50,6 +54,9 @@ class EventHandler {
      */
     fun removeEventListener(listener: EventListener) {
         // Feel the power of smart casts :-)
+        if (listener is MazeEventListener) {
+            mazeEventListeners.remove(listener)
+        }
         if (listener is BaitEventListener) {
             baitEventListeners.remove(listener)
         }
@@ -71,6 +78,12 @@ class EventHandler {
     }
 
     // All the events
+    fun fireMazeReceived(width: Int, height: Int, mazeLines: List<String>) {
+        for (listener in mazeEventListeners) {
+            listener.onMazeReceived(width, height, mazeLines)
+        }
+    }
+
     fun fireBaitAppeared(bait: Bait) {
         for (listener in baitEventListeners) {
             listener.onBaitAppeared(bait)

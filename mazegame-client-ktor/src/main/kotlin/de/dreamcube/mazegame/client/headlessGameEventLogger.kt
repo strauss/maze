@@ -1,5 +1,6 @@
-package de.dreamcube.mazegame.client.maze
+package de.dreamcube.mazegame.client
 
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
 import de.dreamcube.mazegame.client.maze.events.PlayerMovementListener
 import de.dreamcube.mazegame.client.maze.events.ScoreChangeListener
@@ -10,9 +11,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.Duration.Companion.milliseconds
 
-object HeadlessGameEventLogger : PlayerConnectionListener, PlayerMovementListener, ScoreChangeListener {
+object HeadlessPlayerConnectionLogger : PlayerConnectionListener {
 
-    val LOGGER: Logger = LoggerFactory.getLogger(HeadlessGameEventLogger::class.java)
+    val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerConnectionLogger::class.java)
 
     override fun onPlayerLogin(playerId: Int, nick: String) {
         LOGGER.info("Player '$nick ($playerId)' logged in.")
@@ -27,6 +28,11 @@ object HeadlessGameEventLogger : PlayerConnectionListener, PlayerMovementListene
         val moveTime: String = playerSnapshot.moveTime.toString()
         LOGGER.info("Player '$nick ($playerId)' logged out. Total playtime was: $totalPlayTime. Current playtime was: $currentPlayTime. Current points per minute was $ppm. Current move time was: $moveTime.")
     }
+}
+
+object HeadlessPlayerMovementLogger : PlayerMovementListener {
+
+    val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerMovementLogger::class.java)
 
     override fun onPlayerAppear(playerSnapshot: PlayerSnapshot) {
         LOGGER.info("Player '${playerSnapshot.nick} (${playerSnapshot.id})' entered the maze.")
@@ -68,10 +74,14 @@ object HeadlessGameEventLogger : PlayerConnectionListener, PlayerMovementListene
         }
         LOGGER.info("Player '${newPlayerSnapshot.nick} (${newPlayerSnapshot.id})' was teleported away.$teleportReason")
     }
+}
+
+object HeadlessPlayerScoreLogger : ScoreChangeListener {
+    val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerScoreLogger::class.java)
 
     override fun onScoreChange(oldScore: Int, newPlayerSnapshot: PlayerSnapshot) {
         val scoreDifference: Int = newPlayerSnapshot.score - oldScore
-        val collectedBaitType: BaitType? = BaitType.byScore(scoreDifference)
+        val collectedBaitType: BaitType? = BaitType.Companion.byScore(scoreDifference)
         val scoreReason: String = when (collectedBaitType) {
             null -> ""
             BaitType.TRAP -> " They ran into a trap."

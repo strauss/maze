@@ -1,27 +1,43 @@
 package de.dreamcube.mazegame.client
 
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
-import de.dreamcube.mazegame.client.maze.HeadlessGameEventLogger
 import de.dreamcube.mazegame.client.maze.MazeClient
+import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+private val LOGGER: Logger = LoggerFactory.getLogger("main")
 
 fun main() {
-    val config = MazeClientConfigurationDto("localhost", 12345, "aimless")
+    // Bot-Strategien laden
+    Strategy.scanAndAddStrategiesBlocking()
+    LOGGER.info("Found strategies: ${Strategy.getStrategyNamesBlocking()}")
+    val strategyName = "aimless"
+    val config = MazeClientConfigurationDto("localhost", 12345, strategyName)
+
     val mazeClient = MazeClient(config)
-    mazeClient.eventHandler.addEventListener(HeadlessMessageDisplay)
-    mazeClient.eventHandler.addEventListener(HeadlessGameEventLogger)
+    mazeClient.eventHandler.addEventListener(HeadlessChatDisplay)
+    mazeClient.eventHandler.addEventListener(HeadlessPlayerConnectionLogger)
+    mazeClient.eventHandler.addEventListener(HeadlessPlayerScoreLogger)
+
     mazeClient.eventHandler.fireClientInfo("The game is about to start!")
-    val start: Deferred<Unit> = mazeClient.start()
-    runBlocking {
-        launch {
-            delay(5000L)
-            mazeClient.logout()
+    try {
+        val start: Deferred<Unit> = mazeClient.start()
+        runBlocking {
+            launch {
+                delay(5000L)
+                mazeClient.logout()
+            }
+            start.await()
         }
-        start.await()
+        mazeClient.eventHandler.removeEventListener(HeadlessChatDisplay)
+        mazeClient.eventHandler.removeEventListener(HeadlessPlayerConnectionLogger)
+        mazeClient.eventHandler.removeEventListener(HeadlessPlayerScoreLogger)
+    } catch (ex: Exception) {
+        LOGGER.error("Error while starting the client: ${ex.message}", ex)
     }
-    mazeClient.eventHandler.removeEventListener(HeadlessMessageDisplay)
-    mazeClient.eventHandler.removeEventListener(HeadlessGameEventLogger)
 }

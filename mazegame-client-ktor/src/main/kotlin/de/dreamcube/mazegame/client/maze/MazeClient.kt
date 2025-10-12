@@ -3,6 +3,7 @@ package de.dreamcube.mazegame.client.maze
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.commands.ServerCommandParser
 import de.dreamcube.mazegame.client.maze.events.EventHandler
+import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.common.maze.CommandExecutor
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.Message
@@ -24,12 +25,15 @@ import java.util.concurrent.CompletableFuture
  */
 class MazeClient @JvmOverloads constructor(
     internal val clientConfiguration: MazeClientConfigurationDto,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    internal val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 ) {
     companion object {
         private const val NO_ID: Int = -1
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeClient::class.java)
     }
+
+    internal lateinit var strategy: Strategy
+        private set
 
     val serverAddress
         get() = clientConfiguration.serverAddress
@@ -55,6 +59,12 @@ class MazeClient @JvmOverloads constructor(
         private set
 
     /**
+     * The current game speed ... can be changed by the server (soon)
+     */
+    var gameSpeed: Int = 150
+        private set
+
+    /**
      * Channel for outgoing messages.
      */
     private val outgoingMessages = Channel<Message>(Channel.UNLIMITED)
@@ -77,9 +87,10 @@ class MazeClient @JvmOverloads constructor(
     private lateinit var readJob: Job
     private lateinit var writeJob: Job
 
-    private lateinit var maze: Maze
     internal val baits = BaitCollection()
     internal val players = PlayerCollection()
+    val ownPlayer: PlayerView?
+        get() = players.getPlayerViewById(id)
 
     private val selector = SelectorManager(Dispatchers.IO)
 
@@ -93,6 +104,10 @@ class MazeClient @JvmOverloads constructor(
      * Starts the client ... Kotlin edition.
      */
     fun start(): Deferred<Unit> {
+        // We have to get the strategy somewhere ... this is one way to do it.
+        strategy = Strategy.createStrategyBlocking(clientConfiguration.strategyName)
+            ?: throw ClassNotFoundException("Could not find strategy with name '${clientConfiguration.strategyName}'")
+        strategy.initClient(this)
         val result = CompletableDeferred<Unit>()
         scope.launch {
             try {
@@ -206,17 +221,17 @@ class MazeClient @JvmOverloads constructor(
 
     internal fun initializeMaze(width: Int, height: Int, mazeLines: List<String>) {
         if (status == ConnectionStatus.LOGGED_IN) {
-            maze = Maze(width, height, mazeLines)
+            eventHandler.fireMazeReceived(width, height, mazeLines)
             status = ConnectionStatus.SPECTATING
         }
     }
 
-    internal fun onReady() {
+    internal suspend fun onReady() {
         if (status == ConnectionStatus.SPECTATING) {
             status = ConnectionStatus.PLAYING
         }
         if (status == ConnectionStatus.PLAYING) {
-            // TODO: call strategy
+            strategy.makeNextMove()
         }
     }
 

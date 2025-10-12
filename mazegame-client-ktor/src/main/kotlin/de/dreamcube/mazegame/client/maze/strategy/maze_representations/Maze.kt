@@ -1,4 +1,4 @@
-package de.dreamcube.mazegame.client.maze
+package de.dreamcube.mazegame.client.maze.strategy.maze_representations
 
 import java.util.*
 
@@ -57,7 +57,7 @@ class Maze(val width: Int, val height: Int, lines: List<String>) {
     }
 
     /**
-     * The left [BitSet] representing this [Maze].
+     * The left [java.util.BitSet] representing this [Maze].
      */
     private val leftSet = BitSet()
 

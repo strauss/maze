@@ -9,12 +9,15 @@ kotlinxSerialization = "1.6.3"
 kotlinxHtml = "0.12.0"
 kotlinxExtensions = "1.0.1-pre.823"
 shadow = "8.1.1"
+reflections = "0.10.2"
+dokka = "1.9.20"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 shadow-jar = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
 # --- Bibliotheken ------------------------------------------------------
 [libraries]
@@ -44,6 +47,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 jwt = { module = "com.auth0:java-jwt", version.ref = "jwt" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 
 # --- Test-Libs (auskommentiert – bei Bedarf aktivieren) ----------------
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.8.2" }

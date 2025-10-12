@@ -5,6 +5,10 @@ import de.dreamcube.mazegame.common.maze.Message
 
 internal fun String.asMessage() = Message(this)
 
+private val stepMessage = "STEP".asMessage()
+private val turnLeftMessage = "TURN;l".asMessage()
+private val turnRightMessage = "TURN;r".asMessage()
+
 fun createEmptyLastMessage() = "".asMessage()
 
 // Login stuff
@@ -14,3 +18,8 @@ fun createRequestMazeMessage() = "MAZ?".asMessage()
 
 // Logout stuff
 fun createByeMessage() = "BYE!".asMessage()
+
+// Movement
+fun createStepMessage() = stepMessage
+fun createTurnLeftMessage() = turnLeftMessage
+fun createTurnRightMessage() = turnRightMessage

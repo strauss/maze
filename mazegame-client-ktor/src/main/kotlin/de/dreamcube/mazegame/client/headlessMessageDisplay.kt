@@ -6,8 +6,8 @@ import de.dreamcube.mazegame.common.maze.InfoCode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object HeadlessMessageDisplay : ChatInfoListener, ErrorInfoListener {
-    private val LOGGER: Logger = LoggerFactory.getLogger(HeadlessMessageDisplay::class.java)
+object HeadlessChatDisplay : ChatInfoListener {
+    private val LOGGER: Logger = LoggerFactory.getLogger(HeadlessChatDisplay::class.java)
 
     override fun onClientInfo(message: String) {
         LOGGER.info("Client: $message")
@@ -21,7 +21,10 @@ object HeadlessMessageDisplay : ChatInfoListener, ErrorInfoListener {
         val appendix: String = if (whisper) "(whisper)" else ""
         LOGGER.info("$playerNick$appendix: $message")
     }
+}
 
+object HeadlessErrorDisplay : ErrorInfoListener {
+    private val LOGGER: Logger = LoggerFactory.getLogger(HeadlessErrorDisplay::class.java)
     override fun onServerError(infoCode: InfoCode) {
         val infoNumber = infoCode.code
         when (infoCode) {

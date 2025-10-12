@@ -9,6 +9,23 @@ import de.dreamcube.mazegame.common.maze.TeleportType
 sealed interface EventListener
 
 /**
+ * Dummy-Interface for allowing the abstract superclass [de.dreamcube.mazegame.client.maze.strategy.Strategy] to have no specific [EventListener]
+ * implemented. Does not contain any functions.
+ */
+interface NoEventListener : EventListener
+
+/**
+ * This listener interface handles maze related events.
+ */
+interface MazeEventListener : EventListener {
+    /**
+     * After the server sent the whole maze data, this method is called and should be used to create the desired internal maze structure for the
+     * strategy.
+     */
+    fun onMazeReceived(width: Int, height: Int, mazeLines: List<String>)
+}
+
+/**
  * This listener interface handles bait related events.
  */
 interface BaitEventListener : EventListener {

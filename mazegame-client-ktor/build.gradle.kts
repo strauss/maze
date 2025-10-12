@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm")
     application
     alias(libs.plugins.shadow.jar)
+    alias(libs.plugins.jetbrains.dokka)
 }
 
 repositories {
@@ -23,6 +24,10 @@ dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.logback.classic)
 
+    // External dependencies
+    implementation(libs.reflections)
+
+    // Own stuff
     implementation(projects.mazegameCommon)
 
     // Tests
