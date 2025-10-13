@@ -8,11 +8,10 @@ plugins {
 
 repositories {
     mavenCentral()
-    mavenLocal()   // zieht den alten Java-Client aus der lokalen Maven-Repo
 }
 
 dependencies {
-    implementation(platform(project(":")))        // <dependencyManagement> der Basis
+    implementation(platform(project(":")))
 
     // --- Ktor ----------------------------------------------------------
     implementation(libs.ktor.server.core)
@@ -23,9 +22,7 @@ dependencies {
     implementation(libs.ktor.serialization.jackson)
     implementation(libs.ktor.server.thymeleaf)
 
-    // --- Logging & JWT -------------------------------------------------
-    implementation(libs.slf4j.api)
-    implementation(libs.logback.classic)
+    // --- JWT -------------------------------------------------
     implementation(libs.jwt)
 
     // --- Jackson (YAML & Kotlin-Module) --------------------------------
@@ -33,9 +30,7 @@ dependencies {
     implementation(libs.jackson.module.kotlin)
 
     implementation(projects.mazegameCommon)
-
-    // --- Abhängigkeit auf alten Client --------------------------------
-    implementation("mazegame:client:1.0-SNAPSHOT")   // kommt aus mavenLocal() oder Repo
+    implementation(projects.mazegameClientKtor) // Used for client wrapper
 
     // --- Tests (optional) ---------------------------------------------
     testImplementation(kotlin("test"))
@@ -43,7 +38,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("mazegame.server_ktor.ApplicationKt")   // wie im Shade-Plugin der POM :contentReference[oaicite:5]{index=5}
+    mainClass.set("mazegame.server_ktor.ApplicationKt")
 }
 
 tasks.withType<ShadowJar> {
@@ -51,4 +46,4 @@ tasks.withType<ShadowJar> {
     mergeServiceFiles()
 }
 
-tasks.test { useJUnitPlatform() }   // funktioniert, falls JUnit wieder aktiviert wird
+tasks.test { useJUnitPlatform() }

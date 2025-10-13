@@ -5,7 +5,7 @@ import de.dreamcube.mazegame.client.maze.events.ErrorInfoListener
 import de.dreamcube.mazegame.common.maze.InfoCode
 import kotlinx.coroutines.runBlocking
 
-class HeadlessErrorHandler(val mazeClient: MazeClient) : ErrorInfoListener {
+class DuplicateNickHandler(val mazeClient: MazeClient) : ErrorInfoListener {
     private var loginIteration = 0
 
     override fun onServerError(infoCode: InfoCode) {

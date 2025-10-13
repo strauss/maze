@@ -20,10 +20,6 @@ dependencies {
     implementation(libs.ktor.network)
     implementation(libs.ktor.utils)
 
-    // Logging
-    implementation(libs.slf4j.api)
-    implementation(libs.logback.classic)
-
     // External dependencies
     implementation(libs.reflections)
 

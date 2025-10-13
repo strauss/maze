@@ -171,8 +171,10 @@ class Trapeater : Strategy(), MazeEventListener, BaitEventListener, PlayerMoveme
 
     override fun onBaitVanished(bait: Bait) {
         traps.remove(bait)
-        currentTarget = null
-        path.clear()
+        if (currentTarget == bait) {
+            currentTarget = null
+            path.clear()
+        }
     }
 
     override fun onPlayerAppear(playerSnapshot: PlayerSnapshot) {

@@ -22,7 +22,7 @@ fun main() {
     val mazeClient = MazeClient(config)
     mazeClient.eventHandler.addEventListener(HeadlessChatDisplay)
     mazeClient.eventHandler.addEventListener(HeadlessErrorDisplay)
-    mazeClient.eventHandler.addEventListener(HeadlessErrorHandler(mazeClient))
+    mazeClient.eventHandler.addEventListener(DuplicateNickHandler(mazeClient))
     mazeClient.eventHandler.addEventListener(HeadlessPlayerConnectionLogger)
     mazeClient.eventHandler.addEventListener(HeadlessPlayerScoreLogger)
 

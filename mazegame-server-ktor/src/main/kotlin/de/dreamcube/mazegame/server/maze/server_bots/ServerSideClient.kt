@@ -24,5 +24,5 @@ interface ServerSideClient {
     /**
      * Indicates that the client could not connect.
      */
-    val loginFailed: Boolean
+    val connectionFailed: Boolean
 }

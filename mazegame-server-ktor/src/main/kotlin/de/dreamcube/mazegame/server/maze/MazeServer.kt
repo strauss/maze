@@ -11,8 +11,8 @@ import de.dreamcube.mazegame.server.maze.generator.MazeGenerator
 import de.dreamcube.mazegame.server.maze.generator.WallBasedMazeGenerator
 import de.dreamcube.mazegame.server.maze.generator.generateMazeFromConfiguration
 import de.dreamcube.mazegame.server.maze.server_bots.AutoTrapeaterHandler
+import de.dreamcube.mazegame.server.maze.server_bots.ClientWrapper
 import de.dreamcube.mazegame.server.maze.server_bots.FrenzyHandler
-import de.dreamcube.mazegame.server.maze.server_bots.LegacyClientWrapper
 import de.dreamcube.mazegame.server.maze.server_bots.ServerSideClient
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
@@ -188,7 +188,7 @@ class MazeServer(
         maxTrapCount = max(1, baseBaitCount / serverConfiguration.game.baitGenerator.trapDivisor)
         LOGGER.info("Max trap count: $maxTrapCount")
         desiredBaitCount = AtomicInteger(if (serverConfiguration.game.generateBaitsAtStart) baseBaitCount else 0)
-        availableBotNames = LegacyClientWrapper.determineAvailableLegacyBotNames()
+        availableBotNames = ClientWrapper.determineAvailableBotNames()
         val trapeaterName: String = serverConfiguration.serverBots.specialBots.trapeater
         autoTrapeaterEnabled = serverConfiguration.game.autoTrapeater && availableBotNames.contains(trapeaterName)
         if (autoTrapeaterEnabled) {
@@ -726,7 +726,7 @@ class MazeServer(
      */
     internal fun internalSpawnServerSideBot(alias: String): ServerSideClient? {
         if (availableBotNames.contains(alias)) {
-            return LegacyClientWrapper.createServerSideClient(alias, port)
+            return ClientWrapper.createServerSideClient(alias, port)
         }
         return null
     }
@@ -745,7 +745,7 @@ class MazeServer(
         if (serverSideClient != null) {
             do {
                 delay(gameSpeed.delay) // unlimited could be a problem...
-                if (serverSideClient.loginFailed) {
+                if (serverSideClient.connectionFailed) {
                     LOGGER.error("Server side client could not connect.")
                     return null
                 }

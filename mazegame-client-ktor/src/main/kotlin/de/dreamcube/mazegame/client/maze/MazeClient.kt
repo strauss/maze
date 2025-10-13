@@ -32,7 +32,7 @@ class MazeClient @JvmOverloads constructor(
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeClient::class.java)
     }
 
-    internal lateinit var strategy: Strategy
+    lateinit var strategy: Strategy
         private set
 
     val serverAddress
@@ -82,7 +82,7 @@ class MazeClient @JvmOverloads constructor(
     /**
      * The event handler. Each client has its own, or it would get very messy.
      */
-    internal val eventHandler = EventHandler()
+    val eventHandler = EventHandler()
 
     private lateinit var readJob: Job
     private lateinit var writeJob: Job
