@@ -15,7 +15,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.future.asCompletableFuture
-import kotlinx.io.IOException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
@@ -30,6 +29,8 @@ class MazeClient @JvmOverloads constructor(
     companion object {
         private const val NO_ID: Int = -1
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeClient::class.java)
+
+        private val loggedInStates = setOf(ConnectionStatus.LOGGED_IN, ConnectionStatus.SPECTATING, ConnectionStatus.PLAYING)
     }
 
     lateinit var strategy: Strategy
@@ -112,18 +113,18 @@ class MazeClient @JvmOverloads constructor(
             ?: throw ClassNotFoundException("Could not find strategy with name '${clientConfiguration.strategyName}'")
         strategy.initClient(this)
         val result = CompletableDeferred<Unit>()
-        scope.launch {
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
             try {
                 socket = aSocket(selector).tcp().connect(serverAddress, serverPort)
-            } catch (ex: IOException) {
+            } catch (ex: Exception) {
                 LOGGER.error("Connection error: ${ex.message}", ex)
                 result.completeExceptionally(ex)
                 return@launch
             }
-            writeJob = launch { writeLoop() }
             commandExecutor.start()
             commandParser.start()
-            readJob = launch { readLoop(scope) }
+            writeJob = launch { writeLoop() }
+            readJob = scope.launch { readLoop(scope) }
             status = ConnectionStatus.CONNECTED
 
             readJob.join()
@@ -137,8 +138,13 @@ class MazeClient @JvmOverloads constructor(
      * Function for logging out of the game.
      */
     suspend fun logout() {
-        LOGGER.info("Logging out...")
-        sendMessage(createByeMessage())
+        if (status in loggedInStates) {
+            LOGGER.info("Logging out...")
+            sendMessage(createByeMessage())
+        } else {
+            LOGGER.warn("Not logged in.")
+            stop(true)
+        }
     }
 
     /**
@@ -160,13 +166,18 @@ class MazeClient @JvmOverloads constructor(
                 LOGGER.warn("The server terminated the connection!")
             }
             outgoingMessages.close()
-            writeJob.join()
-        } finally {
+            if (this::writeJob.isInitialized) {
+                writeJob.join()
+            }
             status = ConnectionStatus.DEAD
-            LOGGER.info("Connection closed: '{}'", socket.remoteAddress)
-            socket.close()
+            if (this::socket.isInitialized) {
+                LOGGER.info("Connection closed: '{}'", socket.remoteAddress)
+                socket.close()
+            } else {
+                LOGGER.warn("Client terminated before connection to '${serverAddress}:${serverPort}' was established.")
+            }
+        } finally {
             selector.close()
-            scope.cancel()
         }
     }
 
