@@ -21,7 +21,11 @@ class FrenzyHandler(mazeServer: MazeServer) : ServerBotHandler(mazeServer) {
     }
 
     override suspend fun postSpawn() {
-        LOGGER.info("Frenzy bot '$botAlias' spawned.")
+        if(client != null) {
+            LOGGER.info("Frenzy bot '$botAlias' spawned.")
+        } else {
+            LOGGER.warn("Frenzy bot '$botAlias' could not spawn.")
+        }
     }
 
     override suspend fun postDespawn() {
