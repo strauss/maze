@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.1.20"   # aus Parent-POM
-ktor = "3.1.2"
+kotlin = "2.1.20"
+ktor = "3.3.0"
 jackson = "2.18.2"
 slf4j = "2.0.9"
 logback = "1.5.13"
@@ -8,9 +8,12 @@ jwt = "4.4.0"
 kotlinxSerialization = "1.6.3"
 kotlinxHtml = "0.12.0"
 kotlinxExtensions = "1.0.1-pre.823"
+kotlinxCoroutines = "1.10.2"
 shadow = "8.1.1"
 reflections = "0.10.2"
 dokka = "1.9.20"
+flatlaf = "3.6.2"
+miglayout = "11.4.2"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -40,6 +43,12 @@ ktor-utils = { module = "io.ktor:ktor-utils", version.ref = "ktor" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 kotlinx-html = { module = "org.jetbrains.kotlinx:kotlinx-html", version.ref = "kotlinxHtml" }
 kotlinx-extensions = { module = "org.jetbrains.kotlin-wrappers:kotlin-extensions", version.ref = "kotlinxExtensions" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutines" }
+
+# UI
+formdev-flatlaf = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
+miglayout = { module = "com.miglayout:miglayout-swing", version.ref = "miglayout" }
 
 # Logging, Serialization, ...
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
