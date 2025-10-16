@@ -60,6 +60,14 @@ fun Application.configureRouting() {
             call.respond(ThymeleafContent("hello", mapOf()))
         }
         */
+
+        /**
+         * This endpoint is used for allowing a client to get essential connection information about all available running maze servers.
+         */
+        get("server") {
+            ServerController.getReducedServerInformation(call)
+        }
+
         authenticate(basicAuth) {
             post("/login") {
                 val user: UserIdPrincipal? = call.principal<UserIdPrincipal>()
@@ -176,10 +184,6 @@ fun Application.configureRouting() {
             post("/server/{$pathServerId}/contest/report") {
                 val serverId: Int = call.getIntParameter(pathServerId) ?: return@post
                 ServerController.triggerReport(call, serverId)
-            }
-
-            get("server") {
-                ServerController.getactiveServerIds(call)
             }
 
             get("/server/{$pathServerId}/info") {

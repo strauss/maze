@@ -199,9 +199,23 @@ object ServerController {
     /**
      * Gets all active server ids.
      */
-    suspend fun getactiveServerIds(call: ApplicationCall) {
+    suspend fun getReducedServerInformation(call: ApplicationCall) {
         val ids: List<Int> = MazeServer.serverMap.keys.sorted()
-        call.respond(ids)
+        val info: List<ReducedServerInformationDto> = ids.map { id ->
+            val server: MazeServer = MazeServer.serverMap[id]!!
+            val configuration = server.serverConfiguration
+            val spectator: String? = if (configuration.game.allowSpectator) configuration.serverBots.specialBots.spectator else null
+            ReducedServerInformationDto(
+                id,
+                configuration.connection.maxClients,
+                server.getRelevantClientCount(),
+                server.gameSpeed.delay.toInt(),
+                server.maze.width,
+                server.maze.height,
+                spectator
+            )
+        }
+        call.respond(info)
     }
 
     /**

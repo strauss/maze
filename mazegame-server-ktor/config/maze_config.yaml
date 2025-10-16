@@ -64,3 +64,5 @@
     initialSpeed: fast
     events:
       enabled: true
+- connection:
+    port: 12344
