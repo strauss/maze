@@ -46,6 +46,10 @@ abstract class Strategy : NoEventListener {
 
         private val STRATEGIES: MutableMap<String, Class<out Strategy>> = HashMap()
 
+        private val SPECTATOR_NAMES: MutableSet<String> = HashSet()
+
+        private val HUMAN_NAMES: MutableSet<String> = HashSet()
+
         @JvmStatic
         @JvmName("scanAndAddStrategies")
         fun scanAndAddStrategiesBlocking() = runBlocking { scanAndAddStrategies() }
@@ -60,10 +64,18 @@ abstract class Strategy : NoEventListener {
                     val botAnnotation: Bot? = strategyClass.getAnnotation(Bot::class.java)
                     botAnnotation?.let {
                         val strategyName: String = it.value
+                        val spectator: Boolean = it.isSpectator
+                        val human: Boolean = it.isHuman
                         val registeredStrategy = STRATEGIES[strategyName]
                         if (registeredStrategy != null) {
                             LOGGER.warn("Strategy '$strategyName' has already been registered for class '${registeredStrategy.canonicalName}' and will be skipped.")
                             return@let // not quite a 'continue'
+                        }
+                        if (spectator) {
+                            SPECTATOR_NAMES.add(strategyName)
+                        }
+                        if (human) {
+                            HUMAN_NAMES.add(strategyName)
                         }
                         LOGGER.info("Strategy '$strategyName' will be registered for class '${strategyClass.canonicalName}'.")
                         STRATEGIES[strategyName] = strategyClass
@@ -97,6 +109,32 @@ abstract class Strategy : NoEventListener {
         suspend fun getStrategyNames(): Set<String> {
             strategyMutex.withLock {
                 return Collections.unmodifiableSet(TreeSet(STRATEGIES.keys))
+            }
+        }
+
+        @JvmStatic
+        @JvmName("isHumanStrategy")
+        fun String.isHumanStrategyBlocking(): Boolean {
+            val name = this
+            return runBlocking { name.isHumanStrategy() }
+        }
+
+        suspend fun String.isHumanStrategy(): Boolean {
+            strategyMutex.withLock {
+                return HUMAN_NAMES.contains(this)
+            }
+        }
+
+        @JvmStatic
+        @JvmName("isSpectatorStrategy")
+        fun String.isSpectatorStrategyBlocking(): Boolean {
+            val name = this
+            return runBlocking { name.isSpectatorStrategy() }
+        }
+
+        suspend fun String.isSpectatorStrategy(): Boolean {
+            strategyMutex.withLock {
+                return SPECTATOR_NAMES.contains(this)
             }
         }
 

@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.server.control
 
+import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.Player
 import de.dreamcube.mazegame.server.config.ConnectionDto

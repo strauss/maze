@@ -5,4 +5,4 @@ package de.dreamcube.mazegame.client.maze.strategy
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Bot(val value: String)
+annotation class Bot(val value: String, val isSpectator: Boolean = false, val isHuman: Boolean = false)

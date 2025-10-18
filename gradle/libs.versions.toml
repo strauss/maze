@@ -30,14 +30,17 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "k
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml-jvm", version.ref = "ktor" }
 ktor-server-auth = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
 ktor-server-content-neg = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
-ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson-jvm", version.ref = "ktor" }
 ktor-server-thymeleaf = { module = "io.ktor:ktor-server-thymeleaf-jvm", version.ref = "ktor" }
 
-# Ktor Client
-#ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-#ktor-client-cio = { module = "io.ktor:ktor-client.cio", version.ref = "ktor" }
+# Ktor Common
+ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson-jvm", version.ref = "ktor" }
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor" }
 ktor-utils = { module = "io.ktor:ktor-utils", version.ref = "ktor" }
+
+# Ktor Client
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-content-neg = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 
 # Kotlin extensions
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
@@ -58,7 +61,7 @@ jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-d
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 
-# --- Test-Libs (auskommentiert – bei Bedarf aktivieren) ----------------
+# --- Test-Libs
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.8.2" }
 # mockito-core              = { module = "org.mockito:mockito-core",               version = "5.6.0" }
 # mockito-junit             = { module = "org.mockito:mockito-junit-jupiter",      version = "4.8.1" }

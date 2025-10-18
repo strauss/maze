@@ -4,16 +4,6 @@ import de.dreamcube.mazegame.server.config.BaitGeneratorDto
 import de.dreamcube.mazegame.server.config.ConnectionDto
 import de.dreamcube.mazegame.server.config.GeneratorParametersDto
 
-data class ReducedServerInformationDto(
-    val id: Int,
-    val maxClients: Int,
-    val activeClients: Int,
-    val speed: Int,
-    val width: Int,
-    val height: Int,
-    val spectatorName: String? = null
-)
-
 data class ServerInformationDto(val connection: ConnectionDto, val mazeInformation: MazeInformationDto, val gameInformation: GameInformationDto)
 data class MazeInformationDto(val generatorMode: String, val generatorParameters: GeneratorParametersDto, val walkableFields: Int)
 data class GameInformationDto(
