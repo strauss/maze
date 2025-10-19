@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.client.maze.events
 
 import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
@@ -129,4 +130,14 @@ interface ErrorInfoListener : EventListener {
      * This function is called, when the server sends an error-related [infoCode].
      */
     fun onServerError(infoCode: InfoCode)
+}
+
+/**
+ * This listener interface is intended for the UI for directly reacting to connection status changes.
+ */
+interface ClientConnectionStatusListener : EventListener {
+    /**
+     * This function is called, just after the [oldStatus] is changed to the [newStatus].
+     */
+    fun onConnectionStatusChange(oldStatus: ConnectionStatus, newStatus: ConnectionStatus)
 }

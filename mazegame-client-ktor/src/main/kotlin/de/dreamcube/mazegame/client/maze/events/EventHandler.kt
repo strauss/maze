@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.client.maze.events
 
 import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
@@ -20,6 +21,7 @@ class EventHandler {
     private val scoreChangeListeners: MutableList<ScoreChangeListener> = LinkedList()
     private val chatInfoListeners: MutableList<ChatInfoListener> = LinkedList()
     private val errorInfoListeners: MutableList<ErrorInfoListener> = LinkedList()
+    private val clientConnectionStatusListeners: MutableList<ClientConnectionStatusListener> = LinkedList()
 
     /**
      * Adds the given [EventListener] to all matching lists according to the implemented interfaces. This operation costs O(1).
@@ -46,6 +48,9 @@ class EventHandler {
         }
         if (listener is ErrorInfoListener) {
             errorInfoListeners.add(listener)
+        }
+        if (listener is ClientConnectionStatusListener) {
+            clientConnectionStatusListeners.add(listener)
         }
     }
 
@@ -171,6 +176,12 @@ class EventHandler {
     fun fireServerError(infoCode: InfoCode) {
         for (listener in errorInfoListeners) {
             listener.onServerError(infoCode)
+        }
+    }
+
+    fun fireConnectionStatusChange(oldStatus: ConnectionStatus, newStatus: ConnectionStatus) {
+        for (listener in clientConnectionStatusListeners) {
+            listener.onConnectionStatusChange(oldStatus, newStatus)
         }
     }
 }

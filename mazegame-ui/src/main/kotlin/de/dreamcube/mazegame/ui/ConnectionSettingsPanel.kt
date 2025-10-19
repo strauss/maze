@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.ui
 
+import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
 import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
@@ -16,7 +17,7 @@ import java.awt.Font
 import java.awt.event.ItemEvent
 import javax.swing.*
 
-class ConnectionSettingsPanel(private val controller: UiController) : JPanel() {
+class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), ClientConnectionStatusListener {
     companion object {
         private const val TEXT_FIELD_COLUMNS: Int = 20
         private val LOGGER: Logger = LoggerFactory.getLogger(ConnectionSettingsPanel::class.java)
@@ -161,19 +162,23 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel() {
             if (address.isNotBlank() && port.isNotBlank()) {
                 queryButton.isEnabled = false
                 controller.uiScope.launch {
-                    try {
-                        val gameInformationList: List<ReducedServerInformationDto> = controller.queryForGameInformation(address, port.toInt())
-                        fillGameSelection(gameInformationList)
-                        gameSelection.isEnabled = true
-                    } catch (ex: Exception) {
-                        LOGGER.error("Error while retrieving game information from server: '${ex.message}'", ex)
-                        fillGameSelection(listOf())
-                        JOptionPane.showMessageDialog(
-                            this@ConnectionSettingsPanel,
-                            "Error while retrieving game information from server.\nCheck address and port or use a direct connection.",
-                            "Connection Error",
-                            JOptionPane.ERROR_MESSAGE
-                        )
+                    withContext(Dispatchers.IO) {
+                        try {
+                            val gameInformationList: List<ReducedServerInformationDto> = controller.queryForGameInformation(address, port.toInt())
+                            fillGameSelection(gameInformationList)
+                            gameSelection.isEnabled = true
+                        } catch (ex: Exception) {
+                            LOGGER.error("Error while retrieving game information from server: '${ex.message}'", ex)
+                            withContext(Dispatchers.Swing) {
+                                fillGameSelection(listOf())
+                                JOptionPane.showMessageDialog(
+                                    this@ConnectionSettingsPanel,
+                                    "Error while retrieving game information from server.\nCheck address and port or use a direct connection.",
+                                    "Connection Error",
+                                    JOptionPane.ERROR_MESSAGE
+                                )
+                            }
+                        }
                     }
                     queryButton.isEnabled = true
                 }
@@ -242,13 +247,13 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel() {
         add(connectButton, "grow")
 
         connectButton.addActionListener { _ ->
-            if (controller.connectionStatus == ConnectionStatus.UNKNOWN &&
+            if (controller.connectionStatus == ConnectionStatus.NOT_CONNECTED &&
                 addressField.text.isNotBlank() &&
                 gamePortField.text.isNotBlank() &&
                 (strategySelection.selectedItem as String?)?.isNotBlank() ?: false &&
                 nickField.text.isNotBlank()
             ) {
-                controller.uiScope.launch {
+                controller.bgScope.launch {
                     controller.connect(
                         addressField.text,
                         gamePortField.text.toInt(),
@@ -256,24 +261,25 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel() {
                         nickField.text
                     )
                 }
-                // TODO: clean up the ui and fill with score table
+                connectButton.isEnabled = false
             }
         }
 
+        // TODO: here we could add an animated whatever to indicate, that the connection is being established
 
         add(JPanel(), "growy")
+
+        controller.prepareEventListener(this)
     }
 
     private fun handleNick(selectedStrategy: String, spectatorName: String?) {
         controller.uiScope.launch {
-            withContext(Dispatchers.Swing) {
-                if (selectedStrategy.isSpectatorStrategy() && spectatorName != null) {
-                    nickField.text = spectatorName
-                    nickField.isEnabled = false
-                } else {
-                    nickField.text = selectedStrategy
-                    nickField.isEnabled = true
-                }
+            if (selectedStrategy.isSpectatorStrategy() && spectatorName != null) {
+                nickField.text = spectatorName
+                nickField.isEnabled = false
+            } else {
+                nickField.text = selectedStrategy
+                nickField.isEnabled = true
             }
         }
     }
@@ -314,5 +320,19 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel() {
             model.removeAllElements()
         }
         model.addAll(availableStrategies)
+    }
+
+    override fun onConnectionStatusChange(
+        oldStatus: ConnectionStatus,
+        newStatus: ConnectionStatus
+    ) {
+        controller.uiScope.launch {
+            when (newStatus) {
+                ConnectionStatus.CONNECTED -> this@ConnectionSettingsPanel.isEnabled = false
+                else -> {
+                    // nothing
+                }
+            }
+        }
     }
 }

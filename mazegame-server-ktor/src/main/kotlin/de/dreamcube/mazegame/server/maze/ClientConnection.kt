@@ -67,7 +67,7 @@ class ClientConnection(
     /**
      * The current status of the client connection.
      */
-    var status: ConnectionStatus = ConnectionStatus.UNKNOWN
+    var status: ConnectionStatus = ConnectionStatus.NOT_CONNECTED
         private set
 
     /**

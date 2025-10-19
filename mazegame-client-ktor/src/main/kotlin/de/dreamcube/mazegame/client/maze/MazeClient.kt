@@ -50,8 +50,14 @@ class MazeClient @JvmOverloads constructor(
     /**
      * The current status of the connection.
      */
-    var status: ConnectionStatus = ConnectionStatus.UNKNOWN
-        private set
+    var status: ConnectionStatus = ConnectionStatus.NOT_CONNECTED
+        private set(value) {
+            val oldStatus = field
+            field = value
+            if (oldStatus != value) {
+                eventHandler.fireConnectionStatusChange(oldStatus, value)
+            }
+        }
 
     /**
      * The id from the server.

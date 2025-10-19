@@ -6,6 +6,7 @@ import com.formdev.flatlaf.FlatLightLaf
 import de.dreamcube.mazegame.client.DuplicateNickHandler
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.MazeClient
+import de.dreamcube.mazegame.client.maze.events.EventListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
@@ -20,11 +21,20 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.swing.Swing
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.awt.EventQueue
+import java.util.*
 
 class UiController {
+    companion object {
+        private val LOGGER: Logger = LoggerFactory.getLogger(UiController::class.java)
+    }
 
     internal val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Swing)
+    internal val bgScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    private val uiEventListeners: MutableList<EventListener> = LinkedList()
 
     /**
      * The client, but only if the connection is established.
@@ -35,13 +45,32 @@ class UiController {
 
     val connectionStatus: ConnectionStatus
         get() {
-            return if (this::client.isInitialized) client.status else ConnectionStatus.UNKNOWN
+            return if (this::client.isInitialized) client.status else ConnectionStatus.NOT_CONNECTED
         }
 
-    internal fun connect(address: String, port: Int, strategyName: String, displayName: String) {
+    /**
+     * Collects [EventListener]s to be added to the [MazeClient] after it is created but before it is started. They are added when [connect] is
+     * called.
+     */
+    fun prepareEventListener(eventListener: EventListener) {
+        if (connectionStatus == ConnectionStatus.NOT_CONNECTED) {
+            uiEventListeners.add(eventListener)
+        } else {
+            LOGGER.error("The client has already been established: '$connectionStatus'. Event listeners should be added directly.")
+        }
+    }
+
+    internal fun connect(
+        address: String,
+        port: Int,
+        strategyName: String,
+        displayName: String
+    ) {
         val config = MazeClientConfigurationDto(address, port, strategyName, displayName)
         client = MazeClient(config)
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
+        uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
+        uiEventListeners.clear() // a drop in the bucket but hey ... why not? RAM used to be expensive.
         clientTerminationHandle = client.start()
     }
 
