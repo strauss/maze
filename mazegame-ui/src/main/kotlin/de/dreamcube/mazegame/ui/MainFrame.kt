@@ -23,6 +23,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private val scorePanel = JPanel()
     val scoreTable: ScoreTable
     lateinit var messagePane: MessagePane
+    lateinit var mazePanel: MazePanel
 
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
@@ -30,9 +31,6 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         // Fill the UI
         contentPane.layout = BorderLayout()
         mainSplitPane.add(connectionSettingsPanel, JSplitPane.LEFT)
-        val emptyPanel = JPanel()
-        emptyPanel.setSize(100, 200)
-        mainSplitPane.add(emptyPanel, JSplitPane.RIGHT)
         contentPane.add(mainSplitPane, BorderLayout.CENTER)
 
         scorePanel.layout = BorderLayout()
@@ -69,6 +67,9 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
                 ConnectionStatus.LOGGED_IN -> {
                     mainSplitPane.remove(connectionSettingsPanel)
                     mainSplitPane.add(leftSplitPane, JSplitPane.LEFT)
+                    mazePanel = MazePanel(controller)
+                    mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
+                    controller.mazePanel = mazePanel
                     pack()
                 }
 

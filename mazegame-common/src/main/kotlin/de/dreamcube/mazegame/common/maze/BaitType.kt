@@ -28,7 +28,7 @@ enum class BaitType(
         }
 
         fun byCharacter(baitChar: Char): BaitType {
-            return when (baitChar) {
+            return when (baitChar.lowercaseChar()) {
                 'f' -> FOOD
                 'c' -> COFFEE
                 'g' -> GEM
@@ -47,4 +47,8 @@ enum class BaitType(
             }
         }
     }
+
+    val asChar: Char
+        get() = baitName.first().uppercaseChar()
+
 }

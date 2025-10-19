@@ -16,10 +16,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.jackson.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.swing.Swing
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,6 +33,9 @@ class UiController {
 
     private val uiEventListeners: MutableList<EventListener> = LinkedList()
     internal lateinit var uiPlayerCollection: UiPlayerCollection
+
+    val mazeModel = MazeModel(this)
+    internal lateinit var mazePanel: MazePanel
 
     /**
      * The client, but only if the connection is established.
@@ -89,6 +89,13 @@ class UiController {
 
         httpClient.use {
             return it.get(httpAddress).body()
+        }
+    }
+
+    internal fun triggerMazeUpdate(x: Int, y: Int) {
+        uiScope.launch {
+            mazePanel.updatePosition(x, y)
+            mazePanel.repaint()
         }
     }
 
