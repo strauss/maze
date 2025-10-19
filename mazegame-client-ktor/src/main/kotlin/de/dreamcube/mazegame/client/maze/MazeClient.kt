@@ -100,7 +100,7 @@ class MazeClient @JvmOverloads constructor(
     private val ownPlayerInitialized: Boolean
         get() = this::ownPlayer.isInitialized
     val ownPlayerSnapshot: PlayerSnapshot
-        get() = PlayerSnapshot(ownPlayer)
+        get() = runBlocking { players.getPlayerSnapshot(ownPlayer.id)!! }
 
     private val selector = SelectorManager(Dispatchers.IO)
 

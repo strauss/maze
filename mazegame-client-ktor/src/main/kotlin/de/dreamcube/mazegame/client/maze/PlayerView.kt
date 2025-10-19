@@ -5,7 +5,7 @@ import de.dreamcube.mazegame.common.maze.Player
 /**
  * Read-only representation of the current state of a [Player]. Directly reflects all changes in a non-thread-safe manner.
  */
-class PlayerView(private val player: Player) {
+class PlayerView internal constructor(private val player: Player) {
     val id: Int
         get() = player.id
     val nick: String
@@ -30,4 +30,14 @@ class PlayerView(private val player: Player) {
         get() = player.pointsPerMinute
     val moveTime: Double
         get() = player.moveTime
+
+    /**
+     * Takes a snapshot of the current state. The caller is responsible for thread-safety of the snapshot creation.
+     */
+    fun takeSnapshot() = PlayerSnapshot(this)
 }
+
+/**
+ * Creates a read-only view of the player object.
+ */
+fun Player.view(): PlayerView = PlayerView(this)

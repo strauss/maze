@@ -17,12 +17,14 @@ class Player(
     score: Int = 0,
     val loginTime: Long = System.currentTimeMillis(),
     var playStartTime: Long = System.currentTimeMillis(),
-    moveCounter: Int = 0
+    moveCounter: Int = 0,
+    var scoreOffset: Int = score
 ) {
     var score: Int = score
         set(value) {
             // If the server resets the score, it is set to 0, but the ppm are higher than 0. This prevents trapeaters from being reset. Their ppm is
             // usually negative. There might still be a tiny little chance, but it is assumed to be an irrelevant border case.
+            // It also prevents endless recursion, when "resetScore" is called :-D
             if (value == 0 && pointsPerMinute > 0) {
                 resetScore()
             } else {
@@ -38,6 +40,7 @@ class Player(
      */
     fun resetScore() {
         score = 0
+        scoreOffset = 0
         moveCounter = 0
         playStartTime = System.currentTimeMillis()
     }
@@ -60,7 +63,7 @@ class Player(
     val pointsPerMinute: Double
         get() {
             val minutes: Double = currentPlayTime.toDouble() / (60_000.0)
-            return round((score.toDouble() / minutes) * 100.0) / 100.0
+            return round(((score - scoreOffset).toDouble() / minutes) * 100.0) / 100.0
         }
 
     /**

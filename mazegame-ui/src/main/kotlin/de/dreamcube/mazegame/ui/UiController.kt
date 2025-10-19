@@ -35,6 +35,7 @@ class UiController {
     internal val bgScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val uiEventListeners: MutableList<EventListener> = LinkedList()
+    internal lateinit var uiPlayerCollection: UiPlayerCollection
 
     /**
      * The client, but only if the connection is established.

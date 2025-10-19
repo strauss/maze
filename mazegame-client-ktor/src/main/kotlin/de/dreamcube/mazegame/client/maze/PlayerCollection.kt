@@ -26,12 +26,18 @@ class PlayerCollection {
     private val playerIdToPlayerMap: MutableMap<Int, Player> = LinkedHashMap()
 
     /**
+     * Internal set of player IDs that never received a score, ever. This is used to decide when to set the score offset.
+     */
+    private val virginScorePlayerIds: MutableSet<Int> = HashSet()
+
+    /**
      * Adds a new [Player] to this [PlayerCollection]. It should only be called whenever a player appears.
      */
     internal suspend fun addPlayer(player: Player): Boolean {
         playerMutex.withLock {
             if (!playerIdToPlayerMap.containsKey(player.id)) {
                 playerIdToPlayerMap[player.id] = player
+                virginScorePlayerIds.add(player.id)
                 return true
             }
             return false
@@ -44,7 +50,8 @@ class PlayerCollection {
     internal suspend fun removePlayerById(playerId: Int): PlayerSnapshot? {
         playerMutex.withLock {
             val removedPlayer: Player? = playerIdToPlayerMap.remove(playerId)
-            return removedPlayer?.let { player -> PlayerSnapshot(PlayerView(player)) }
+            virginScorePlayerIds.remove(playerId) // just in case
+            return removedPlayer?.view()?.takeSnapshot()
         }
     }
 
@@ -53,7 +60,7 @@ class PlayerCollection {
      * reflect all changes made to the player object and access will not be thread-safe.
      */
     internal fun getPlayerViewById(playerId: Int): PlayerView? {
-        return playerIdToPlayerMap[playerId]?.let { PlayerView(it) }
+        return playerIdToPlayerMap[playerId]?.view()
     }
 
     /**
@@ -61,7 +68,7 @@ class PlayerCollection {
      */
     internal suspend fun getPlayerSnapshot(playerId: Int): PlayerSnapshot? {
         playerMutex.withLock {
-            return getPlayerViewById(playerId)?.let { PlayerSnapshot(it) }
+            return getPlayerViewById(playerId)?.takeSnapshot()
         }
     }
 
@@ -79,15 +86,15 @@ class PlayerCollection {
     ): Pair<PlayerSnapshot, PlayerSnapshot>? {
         playerMutex.withLock {
             val player: Player = playerIdToPlayerMap[playerId] ?: return null
-            val playerView = PlayerView(player)
-            val oldSnapshot = PlayerSnapshot(playerView)
+            val playerView = player.view()
+            val oldSnapshot = playerView.takeSnapshot()
             player.x = newX
             player.y = newY
             player.viewDirection = newViewDirection
             if (reason in MOVE_REASONS) {
                 player.incrementMoveCounter()
             }
-            val newSnapshot = PlayerSnapshot(playerView)
+            val newSnapshot = playerView.takeSnapshot()
             return Pair(oldSnapshot, newSnapshot)
         }
     }
@@ -101,7 +108,11 @@ class PlayerCollection {
             val player: Player = playerIdToPlayerMap[playerId] ?: return null
             val oldScore = player.score
             player.score = newScore
-            val newSnapshot = PlayerSnapshot(PlayerView(player))
+            if (virginScorePlayerIds.contains(playerId)) {
+                player.scoreOffset = newScore
+                virginScorePlayerIds.remove(playerId)
+            }
+            val newSnapshot = player.view().takeSnapshot()
             return Pair(oldScore, newSnapshot)
         }
     }
@@ -114,7 +125,7 @@ class PlayerCollection {
     internal suspend fun elements(): List<PlayerSnapshot> {
         playerMutex.withLock {
             return playerIdToPlayerMap.values.asSequence()
-                .map { PlayerSnapshot(PlayerView(it)) }
+                .map { it.view().takeSnapshot() }
                 .toList()
         }
     }
