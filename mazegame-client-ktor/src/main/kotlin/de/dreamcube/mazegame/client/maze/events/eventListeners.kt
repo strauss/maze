@@ -89,7 +89,7 @@ interface PlayerMovementListener : EventListener {
     /**
      * This function is called, when a player was teleported.
      */
-    fun onPlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?)
+    fun onPlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, causingPlayerId: Int?)
 }
 
 /**

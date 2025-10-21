@@ -62,8 +62,12 @@ fun createPlayerTeleportByTrapMessage(player: Player) =
     listOf(createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT), TeleportType.TRAP.shortName)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createPlayerTeleportByCollisionMessage(player: Player, otherPlayerId: Int) =
-    listOf(createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT), TeleportType.COLLISION.shortName, otherPlayerId.toString())
+fun createPlayerTeleportByCollisionMessage(player: Player, causingPlayerId: Int) =
+    listOf(
+        createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT),
+        TeleportType.COLLISION.shortName,
+        causingPlayerId.toString()
+    )
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createPlayerScoreChangedMessage(player: Player) = listOf("PSCO", player.id.toString(), player.score)

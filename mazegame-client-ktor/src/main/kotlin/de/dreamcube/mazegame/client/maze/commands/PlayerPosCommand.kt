@@ -14,7 +14,7 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
     private val viewDirection: ViewDirection
     private val reason: PlayerPositionChangeReason
     private val teleportType: TeleportType?
-    private val otherPlayerId: Int?
+    private val causingPlayerId: Int?
 
     override val okay: Boolean
 
@@ -26,7 +26,7 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
             viewDirection = ViewDirection.random()
             reason = PlayerPositionChangeReason.VANISH
             teleportType = null
-            otherPlayerId = null
+            causingPlayerId = null
             okay = false
         } else {
             id = commandWithParameters[1].toInt()
@@ -36,7 +36,7 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
             reason = PlayerPositionChangeReason.fromShortName(commandWithParameters[5])
             teleportType = if (reason == PlayerPositionChangeReason.TELEPORT && commandWithParameters.size > 6)
                 TeleportType.fromShortName(commandWithParameters[6]) else null
-            otherPlayerId = if (teleportType != null && commandWithParameters.size > 7)
+            causingPlayerId = if (teleportType != null && commandWithParameters.size > 7)
                 commandWithParameters[7].toInt() else null
             okay = true
         }
@@ -52,7 +52,7 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
                     oldSnapshot.position,
                     newSnapshot,
                     teleportType,
-                    otherPlayerId
+                    causingPlayerId
                 )
 
                 PlayerPositionChangeReason.APPEAR -> mazeClient.eventHandler.firePlayerAppear(newSnapshot)

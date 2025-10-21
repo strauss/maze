@@ -68,12 +68,12 @@ object HeadlessPlayerMovementLogger : PlayerMovementListener {
         oldPosition: PlayerPosition,
         newPlayerSnapshot: PlayerSnapshot,
         teleportType: TeleportType?,
-        otherPlayerId: Int?
+        causingPlayerId: Int?
     ) {
-        val collisionReason = when (otherPlayerId) {
+        val collisionReason = when (causingPlayerId) {
             null -> ""
             newPlayerSnapshot.id -> " It was their own fault."
-            else -> " It was the other player's fault ($otherPlayerId)."
+            else -> " It was the other player's fault ($causingPlayerId)."
         }
         val teleportReason: String = when (teleportType) {
             null -> ""

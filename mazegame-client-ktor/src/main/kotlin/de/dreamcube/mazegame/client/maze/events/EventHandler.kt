@@ -143,9 +143,9 @@ class EventHandler {
         }
     }
 
-    fun firePlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, otherPlayerId: Int?) {
+    fun firePlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, causingPlayerId: Int?) {
         for (listener in playerMovementListeners) {
-            listener.onPlayerTeleport(oldPosition, newPlayerSnapshot, teleportType, otherPlayerId)
+            listener.onPlayerTeleport(oldPosition, newPlayerSnapshot, teleportType, causingPlayerId)
         }
     }
 

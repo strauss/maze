@@ -152,7 +152,7 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         oldPosition: PlayerPosition,
         newPlayerSnapshot: PlayerSnapshot,
         teleportType: TeleportType?,
-        otherPlayerId: Int?
+        causingPlayerId: Int?
     ) {
         movePlayer(oldPosition, newPlayerSnapshot)
     }

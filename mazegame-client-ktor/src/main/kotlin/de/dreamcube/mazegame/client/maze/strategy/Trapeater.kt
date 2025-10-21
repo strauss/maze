@@ -203,7 +203,7 @@ class Trapeater : Strategy(), MazeEventListener, BaitEventListener, PlayerMoveme
         oldPosition: PlayerPosition,
         newPlayerSnapshot: PlayerSnapshot,
         teleportType: TeleportType?,
-        otherPlayerId: Int?
+        causingPlayerId: Int?
     ) {
         // If we teleport, we drop the target and select a new one
         if (newPlayerSnapshot.id == mazeClient.id) {
