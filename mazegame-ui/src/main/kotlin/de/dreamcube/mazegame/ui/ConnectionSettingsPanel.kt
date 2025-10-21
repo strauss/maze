@@ -247,7 +247,8 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         add(connectButton, "grow")
 
         connectButton.addActionListener { _ ->
-            if (controller.connectionStatus == ConnectionStatus.NOT_CONNECTED &&
+            val readyToConnect = controller.connectionStatus == ConnectionStatus.NOT_CONNECTED || controller.connectionStatus == ConnectionStatus.DEAD
+            if (readyToConnect &&
                 addressField.text.isNotBlank() &&
                 gamePortField.text.isNotBlank() &&
                 (strategySelection.selectedItem as String?)?.isNotBlank() ?: false &&
@@ -329,6 +330,11 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         controller.uiScope.launch {
             when (newStatus) {
                 ConnectionStatus.CONNECTED -> this@ConnectionSettingsPanel.isEnabled = false
+                ConnectionStatus.DEAD -> {
+                    this@ConnectionSettingsPanel.isEnabled = true
+                    connectButton.isEnabled = true
+                }
+
                 else -> {
                     // nothing
                 }

@@ -38,6 +38,19 @@ class MazePanel(private val controller: UiController) : JPanel() {
 
     private var pressPoint: Point? = null
 
+    internal fun reset() {
+        // Erase the image with a transparent rectangle
+        image.graphics.color = Color(0xff, 0xff, 0xff, 0x00)
+        image.graphics.drawRect(0, 0, width * zoom, height * zoom)
+        repaint()
+
+        // change all values
+        zoom = INITIAL_ZOOM
+        imageZoom = 0
+        offset = Point(0, 0)
+        pressPoint = null
+    }
+
     init {
         minimumSize = Dimension(12 * zoom, 9 * zoom)
         preferredSize = Dimension(45 * zoom, 35 * zoom)

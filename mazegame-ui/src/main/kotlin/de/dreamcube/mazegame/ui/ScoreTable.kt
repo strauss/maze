@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
+import kotlinx.coroutines.launch
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
@@ -80,6 +81,10 @@ class ScoreTable(private val controller: UiController) : JTable(), PlayerConnect
         controller.prepareEventListener(this)
     }
 
+    internal fun reset() {
+        uiPlayerInformationModel.reset()
+    }
+
     private fun adjustPreferredViewportSize() {
         preferredScrollableViewportSize = Dimension(90 * UiPlayerCollection.COLUMN_NAMES.size, rowHeight * model.rowCount)
     }
@@ -96,7 +101,9 @@ class ScoreTable(private val controller: UiController) : JTable(), PlayerConnect
     }
 
     override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        adjustPreferredViewportSize()
+        controller.uiScope.launch {
+            adjustPreferredViewportSize()
+        }
     }
 
     override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
@@ -104,6 +111,8 @@ class ScoreTable(private val controller: UiController) : JTable(), PlayerConnect
     }
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
-        adjustPreferredViewportSize()
+        controller.uiScope.launch {
+            adjustPreferredViewportSize()
+        }
     }
 }

@@ -3,15 +3,17 @@ package de.dreamcube.mazegame.ui
 import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.BaitEventListener
+import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.events.MazeEventListener
 import de.dreamcube.mazegame.client.maze.events.PlayerMovementListener
 import de.dreamcube.mazegame.common.maze.BaitType
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MazeModel(private val controller: UiController) : MazeEventListener, BaitEventListener, PlayerMovementListener {
+class MazeModel(private val controller: UiController) : MazeEventListener, BaitEventListener, PlayerMovementListener, ClientConnectionStatusListener {
 
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeModel::class.java)
@@ -50,9 +52,16 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         private set
     internal var height: Int = 0
         private set
-    private lateinit var internalMaze: Array<MazeField>
+    var internalMaze: Array<MazeField> = Array(0) { UnknownMazeField }
     var mazeReceived: Boolean = false
         private set
+
+    private fun reset() {
+        width = 0
+        height = 0
+        internalMaze = Array(0) { UnknownMazeField }
+        mazeReceived = false
+    }
 
     override fun onMazeReceived(width: Int, height: Int, mazeLines: List<String>) {
         this.width = width
@@ -170,6 +179,15 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         if (mazeField is PathMazeField) {
             mazeField.player = newPlayerSnapshot
             controller.triggerMazeUpdate(newPlayerSnapshot.x, newPlayerSnapshot.y)
+        }
+    }
+
+    override fun onConnectionStatusChange(
+        oldStatus: ConnectionStatus,
+        newStatus: ConnectionStatus
+    ) {
+        if (newStatus == ConnectionStatus.DEAD) {
+            reset()
         }
     }
 }

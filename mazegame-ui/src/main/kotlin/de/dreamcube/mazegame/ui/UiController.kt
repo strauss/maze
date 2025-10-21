@@ -71,8 +71,14 @@ class UiController {
         client = MazeClient(config)
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
         uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
-        uiEventListeners.clear() // a drop in the bucket but hey ... why not? RAM used to be expensive.
+//        uiEventListeners.clear() // a drop in the bucket but hey ... why not? RAM used to be expensive.
         clientTerminationHandle = client.start()
+    }
+
+    internal fun disconnect() {
+        bgScope.launch {
+            client.logout()
+        }
     }
 
     internal suspend fun queryForGameInformation(address: String, port: Int): List<ReducedServerInformationDto> {

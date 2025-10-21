@@ -90,6 +90,12 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
         }
     }
 
+    internal fun reset() {
+        uiPlayerInformationList.clear()
+        idToIndexMap.clear()
+        fireTableDataChanged()
+    }
+
     override fun getRowCount(): Int = uiPlayerInformationList.size
 
     override fun getColumnCount(): Int = COLUMN_NAMES.size

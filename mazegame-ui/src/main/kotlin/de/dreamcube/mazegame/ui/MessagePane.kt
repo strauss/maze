@@ -33,6 +33,8 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
     @Transient
     private val messageStyle: Style
 
+    private val playerIds: MutableSet<Int> = HashSet()
+
     init {
         val baseStyle = addStyle("base", null)
         StyleConstants.setFontFamily(baseStyle, "Arial")
@@ -91,11 +93,11 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
 
     private fun appendChatMessage(message: String) {
         this.styledDocument.insertString(this.styledDocument.length, "$message\n", messageStyle)
-        setCaretPosition(this.styledDocument.length)
+        caretPosition = styledDocument.length
     }
 
     override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        // ignore
+        playerIds.add(playerSnapshot.id)
     }
 
     override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
@@ -103,7 +105,22 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
     }
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
-        removeStyle(OTHER_CLIENT_STYLE_PREFIX + playerSnapshot.id)
-        removeStyle(OTHER_CLIENT_WHISPER_STYLE_PREFIX + playerSnapshot.id)
+        val playerId = playerSnapshot.id
+        removeStyleForPlayer(playerId)
+        playerIds.remove(playerId)
+    }
+
+    internal fun reset() {
+        for (playerId in playerIds) {
+            removeStyleForPlayer(playerId)
+        }
+        playerIds.clear()
+        styledDocument.remove(0, styledDocument.length)
+        caretPosition = 0
+    }
+
+    private fun removeStyleForPlayer(playerId: Int) {
+        removeStyle(OTHER_CLIENT_STYLE_PREFIX + playerId)
+        removeStyle(OTHER_CLIENT_WHISPER_STYLE_PREFIX + playerId)
     }
 }

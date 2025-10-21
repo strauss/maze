@@ -124,6 +124,7 @@ class MazeClient @JvmOverloads constructor(
                 socket = aSocket(selector).tcp().connect(serverAddress, serverPort)
             } catch (ex: Exception) {
                 LOGGER.error("Connection error: ${ex.message}", ex)
+                status = ConnectionStatus.DEAD
                 result.completeExceptionally(ex)
                 return@launch
             }
