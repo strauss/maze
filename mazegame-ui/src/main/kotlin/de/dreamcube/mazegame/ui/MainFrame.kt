@@ -57,6 +57,10 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         mainSplitPane.resizeWeight = 0.1
 
         controller.mazePanel = mazePanel
+        val glassPane = GlassPane(mazePanel)
+        controller.glassPane = glassPane
+        this.glassPane = glassPane
+        glassPane.isVisible = true
 
         controller.prepareEventListener(this)
 
@@ -79,7 +83,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         })
 
         // Size and position
-        setSize(640, 480)
+        setSize(800, 600)
         isLocationByPlatform = true
         controller.uiScope.launch {
             pack()
@@ -90,7 +94,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     fun createScrollableMessagePane(): JScrollPane {
         messagePane = MessagePane(controller)
         messagePane.isEditable = false
-        messagePane.preferredSize = Dimension(160, 300)
+        messagePane.preferredSize = Dimension(450, 300)
         messagePane.isVisible = false
         return JScrollPane(messagePane)
     }

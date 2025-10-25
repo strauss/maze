@@ -36,6 +36,7 @@ class UiController {
 
     val mazeModel = MazeModel(this)
     internal lateinit var mazePanel: MazePanel
+    internal lateinit var glassPane: GlassPane
 
     /**
      * The client, but only if the connection is established.

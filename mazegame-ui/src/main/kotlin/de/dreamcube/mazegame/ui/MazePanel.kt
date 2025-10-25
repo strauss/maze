@@ -20,7 +20,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
         private set(value) {
             if (value in MIN_ZOOM..MAX_ZOOM) {
                 field = value
-                // TODO: Glasspane zoom
+                controller.glassPane.repaint()
                 if (controller.mazeModel.mazeReceived) {
                     // TODO: Try without because we can center
                     offset.x = min(offset.x, getWidth() - 10 * value).coerceAtLeast(-(controller.mazeModel.width - 10) * value)
@@ -34,7 +34,8 @@ class MazePanel(private val controller: UiController) : JPanel() {
     var imageZoom = 0
         private set
 
-    private var offset: Point = Point(0, 0)
+    internal var offset: Point = Point(0, 0)
+        private set
 
     private var pressPoint: Point? = null
 
@@ -49,6 +50,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
         imageZoom = 0
         offset = Point(0, 0)
         pressPoint = null
+        controller.glassPane.reset()
     }
 
     init {

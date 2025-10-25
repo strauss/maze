@@ -14,7 +14,7 @@ import javax.swing.table.TableColumn
 
 class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnectionListener {
 
-    val scoreFont: Font = font.deriveFont(Font.BOLD)
+    val scoreFont: Font = Font(font.name, Font.PLAIN, 16)
 
     val cellRenderer: DefaultTableCellRenderer
     val uiPlayerInformationModel: UiPlayerCollection
@@ -23,7 +23,8 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
         columnSelectionAllowed = false
         rowSelectionAllowed = true
         rowHeight += 4
-        intercellSpacing = Dimension(0, 2)
+        intercellSpacing = Dimension(0, 3)
+
 
         cellRenderer = object : DefaultTableCellRenderer() {
             private var col: Int = -1
@@ -37,10 +38,13 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
                 row: Int,
                 column: Int
             ): Component? {
-                this.col = column
+                col = column
                 this.row = row
-                this.font = scoreFont
-                return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                val default = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+
+                default.font = if (col == 1 || col == 2) scoreFont.deriveFont(Font.BOLD) else scoreFont
+
+                return default
             }
 
             override fun setValue(value: Any?) {
@@ -101,11 +105,14 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
     override fun valueChanged(e: ListSelectionEvent?) {
         super.valueChanged(e)
         if (selectedRow >= 0) {
-            val uiPlayerInformation: UiPlayerInformation? = uiPlayerInformationModel[selectedRow]
-            if (uiPlayerInformation != null) {
-
-                // TODO: handle marking on glass pane
+            val selectedPlayer: UiPlayerInformation? = uiPlayerInformationModel[selectedRow]
+            if (selectedPlayer != null) {
+                controller.glassPane.markPlayer(selectedPlayer)
+            } else {
+                controller.glassPane.clearMark()
             }
+        } else {
+            controller.glassPane.clearMark()
         }
     }
 

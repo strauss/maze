@@ -82,7 +82,7 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
                 } else {
                     otherClientStyle = addStyle(OTHER_CLIENT_STYLE_PREFIX + playerId, clientStyle)
                 }
-                StyleConstants.setForeground(otherClientStyle, Color.black) // TODO: determine correct player color
+                StyleConstants.setForeground(otherClientStyle, controller.uiPlayerCollection.getById(playerId)?.color ?: Color.black)
                 styledDocument.insertString(styledDocument.length, "$playerNick: ", otherClientStyle)
                 appendChatMessage(message)
             } catch (ex: BadLocationException) {

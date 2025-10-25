@@ -305,6 +305,9 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         gamePortField.isEnabled = true
         gameLabel.isVisible = false
         gameSelection.isVisible = false
+        // TODO: make these combo-boxes with predefined values, this should do for now
+        addressField.text = "dreamcube.de"
+        gamePortField.text = "12345"
     }
 
     private fun fillGameSelection(elements: List<ReducedServerInformationDto>) {

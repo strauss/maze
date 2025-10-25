@@ -19,13 +19,19 @@ class UiPlayerInformation(
     companion object {
         private val BLACKISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.1f))
         private val WHITEISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.9f))
+        private const val MARKER_ALPHA = 192
     }
 
     var snapshot: PlayerSnapshot = initialPlayerSnapshot
         internal set
     var color: Color = initialColor
-        internal set
-    var bgColor: Color = determineBgColorByLuminance(color)
+        internal set(value) {
+            field = value
+            bgColor = determineBgColorByLuminance(value)
+            markerColor = field.changeAlpha(MARKER_ALPHA)
+        }
+    var bgColor: Color = determineBgColorByLuminance(initialColor)
+    var markerColor: Color = initialColor.changeAlpha(MARKER_ALPHA)
 
     val id
         get() = snapshot.id
@@ -47,6 +53,8 @@ class UiPlayerInformation(
 
         return if (contrastToBlack > contrastToWhite) BLACKISH else WHITEISH
     }
+
+    private fun Color.changeAlpha(alpha: Int) = Color(this.red, this.green, this.blue, alpha)
 
 }
 
@@ -175,10 +183,10 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
             }
 
             // ms/step
-            3 -> valueAt.snapshot.moveTime.toString()
+            3 -> String.format("%.2f", valueAt.snapshot.moveTime)
 
             // ppm
-            4 -> valueAt.snapshot.pointsPerMinute.toString()
+            4 -> String.format("%.2f", valueAt.snapshot.pointsPerMinute)
 
             else -> valueAt
         }
