@@ -45,7 +45,16 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
 
             override fun setValue(value: Any?) {
                 if (value is String) {
-                    foreground = if (row == selectedRow) selectionForeground else uiPlayerInformationModel[row]?.color ?: foreground
+                    // colors
+                    val playerColor = uiPlayerInformationModel[row]?.color
+                    val playerBgColor = uiPlayerInformationModel[row]?.bgColor
+
+                    selectionForeground = playerBgColor ?: selectionForeground
+                    foreground = if (row == selectedRow) selectionForeground else playerColor ?: foreground
+
+                    selectionBackground = playerColor ?: selectionBackground
+                    background = if (row == selectedRow) selectionBackground else playerBgColor
+
                     horizontalAlignment = when (col) {
                         0 -> CENTER // ID
                         1 -> LEFT // Nick

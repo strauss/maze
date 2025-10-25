@@ -7,17 +7,47 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import javax.swing.table.AbstractTableModel
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.pow
 
 class UiPlayerInformation(
     initialPlayerSnapshot: PlayerSnapshot,
     initialColor: Color = Color.darkGray
 ) {
+
+    companion object {
+        private val BLACKISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.1f))
+        private val WHITEISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.9f))
+    }
+
     var snapshot: PlayerSnapshot = initialPlayerSnapshot
         internal set
     var color: Color = initialColor
         internal set
+    var bgColor: Color = determineBgColorByLuminance(color)
+
     val id
         get() = snapshot.id
+
+    private fun determineBgColorByLuminance(color: Color): Color {
+        /**
+         * Converts a normalized RBG component to "linear"
+         */
+        fun lin(c: Double): Double = if (c <= 0.04045) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)
+        fun contrast(lum1: Double, lum2: Double) = (max(lum1, lum2) + 0.05) / (min(lum1, lum2) + 0.05)
+
+        val linRed: Double = lin(color.red / 255.0)
+        val linGreen: Double = lin(color.green / 255.0)
+        val linBlue: Double = lin(color.blue / 255.0)
+
+        val luminance = 0.2126 * linRed + 0.7152 * linGreen + 0.0722 * linBlue
+        val contrastToBlack = contrast(luminance, 0.1)
+        val contrastToWhite = contrast(luminance, 0.9)
+
+        return if (contrastToBlack > contrastToWhite) BLACKISH else WHITEISH
+    }
+
 }
 
 enum class ScoreRepresentationMode {
@@ -205,9 +235,9 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
         }
         for (playerInformation: UiPlayerInformation in uiPlayerInformationList) {
             val desiredColor = Color(Color.HSBtoRGB(hue, 1.0f, maxB))
-            val green = desiredColor.getGreen()
-            val relativeGreen = green / 255f
-            val brightness = maxB - (maxB - minB) * relativeGreen
+            val green: Int = desiredColor.green
+            val relativeGreen: Float = green / 255f
+            val brightness: Float = maxB - (maxB - minB) * relativeGreen
             val actualColor = Color(Color.HSBtoRGB(hue, 1.0f, brightness))
             playerInformation.color = actualColor
             hue += deltaHue
