@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 
-class ScoreTable(private val controller: UiController) : JTable(), PlayerConnectionListener {
+class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnectionListener {
 
     val scoreFont: Font = font.deriveFont(Font.BOLD)
 

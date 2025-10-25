@@ -17,6 +17,9 @@ class PlayerSnapshot(val view: PlayerView) {
     val currentPlayTime: Long = view.currentPlayTime
     val pointsPerMinute: Double = view.pointsPerMinute
     val moveTime: Double = view.moveTime
+    val scoreOffset: Int = view.scoreOffset
     val position: PlayerPosition
         get() = PlayerPosition(x, y, viewDirection)
+    val localScore: Int
+        get() = score - scoreOffset
 }

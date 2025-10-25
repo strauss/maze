@@ -20,6 +20,24 @@ class UiPlayerInformation(
         get() = snapshot.id
 }
 
+enum class ScoreRepresentationMode {
+    /**
+     * In this mode, the scores from the server are represented "as is".
+     */
+    SERVER,
+
+    /**
+     * In this mode, the score counting starts at 0 at connection time, meaning the first reported score at login of each other player is subtracted
+     * as offset in the representation.
+     */
+    CLIENT;
+
+    fun toggle() = when (this) {
+        SERVER -> CLIENT
+        CLIENT -> SERVER
+    }
+}
+
 /**
  * This collection serves as [AbstractTableModel] for the score view. It also serves as data structure for maintaining client-side player information.
  */
@@ -37,6 +55,8 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
 
     private val idToIndexMap: MutableMap<Int, Int> = HashMap()
     private val uiPlayerInformationList: MutableList<UiPlayerInformation> = ArrayList()
+
+    private var scoreRepresentationMode = ScoreRepresentationMode.SERVER
 
     operator fun get(index: Int): UiPlayerInformation? {
         if (index < 0 || index >= uiPlayerInformationList.size) {
@@ -90,9 +110,15 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
         }
     }
 
+    internal fun toggleScoreRepresentation() {
+        scoreRepresentationMode = scoreRepresentationMode.toggle()
+        fireTableDataChanged()
+    }
+
     internal fun reset() {
         uiPlayerInformationList.clear()
         idToIndexMap.clear()
+        scoreRepresentationMode = ScoreRepresentationMode.SERVER
         fireTableDataChanged()
     }
 
@@ -113,7 +139,10 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
             1 -> valueAt.snapshot.nick
 
             // Score
-            2 -> valueAt.snapshot.score.toString() // TODO: implement toggle mode and pick the right one
+            2 -> when (scoreRepresentationMode) {
+                ScoreRepresentationMode.SERVER -> valueAt.snapshot.score.toString()
+                ScoreRepresentationMode.CLIENT -> valueAt.snapshot.localScore.toString()
+            }
 
             // ms/step
             3 -> valueAt.snapshot.moveTime.toString()

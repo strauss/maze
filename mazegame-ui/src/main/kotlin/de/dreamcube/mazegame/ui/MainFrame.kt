@@ -21,8 +21,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private val mainSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
     private val connectionSettingsPanel = ConnectionSettingsPanel(controller)
     private val leftSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
-    private val scorePanel = JPanel()
-    private val scoreTable: ScoreTable
+    private val scorePanel: ScorePanel
     private lateinit var messagePane: MessagePane
     private val mazePanel: MazePanel
     private var connectionCounter: Int = 0
@@ -35,10 +34,8 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         contentPane.layout = BorderLayout()
         contentPane.add(mainSplitPane, BorderLayout.CENTER)
 
-        scorePanel.layout = BorderLayout()
-        scoreTable = ScoreTable(controller)
-        val tableScrollPane = JScrollPane(scoreTable)
-        scorePanel.add(tableScrollPane)
+        val scoreTable = ScoreTable(controller)
+        scorePanel = ScorePanel(scoreTable)
 
         val messageScrollPane = createScrollableMessagePane()
         val messagePanel = JPanel()
@@ -115,7 +112,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
                     if (connectionCounter > 0) {
                         mazePanel.reset()
                         messagePane.reset()
-                        scoreTable.reset()
+                        scorePanel.scoreTable.reset()
 
                         // The ui should enable a new connection
                         leftSplitPane.remove(scorePanel)

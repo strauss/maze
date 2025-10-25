@@ -30,6 +30,8 @@ class PlayerView internal constructor(private val player: Player) {
         get() = player.pointsPerMinute
     val moveTime: Double
         get() = player.moveTime
+    val scoreOffset: Int
+        get() = player.scoreOffset
 
     /**
      * Takes a snapshot of the current state. The caller is responsible for thread-safety of the snapshot creation.
