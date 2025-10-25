@@ -20,6 +20,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
     private val botFlavorTextLabel = JLabel()
     private val gameSpeedLabel = JLabel()
     private val zoomLabel = JLabel()
+    private val positionLabel = JLabel()
 
     init {
         controller.statusBar = this
@@ -52,8 +53,10 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         // Game status stuff
         val gameStatusPanel = JPanel()
         gameStatusPanel.layout = FlowLayout()
-//        zoomLabel.text = "Z: ${MazePanel.INITIAL_ZOOM}"
 
+        invalidPositionStatus()
+
+        gameStatusPanel.add(positionLabel)
         gameStatusPanel.add(zoomLabel)
         gameStatusPanel.add(gameSpeedLabel)
 
@@ -75,6 +78,14 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         }
     }
 
+    internal fun updatePositionStatus(x: Int, y: Int) {
+        positionLabel.text = "($x/$y)"
+    }
+
+    internal fun invalidPositionStatus() {
+        positionLabel.text = "(-/-)"
+    }
+
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
@@ -84,7 +95,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
             serverAddressLabel.text = controller.completeServerAddressString
             strategyLabel.text = controller.strategyName?.let { "as $it (${controller.getStrategyTypeForStatusBar()})" } ?: ""
             botFlavorTextLabel.text = controller.strategyName?.flavorText() ?: ""
-            zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Z: ${controller.mazePanel.zoom}"
+            zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${controller.mazePanel.zoom}"
             gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "${controller.gameSpeed} ms"
         }
     }

@@ -144,6 +144,14 @@ class UiController {
         }
     }
 
+    internal fun updatePositionStatus(x: Int, y: Int) {
+        if (x < 0 || y < 0 || x >= mazeModel.width || y >= mazeModel.height) {
+            statusBar.invalidPositionStatus()
+        } else {
+            statusBar.updatePositionStatus(x, y)
+        }
+    }
+
 }
 
 fun main() {

@@ -8,7 +8,7 @@ import java.awt.event.*
 import javax.swing.JPanel
 import kotlin.math.min
 
-class MazePanel(private val controller: UiController) : JPanel() {
+class MazePanel(internal val controller: UiController) : JPanel() {
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazePanel::class.java)
         internal const val INITIAL_ZOOM = 17
@@ -94,6 +94,14 @@ class MazePanel(private val controller: UiController) : JPanel() {
                     offset.y = min(offset.y, getHeight() - 10 * zoom)
                         .coerceAtLeast(-(controller.mazeModel.height - 10) * zoom)
                     repaint()
+                }
+            }
+
+            override fun mouseMoved(e: MouseEvent?) {
+                if (controller.glassPane.playerToMark == null) {
+                    val x = (e?.x ?: 0) - offset.x
+                    val y = (e?.y ?: 0) - offset.y
+                    controller.updatePositionStatus(x / zoom, y / zoom)
                 }
             }
         }

@@ -13,7 +13,7 @@ class GlassPane(val mazePanel: MazePanel) : JComponent() {
         RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON,
         RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY
     )
-    private var playerToMark: UiPlayerInformation? = null
+    internal var playerToMark: UiPlayerInformation? = null
 
     protected override fun paintComponent(g: Graphics?) {
         val player = playerToMark ?: return
@@ -32,11 +32,13 @@ class GlassPane(val mazePanel: MazePanel) : JComponent() {
 
     internal fun markPlayer(player: UiPlayerInformation) {
         playerToMark = player
+        mazePanel.controller.updatePositionStatus(player.snapshot.x, player.snapshot.y)
         repaint()
     }
 
     internal fun clearMark() {
         playerToMark = null
+        mazePanel.controller.updatePositionStatus(-1, -1)
         repaint()
     }
 

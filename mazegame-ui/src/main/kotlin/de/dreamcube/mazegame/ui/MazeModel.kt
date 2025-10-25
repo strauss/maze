@@ -10,6 +10,7 @@ import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
+import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -179,6 +180,14 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         if (mazeField is PathMazeField) {
             mazeField.player = newPlayerSnapshot
             controller.triggerMazeUpdate(newPlayerSnapshot.x, newPlayerSnapshot.y)
+
+            // If we have a marked player, we write their maze coordinates to the status bar
+            val playerToMark: UiPlayerInformation? = controller.glassPane.playerToMark
+            if (playerToMark != null && playerToMark.id == newPlayerSnapshot.id) {
+                controller.uiScope.launch {
+                    controller.updatePositionStatus(newPlayerSnapshot.x, newPlayerSnapshot.y)
+                }
+            }
         }
     }
 
