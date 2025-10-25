@@ -4,10 +4,14 @@ import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.awt.BorderLayout
 import java.awt.Dimension
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
 import javax.swing.*
+import kotlin.system.exitProcess
 
 class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnectionListener {
     companion object {
@@ -25,7 +29,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private val leaveButton = JButton("Leave")
 
     init {
-        defaultCloseOperation = EXIT_ON_CLOSE
+        defaultCloseOperation = DO_NOTHING_ON_CLOSE
 
         // Fill the UI
         contentPane.layout = BorderLayout()
@@ -58,6 +62,24 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         controller.mazePanel = mazePanel
 
         controller.prepareEventListener(this)
+
+        // close operation
+        addWindowListener(object : WindowAdapter() {
+
+            override fun windowClosing(e: WindowEvent?) {
+                controller.bgScope.launch {
+                    launch {
+                        // Force exit after 5 seconds
+                        delay(5000L)
+                        exitProcess(0)
+                    }
+                    // clean disconnect and exit
+                    controller.onExit()
+                    exitProcess(0)
+                }
+            }
+
+        })
 
         // Size and position
         setSize(640, 480)

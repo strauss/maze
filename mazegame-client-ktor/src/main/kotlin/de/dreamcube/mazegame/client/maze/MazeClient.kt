@@ -141,11 +141,14 @@ class MazeClient @JvmOverloads constructor(
         return result
     }
 
+    val isLoggedIn
+        get() = status in loggedInStates
+
     /**
      * Function for logging out of the game.
      */
     suspend fun logout() {
-        if (status in loggedInStates) {
+        if (isLoggedIn) {
             LOGGER.info("Logging out...")
             sendMessage(createByeMessage())
         } else {
