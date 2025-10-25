@@ -155,7 +155,8 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
 
         // Query button for managed connection
         add(JPanel()) // Dummy panel without content
-        add(queryButton, "growx")
+        queryButton.preferredSize = Dimension(addressField.preferredSize.width, queryButton.preferredSize.height)
+        add(queryButton)
         queryButton.addActionListener { _ ->
             val address = addressField.text
             val port = portField.text
@@ -244,7 +245,8 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         add(nickField)
 
         add(JPanel())
-        add(connectButton, "grow")
+        connectButton.preferredSize = Dimension(addressField.preferredSize.width, connectButton.preferredSize.height)
+        add(connectButton)
 
         connectButton.addActionListener { _ ->
             val readyToConnect = controller.connectionStatus == ConnectionStatus.NOT_CONNECTED || controller.connectionStatus == ConnectionStatus.DEAD

@@ -18,35 +18,44 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private val connectionSettingsPanel = ConnectionSettingsPanel(controller)
     private val leftSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
     private val scorePanel = JPanel()
-    val scoreTable: ScoreTable
-    lateinit var messagePane: MessagePane
-    lateinit var mazePanel: MazePanel
+    private val scoreTable: ScoreTable
+    private lateinit var messagePane: MessagePane
+    private val mazePanel: MazePanel
     private var connectionCounter: Int = 0
+    private val leaveButton = JButton("Leave")
 
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
 
         // Fill the UI
         contentPane.layout = BorderLayout()
-        mainSplitPane.add(connectionSettingsPanel, JSplitPane.LEFT)
         contentPane.add(mainSplitPane, BorderLayout.CENTER)
 
         scorePanel.layout = BorderLayout()
         scoreTable = ScoreTable(controller)
         val tableScrollPane = JScrollPane(scoreTable)
         scorePanel.add(tableScrollPane)
-        leftSplitPane.add(scorePanel)
+
         val messageScrollPane = createScrollableMessagePane()
         val messagePanel = JPanel()
         messagePanel.layout = BorderLayout()
         messagePanel.add(messageScrollPane, BorderLayout.CENTER)
-        val leaveButton = JButton("Leave")
+
         leaveButton.addActionListener { _ ->
             controller.disconnect()
         }
         messagePanel.add(leaveButton, BorderLayout.SOUTH)
+        leaveButton.isVisible = false
+        leftSplitPane.add(connectionSettingsPanel, JSplitPane.TOP)
         leftSplitPane.add(messagePanel, JSplitPane.BOTTOM)
         leftSplitPane.resizeWeight = 0.4
+        mainSplitPane.add(leftSplitPane, JSplitPane.LEFT)
+
+        mazePanel = MazePanel(controller)
+        mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
+        mainSplitPane.resizeWeight = 0.1
+
+        controller.mazePanel = mazePanel
 
         controller.prepareEventListener(this)
 
@@ -74,16 +83,10 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         controller.uiScope.launch {
             when (newStatus) {
                 ConnectionStatus.LOGGED_IN -> {
-                    mainSplitPane.remove(connectionSettingsPanel)
-                    mainSplitPane.add(leftSplitPane, JSplitPane.LEFT)
-                    if (connectionCounter < 1) {
-                        // On first login, we need to create and setup the maze panel
-                        mazePanel = MazePanel(controller)
-                        mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
-                        controller.mazePanel = mazePanel
-                    }
+                    leftSplitPane.remove(connectionSettingsPanel)
+                    leftSplitPane.add(scorePanel, JSplitPane.TOP)
                     connectionCounter += 1
-                    pack()
+                    leaveButton.isVisible = true
                 }
 
                 ConnectionStatus.DEAD -> {
@@ -93,8 +96,10 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
                         scoreTable.reset()
 
                         // The ui should enable a new connection
-                        mainSplitPane.remove(leftSplitPane)
-                        mainSplitPane.add(connectionSettingsPanel)
+                        leftSplitPane.remove(scorePanel)
+                        leftSplitPane.add(connectionSettingsPanel, JSplitPane.TOP)
+                        leaveButton.isVisible = false
+                        repaint()
                     }
                 }
 
