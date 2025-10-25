@@ -50,6 +50,8 @@ abstract class Strategy : NoEventListener {
 
         private val HUMAN_NAMES: MutableSet<String> = HashSet()
 
+        private val FLAVOR_TEXTS: MutableMap<String, String> = HashMap()
+
         @JvmStatic
         @JvmName("scanAndAddStrategies")
         fun scanAndAddStrategiesBlocking() = runBlocking { scanAndAddStrategies() }
@@ -79,6 +81,7 @@ abstract class Strategy : NoEventListener {
                         }
                         LOGGER.info("Strategy '$strategyName' will be registered for class '${strategyClass.canonicalName}'.")
                         STRATEGIES[strategyName] = strategyClass
+                        FLAVOR_TEXTS[strategyName] = it.flavor
                     }
                 }
             }
@@ -121,7 +124,7 @@ abstract class Strategy : NoEventListener {
 
         suspend fun String.isHumanStrategy(): Boolean {
             strategyMutex.withLock {
-                return HUMAN_NAMES.contains(this)
+                return this in HUMAN_NAMES
             }
         }
 
@@ -134,7 +137,33 @@ abstract class Strategy : NoEventListener {
 
         suspend fun String.isSpectatorStrategy(): Boolean {
             strategyMutex.withLock {
-                return SPECTATOR_NAMES.contains(this)
+                return this in SPECTATOR_NAMES
+            }
+        }
+
+        @JvmStatic
+        @JvmName("isBotStrategy")
+        fun String.isBotStrategyBlocking(): Boolean {
+            val name = this
+            return runBlocking { name.isBotStrategy() }
+        }
+
+        suspend fun String.isBotStrategy(): Boolean {
+            strategyMutex.withLock {
+                return this !in HUMAN_NAMES && this !in SPECTATOR_NAMES
+            }
+        }
+
+        @JvmStatic
+        @JvmName("flavorText")
+        fun String.flavorTextBlocking(): String {
+            val name = this
+            return runBlocking { name.flavorText() }
+        }
+
+        suspend fun String.flavorText(): String {
+            strategyMutex.withLock {
+                return FLAVOR_TEXTS[this] ?: ""
             }
         }
 

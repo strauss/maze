@@ -15,8 +15,12 @@ class ReadyCommand(mazeClient: MazeClient, commandWithParameters: List<String>) 
     }
 
     override suspend fun internalExecute() {
+        val oldSpeed: Int = mazeClient.gameSpeed
         if (gameSpeed != null) {
             mazeClient.gameSpeed = gameSpeed
+            if (oldSpeed != gameSpeed) {
+                mazeClient.eventHandler.fireSpeedChanged(oldSpeed, gameSpeed)
+            }
         }
         mazeClient.onReady()
     }

@@ -26,6 +26,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private val mazePanel: MazePanel
     private var connectionCounter: Int = 0
     private val leaveButton = JButton("Leave")
+    private val statusBar = StatusBar(controller)
 
     init {
         defaultCloseOperation = DO_NOTHING_ON_CLOSE
@@ -33,6 +34,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         // Fill the UI
         contentPane.layout = BorderLayout()
         contentPane.add(mainSplitPane, BorderLayout.CENTER)
+        contentPane.add(statusBar, BorderLayout.SOUTH)
 
         val scoreTable = ScoreTable(controller)
         scorePanel = ScorePanel(scoreTable)

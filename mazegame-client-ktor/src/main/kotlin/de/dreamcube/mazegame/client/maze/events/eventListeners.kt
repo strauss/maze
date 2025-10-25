@@ -141,3 +141,13 @@ interface ClientConnectionStatusListener : EventListener {
      */
     fun onConnectionStatusChange(oldStatus: ConnectionStatus, newStatus: ConnectionStatus)
 }
+
+/**
+ * This listener interface is used for speed changes.
+ */
+interface SpeedChangedListener : EventListener {
+    /**
+     * This function is called, whenever the game speed changes.
+     */
+    fun onSpeedChanged(oldSpeed: Int, newSpeed: Int)
+}

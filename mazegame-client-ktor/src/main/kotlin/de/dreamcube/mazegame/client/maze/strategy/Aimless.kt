@@ -4,7 +4,7 @@ import de.dreamcube.mazegame.client.maze.events.ErrorInfoListener
 import de.dreamcube.mazegame.common.maze.InfoCode
 import kotlin.random.Random
 
-@Bot("dummy")
+@Bot("dummy", flavor = "I run against walls!")
 @Suppress("unused")
 class Aimless : Strategy(), ErrorInfoListener {
 

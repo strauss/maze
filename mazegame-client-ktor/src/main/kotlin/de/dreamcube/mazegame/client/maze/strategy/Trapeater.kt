@@ -18,7 +18,7 @@ import kotlin.math.abs
  * The bot sticks to a target until it is collected or the bot is teleported. This intentionally bad strategy is good enough for a [Trapeater]. It is
  * not easily adaptable to "real" strategies. Developing a better approach will be faster ... you have been warned!
  */
-@Bot("trapeater")
+@Bot("trapeater", flavor = "I eat traps for breakfast!")
 @Suppress("unused")
 class Trapeater : Strategy(), MazeEventListener, BaitEventListener, PlayerMovementListener {
 

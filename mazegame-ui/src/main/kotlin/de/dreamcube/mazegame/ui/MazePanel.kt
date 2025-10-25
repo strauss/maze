@@ -11,7 +11,7 @@ import kotlin.math.min
 class MazePanel(private val controller: UiController) : JPanel() {
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazePanel::class.java)
-        private const val INITIAL_ZOOM = 17
+        internal const val INITIAL_ZOOM = 17
         private const val MIN_ZOOM = 5
         private const val MAX_ZOOM = 31
     }
@@ -26,6 +26,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
                     offset.x = min(offset.x, getWidth() - 10 * value).coerceAtLeast(-(controller.mazeModel.width - 10) * value)
                     offset.y = min(offset.y, getHeight() - 10 * value).coerceAtLeast(-(controller.mazeModel.height - 10) * value)
                 }
+                controller.updateZoom(value)
             }
         }
 

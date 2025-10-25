@@ -22,6 +22,7 @@ class EventHandler {
     private val chatInfoListeners: MutableList<ChatInfoListener> = LinkedList()
     private val errorInfoListeners: MutableList<ErrorInfoListener> = LinkedList()
     private val clientConnectionStatusListeners: MutableList<ClientConnectionStatusListener> = LinkedList()
+    private val speedChangedListeners: MutableList<SpeedChangedListener> = LinkedList()
 
     /**
      * Adds the given [EventListener] to all matching lists according to the implemented interfaces. This operation costs O(1).
@@ -182,6 +183,12 @@ class EventHandler {
     fun fireConnectionStatusChange(oldStatus: ConnectionStatus, newStatus: ConnectionStatus) {
         for (listener in clientConnectionStatusListeners) {
             listener.onConnectionStatusChange(oldStatus, newStatus)
+        }
+    }
+
+    fun fireSpeedChanged(oldSpeed: Int, newSpeed: Int) {
+        for (listener in speedChangedListeners) {
+            listener.onSpeedChanged(oldSpeed, newSpeed)
         }
     }
 }

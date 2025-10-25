@@ -8,6 +8,9 @@ import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.client.maze.events.EventListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
+import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
+import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isHumanStrategy
+import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
 import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import io.ktor.client.*
@@ -28,8 +31,8 @@ class UiController {
         private val LOGGER: Logger = LoggerFactory.getLogger(UiController::class.java)
     }
 
-    internal val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Swing)
-    internal val bgScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Swing)
+    val bgScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val uiEventListeners: MutableList<EventListener> = LinkedList()
     internal lateinit var uiPlayerCollection: UiPlayerCollection
@@ -37,6 +40,13 @@ class UiController {
     val mazeModel = MazeModel(this)
     internal lateinit var mazePanel: MazePanel
     internal lateinit var glassPane: GlassPane
+    internal lateinit var statusBar: StatusBar
+    internal var completeServerAddressString: String = "-"
+    internal var strategyName: String? = null
+    internal var flavorText: String? = null
+
+    internal val gameSpeed: Int
+        get() = if (this::client.isInitialized) client.gameSpeed else -1
 
     /**
      * The client, but only if the connection is established.
@@ -73,11 +83,18 @@ class UiController {
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
         uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
         clientTerminationHandle = client.start()
+        completeServerAddressString = "@$address:$port"
+        this.strategyName = strategyName
+        runBlocking {
+            flavorText = strategyName.flavorText()
+        }
     }
 
     internal fun disconnect() {
         bgScope.launch {
             client.logout()
+            completeServerAddressString = ""
+            strategyName = null
         }
     }
 
@@ -108,6 +125,22 @@ class UiController {
         uiScope.launch {
             mazePanel.updatePosition(x, y)
             mazePanel.repaint()
+        }
+    }
+
+    internal suspend fun getStrategyTypeForStatusBar(): String {
+        return strategyName?.let {
+            when {
+                it.isHumanStrategy() -> "Human"
+                it.isSpectatorStrategy() -> "Spectator"
+                else -> "Bot"
+            }
+        } ?: ""
+    }
+
+    internal fun updateZoom(zoom: Int) {
+        if (this::statusBar.isInitialized) {
+            statusBar.updateZoom(zoom)
         }
     }
 

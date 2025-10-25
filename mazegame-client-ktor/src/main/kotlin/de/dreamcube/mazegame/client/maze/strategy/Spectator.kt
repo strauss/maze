@@ -1,6 +1,6 @@
 package de.dreamcube.mazegame.client.maze.strategy
 
-@Bot("spectator", isSpectator = true)
+@Bot("spectator", isSpectator = true, flavor = "Who will win? Nobody knows!")
 class Spectator : Strategy() {
 
     /**
