@@ -9,13 +9,20 @@ val BLACKISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.05f))
 val WHITISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.95f))
 const val SATURATION: Float = 1.0f
 
+/**
+ * Converts a normalized RBG component to "linear"
+ */
 private fun lin(c: Double): Double = if (c <= 0.04045) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)
+
+/**
+ * Calculates the contrast between two luminance values.
+ */
 private fun contrast(lum1: Double, lum2: Double) = (max(lum1, lum2) + 0.05) / (min(lum1, lum2) + 0.05)
 
+/**
+ * Compares the luminance between the color and both black and white. Whichever "wins" determines the resulting background color.
+ */
 fun determineBgColorByLuminance(color: Color): Color {
-    /**
-     * Converts a normalized RBG component to "linear"
-     */
     val linRed: Double = lin(color.red / 255.0)
     val linGreen: Double = lin(color.green / 255.0)
     val linBlue: Double = lin(color.blue / 255.0)
@@ -54,9 +61,4 @@ fun getColorDistribution(dark: Boolean = false, granularity: Int = 360, start: I
             }
         }
     }
-}
-
-fun main() {
-    val result = getColorDistribution()
-    println(result.size)
 }
