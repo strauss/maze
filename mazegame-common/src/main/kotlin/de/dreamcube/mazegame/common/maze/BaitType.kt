@@ -51,4 +51,5 @@ enum class BaitType(
     val asChar: Char
         get() = baitName.first().uppercaseChar()
 
+    override fun toString(): String = baitName
 }

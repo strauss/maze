@@ -7,10 +7,7 @@ import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import kotlinx.coroutines.launch
 import java.awt.BorderLayout
 import java.awt.FlowLayout
-import javax.swing.BorderFactory
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.UIManager
+import javax.swing.*
 
 class StatusBar(private val controller: UiController) : JPanel(), ClientConnectionStatusListener, SpeedChangedListener {
 
@@ -21,6 +18,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
     private val gameSpeedLabel = JLabel()
     private val zoomLabel = JLabel()
     private val positionLabel = JLabel()
+    private val serverControlButton = JButton("⎈")
 
     init {
         controller.statusBar = this
@@ -59,6 +57,12 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         gameStatusPanel.add(positionLabel)
         gameStatusPanel.add(zoomLabel)
         gameStatusPanel.add(gameSpeedLabel)
+        gameStatusPanel.add(serverControlButton)
+        serverControlButton.isVisible = false
+        serverControlButton.isEnabled = false
+        serverControlButton.addActionListener { _ ->
+            controller.toggleServerControlView()
+        }
 
         //3rd
         add(gameStatusPanel, BorderLayout.EAST)
@@ -86,6 +90,14 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         positionLabel.text = "(-/-)"
     }
 
+    internal fun onServerControl() {
+        serverControlButton.isVisible = true
+    }
+
+    internal fun onNoServerControl() {
+        serverControlButton.isVisible = false
+    }
+
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
@@ -97,6 +109,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
             botFlavorTextLabel.text = controller.strategyName?.flavorText() ?: ""
             zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${controller.mazePanel.zoom}"
             gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "${controller.gameSpeed} ms"
+            serverControlButton.isEnabled = controller.isLoggedIn
         }
     }
 

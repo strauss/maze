@@ -27,6 +27,8 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private var connectionCounter: Int = 0
     private val leaveButton = JButton("Leave")
     private val statusBar = StatusBar(controller)
+    private var serverControlPanel: ServerControlPanel? = null
+    private var serverControlPanelInPlace: Boolean = false
 
     init {
         controller.mainFrame = this
@@ -100,6 +102,23 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         messagePane.preferredSize = Dimension(450, 300)
         messagePane.isVisible = false
         return JScrollPane(messagePane)
+    }
+
+    fun showOrHideServerControlPanel() {
+        if (serverControlPanel == null) {
+            serverControlPanel = ServerControlPanel(controller)
+        }
+        if (serverControlPanelInPlace) {
+            contentPane.remove(serverControlPanel)
+            serverControlPanel?.isVisible = false
+            serverControlPanelInPlace = false
+        } else {
+            contentPane.add(serverControlPanel!!, BorderLayout.EAST)
+            serverControlPanel?.isVisible = true
+            serverControlPanelInPlace = true
+        }
+        revalidate()
+        repaint()
     }
 
     override fun onConnectionStatusChange(

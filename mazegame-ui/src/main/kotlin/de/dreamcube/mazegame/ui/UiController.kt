@@ -1,7 +1,5 @@
 package de.dreamcube.mazegame.ui
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.formdev.flatlaf.FlatLightLaf
 import de.dreamcube.mazegame.client.DuplicateNickHandler
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
@@ -11,14 +9,7 @@ import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isHumanStrategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
-import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.swing.Swing
 import org.slf4j.Logger
@@ -57,6 +48,14 @@ class UiController {
     private lateinit var client: MazeClient
 
     private lateinit var clientTerminationHandle: Deferred<Unit>
+
+    internal var serverController: ServerCommandController? = null
+
+    private val serverControllerActive: Boolean
+        get() = serverController != null
+
+    internal val isLoggedIn: Boolean
+        get() = client.isLoggedIn
 
     val connectionStatus: ConnectionStatus
         get() {
@@ -116,23 +115,6 @@ class UiController {
         scoreTable.reset()
     }
 
-    internal suspend fun queryForGameInformation(address: String, port: Int): List<ReducedServerInformationDto> {
-        val httpAddress = "http://$address:$port/server"
-        val httpClient = HttpClient(CIO) {
-            this.expectSuccess = true
-            install(ContentNegotiation) {
-                jackson {
-                    registerKotlinModule()
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                }
-            }
-        }
-
-        httpClient.use {
-            return it.get(httpAddress).body()
-        }
-    }
-
     internal fun triggerMazeUpdate(x: Int, y: Int) {
         uiScope.launch {
             mazePanel.updatePosition(x, y)
@@ -171,6 +153,25 @@ class UiController {
         if (this::client.isInitialized) {
             client.eventHandler.fireClientInfo(message)
         }
+    }
+
+    internal fun deactivateServerController() {
+        serverController?.cancel()
+        serverController = null
+        statusBar.onNoServerControl()
+    }
+
+    internal suspend fun activateServerController(serverAddress: String, serverPort: Int, serverPassword: String, gamePort: Int) {
+        serverController = ServerCommandController(bgScope, serverAddress, serverPort, serverPassword, gamePort)
+        serverController?.loginOrRefreshToken()
+        statusBar.onServerControl()
+    }
+
+    internal fun toggleServerControlView() {
+        if (!serverControllerActive) {
+            return
+        }
+        mainFrame.showOrHideServerControlPanel()
     }
 
 }

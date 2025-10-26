@@ -3,8 +3,9 @@ package de.dreamcube.mazegame.ui
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
-import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
+import de.dreamcube.mazegame.common.api.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import io.ktor.client.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
@@ -110,6 +111,11 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
 
     private val serverInfoPanel = ServerInfoPanel()
 
+    private val serverControlHeader = JLabel("Server Control (optional)")
+    private val serverControlPasswordLabel = JLabel("Password")
+    private val serverControlPasswordField = JPasswordField(TEXT_FIELD_COLUMNS)
+    private val serverControlActivateButton = JButton("Activate")
+
     private val strategyLabel = JLabel("Select")
     private val strategySelection = JComboBox<String>()
 
@@ -119,7 +125,6 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
     private val connectButton = JButton("Connect")
 
     init {
-        // TODO: Layout richtig konfigurieren
         layout = MigLayout("wrap 2", "[][grow]", "[]")
         val connectionLabel = JLabel("Connection")
         connectionLabel.font = connectionLabel.font.deriveFont(Font.BOLD)
@@ -148,9 +153,11 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
 
         // Address and port
         add(addressLabel)
+        addressField.text = "localhost" // TODO: make it better
         add(addressField)
 
         add(portLabel)
+        portField.text = "8080" // TODO: make it better
         add(portField)
 
         // Query button for managed connection
@@ -162,23 +169,24 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
             val port = portField.text
             if (address.isNotBlank() && port.isNotBlank()) {
                 queryButton.isEnabled = false
-                controller.uiScope.launch {
-                    withContext(Dispatchers.IO) {
-                        try {
-                            val gameInformationList: List<ReducedServerInformationDto> = controller.queryForGameInformation(address, port.toInt())
-                            fillGameSelection(gameInformationList)
+                controller.bgScope.launch {
+                    try {
+                        val gameInformationList: List<ReducedServerInformationDto> =
+                            ServerCommandController.queryForGameInformation(address, port.toInt())
+                        fillGameSelection(gameInformationList)
+                        withContext(Dispatchers.Swing) {
                             gameSelection.isEnabled = true
-                        } catch (ex: Exception) {
-                            LOGGER.error("Error while retrieving game information from server: '${ex.message}'", ex)
-                            withContext(Dispatchers.Swing) {
-                                fillGameSelection(listOf())
-                                JOptionPane.showMessageDialog(
-                                    this@ConnectionSettingsPanel,
-                                    "Error while retrieving game information from server.\nCheck address and port or use a direct connection.",
-                                    "Connection Error",
-                                    JOptionPane.ERROR_MESSAGE
-                                )
-                            }
+                        }
+                    } catch (ex: Exception) {
+                        LOGGER.error("Error while retrieving game information from server: '${ex.message}'", ex)
+                        withContext(Dispatchers.Swing) {
+                            fillGameSelection(listOf())
+                            JOptionPane.showMessageDialog(
+                                this@ConnectionSettingsPanel,
+                                "Error while retrieving game information from server.\nCheck address and port or use a direct connection.",
+                                "Connection Error",
+                                JOptionPane.ERROR_MESSAGE
+                            )
                         }
                     }
                     queryButton.isEnabled = true
@@ -204,6 +212,8 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
                     queryButton.isEnabled = false
                     managedConnection.isEnabled = false
                     directConnection.isEnabled = false
+                    serverControlPasswordField.isEnabled = true
+                    serverControlActivateButton.isEnabled = true
                     serverInfoPanel.activate(item)
                     val selectedStrategyName: String? = strategySelection.selectedItem as String?
                     if (selectedStrategyName != null) {
@@ -217,6 +227,8 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
                 queryButton.isEnabled = true
                 managedConnection.isEnabled = true
                 directConnection.isEnabled = true
+                serverControlPasswordField.isEnabled = false
+                serverControlActivateButton.isEnabled = false
                 serverInfoPanel.clear()
             }
         }
@@ -225,6 +237,51 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         serverInfoPanel.adjustLeftSide(addressLabel.preferredSize.width)
         add(JSeparator(), "span 2")
 
+        // Server control stuff
+        serverControlHeader.font = serverControlHeader.font.deriveFont(Font.BOLD)
+        add(serverControlHeader, "span 2")
+
+        serverControlPasswordField.echoChar = '★'
+        serverControlPasswordField.isEnabled = false
+        add(serverControlPasswordLabel)
+        add(serverControlPasswordField)
+
+        serverControlActivateButton.preferredSize = Dimension(addressField.preferredSize.width, serverControlActivateButton.preferredSize.height)
+        serverControlActivateButton.isEnabled = false
+        add(JPanel()) // Dummy panel without content
+        add(serverControlActivateButton)
+        serverControlActivateButton.addActionListener { _ ->
+            serverControlActivateButton.isEnabled = false
+            controller.bgScope.launch {
+                try {
+                    controller.activateServerController(
+                        addressField.text,
+                        portField.text.toInt(),
+                        String(serverControlPasswordField.password),
+                        gamePortField.text.toInt()
+                    )
+                    withContext(Dispatchers.Swing) {
+                        gameSelection.isEnabled = false
+                        serverControlPasswordField.text = "success"
+                        serverControlPasswordField.isEnabled = false
+                    }
+                } catch (ex: ClientRequestException) {
+                    LOGGER.error("Connection to server failed: ${ex.message}")
+                    controller.deactivateServerController()
+                    withContext(Dispatchers.Swing) {
+                        serverControlActivateButton.isEnabled = true
+                        JOptionPane.showMessageDialog(
+                            this@ConnectionSettingsPanel,
+                            "Error while activating the server control. Check the server password and try again.",
+                            "Connection Error",
+                            JOptionPane.ERROR_MESSAGE
+                        )
+                    }
+                }
+            }
+        }
+
+        // Strategy stuff
         val strategyHeader = JLabel("Strategy")
         strategyHeader.font = strategyHeader.font.deriveFont(Font.BOLD)
         add(strategyHeader, "span 2")
@@ -295,6 +352,10 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         gamePortField.isEnabled = false
         gameLabel.isVisible = true
         gameSelection.isVisible = true
+        serverControlHeader.isVisible = true
+        serverControlPasswordLabel.isVisible = true
+        serverControlPasswordField.isVisible = true
+        serverControlActivateButton.isVisible = true
     }
 
     private fun directConnectionSelected() {
@@ -305,6 +366,12 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         gamePortField.isEnabled = true
         gameLabel.isVisible = false
         gameSelection.isVisible = false
+        serverControlHeader.isVisible = false
+        serverControlPasswordLabel.isVisible = false
+        serverControlPasswordField.isVisible = false
+        serverControlActivateButton.isVisible = false
+        fillGameSelection(emptyList())
+
         // TODO: make these combo-boxes with predefined values, this should do for now
         addressField.text = "dreamcube.de"
         gamePortField.text = "12345"
@@ -338,6 +405,11 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
                 ConnectionStatus.DEAD -> {
                     this@ConnectionSettingsPanel.isEnabled = true
                     connectButton.isEnabled = true
+                    controller.deactivateServerController()
+                    serverControlPasswordField.text = ""
+                    serverControlPasswordField.isEnabled = true
+                    serverControlActivateButton.isEnabled = true
+                    gameSelection.isEnabled = true
                 }
 
                 else -> {
