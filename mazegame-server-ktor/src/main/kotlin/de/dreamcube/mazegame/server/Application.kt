@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
+import de.dreamcube.mazegame.common.api.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.control.ServerController
 import de.dreamcube.mazegame.server.control.configureAuthentication
 import de.dreamcube.mazegame.server.control.configureRouting

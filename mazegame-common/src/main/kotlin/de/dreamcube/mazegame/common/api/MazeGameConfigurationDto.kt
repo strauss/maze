@@ -1,8 +1,4 @@
-package de.dreamcube.mazegame.server.config
-
-import de.dreamcube.mazegame.server.maze.GameSpeed
-import de.dreamcube.mazegame.server.maze.generator.GeneratorMode
-
+package de.dreamcube.mazegame.common.api
 
 data class ConnectionDto(val port: Int = 0, val maxClients: Int = 20, val loginTimeout: Long = 30_000L, val instantFlush: Boolean = false)
 data class GeneratorParametersDto(

@@ -1,7 +1,10 @@
 package de.dreamcube.mazegame.server.control
 
+import de.dreamcube.mazegame.common.api.JwtToken
+import de.dreamcube.mazegame.common.api.MazeServerConfigurationDto
+import de.dreamcube.mazegame.common.api.PutBaitCommandDto
+import de.dreamcube.mazegame.common.api.TeleportCommandDto
 import de.dreamcube.mazegame.common.maze.BaitType
-import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -76,7 +79,7 @@ fun Application.configureRouting() {
                     return@post
                 }
                 val token = JwtService.issue(user.name, jwtTtl)
-                call.respond(mapOf("token" to token, "expires" to jwtTtl))
+                call.respond(JwtToken(token, jwtTtl))
             }
         }
 

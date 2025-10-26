@@ -17,7 +17,7 @@ class AutoTrapeaterHandler(mazeServer: MazeServer) : ServerBotHandler(mazeServer
 
         /**
          * Determines the speed penalty a trapeater receives, when no traps are present. It is a fraction of the current delay that is determined by
-         * the current [de.dreamcube.mazegame.server.maze.GameSpeed]. A value of 1.0 doubles the delay and halves the speed.
+         * the current [de.dreamcube.mazegame.common.api.GameSpeed]. A value of 1.0 doubles the delay and halves the speed.
          */
         private const val NORMAL_PENALTY_FRACTION: Double = 1.4  // 210 @ 150
 

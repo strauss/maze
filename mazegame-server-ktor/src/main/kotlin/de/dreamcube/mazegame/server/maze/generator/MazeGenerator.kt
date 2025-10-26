@@ -1,11 +1,12 @@
 package de.dreamcube.mazegame.server.maze.generator
 
+import de.dreamcube.mazegame.common.api.GeneratorMode
+import de.dreamcube.mazegame.common.api.GeneratorParametersDto
+import de.dreamcube.mazegame.common.api.MazeGeneratorConfigurationDto
 import de.dreamcube.mazegame.common.maze.MAX_RANDOM_HEIGHT
 import de.dreamcube.mazegame.common.maze.MAX_RANDOM_WITH
 import de.dreamcube.mazegame.common.maze.MIN_RANDOM_HEIGHT
 import de.dreamcube.mazegame.common.maze.MIN_RANDOM_WIDTH
-import de.dreamcube.mazegame.server.config.GeneratorParametersDto
-import de.dreamcube.mazegame.server.config.MazeGeneratorConfigurationDto
 import de.dreamcube.mazegame.server.maze.Maze
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

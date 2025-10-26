@@ -1,12 +1,8 @@
 package de.dreamcube.mazegame.server.control
 
-import de.dreamcube.mazegame.common.control.ReducedServerInformationDto
+import de.dreamcube.mazegame.common.api.*
 import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.Player
-import de.dreamcube.mazegame.server.config.ConnectionDto
-import de.dreamcube.mazegame.server.config.GameDto
-import de.dreamcube.mazegame.server.config.MazeGeneratorConfigurationDto
-import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
@@ -96,6 +92,7 @@ object ServerController {
         @Suppress("kotlin:S6518") // yeah ...
         if (server.desiredBaitCount.get() <= 0) {
             call.respond(HttpStatusCode.PreconditionFailed, "Server $serverId already stopped.")
+            return
         }
         server.commandExecutor.addCommand(StopCommand(server, now))
         call.respond(HttpStatusCode.NoContent)

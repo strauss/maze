@@ -1,4 +1,4 @@
-package de.dreamcube.mazegame.server.maze.generator
+package de.dreamcube.mazegame.common.api
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue

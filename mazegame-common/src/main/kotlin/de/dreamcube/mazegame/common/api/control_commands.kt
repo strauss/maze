@@ -1,4 +1,4 @@
-package de.dreamcube.mazegame.server.control
+package de.dreamcube.mazegame.common.api
 
 import de.dreamcube.mazegame.common.maze.BaitType
 

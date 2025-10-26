@@ -22,13 +22,12 @@ class Player(
 ) {
     var score: Int = score
         set(value) {
+            field = value
             // If the server resets the score, it is set to 0, but the ppm are higher than 0. This prevents trapeaters from being reset. Their ppm is
             // usually negative. There might still be a tiny little chance, but it is assumed to be an irrelevant border case.
             // It also prevents endless recursion, when "resetScore" is called :-D
             if (value == 0 && pointsPerMinute > 0) {
-                resetScore()
-            } else {
-                field = value
+                internalResetScoreRelatedInformation()
             }
         }
 
@@ -40,6 +39,10 @@ class Player(
      */
     fun resetScore() {
         score = 0
+        internalResetScoreRelatedInformation()
+    }
+
+    private fun internalResetScoreRelatedInformation() {
         scoreOffset = 0
         moveCounter = 0
         playStartTime = System.currentTimeMillis()

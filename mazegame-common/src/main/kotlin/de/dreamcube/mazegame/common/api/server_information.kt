@@ -1,8 +1,4 @@
-package de.dreamcube.mazegame.server.control
-
-import de.dreamcube.mazegame.server.config.BaitGeneratorDto
-import de.dreamcube.mazegame.server.config.ConnectionDto
-import de.dreamcube.mazegame.server.config.GeneratorParametersDto
+package de.dreamcube.mazegame.common.api
 
 data class ServerInformationDto(val connection: ConnectionDto, val mazeInformation: MazeInformationDto, val gameInformation: GameInformationDto)
 data class MazeInformationDto(val generatorMode: String, val generatorParameters: GeneratorParametersDto, val walkableFields: Int)
@@ -40,3 +36,15 @@ data class PlayerInformationDto(
 )
 
 data class PlayTimeDto(val milliseconds: Long, val time: String)
+
+data class ReducedServerInformationDto(
+    val id: Int,
+    val maxClients: Int,
+    val activeClients: Int,
+    val speed: Int,
+    val width: Int,
+    val height: Int,
+    val spectatorName: String? = null
+) {
+    override fun toString(): String = "$id ($width x $height)"
+}

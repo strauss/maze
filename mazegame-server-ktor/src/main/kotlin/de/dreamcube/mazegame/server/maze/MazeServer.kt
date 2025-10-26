@@ -1,7 +1,8 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.api.GameSpeed
+import de.dreamcube.mazegame.common.api.MazeServerConfigurationDto
 import de.dreamcube.mazegame.common.maze.*
-import de.dreamcube.mazegame.server.config.MazeServerConfigurationDto
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import de.dreamcube.mazegame.server.contest.ContestController
 import de.dreamcube.mazegame.server.maze.commands.control.GoCommand

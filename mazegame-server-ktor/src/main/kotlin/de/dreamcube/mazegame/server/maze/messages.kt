@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.maze.*
 
 internal fun String.asMessage() = Message(this)
