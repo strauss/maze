@@ -21,11 +21,6 @@ class MazePanel(internal val controller: UiController) : JPanel() {
             if (value in MIN_ZOOM..MAX_ZOOM) {
                 field = value
                 controller.glassPane.repaint()
-                if (controller.mazeModel.mazeReceived) {
-                    // TODO: Try without because we can center
-                    offset.x = min(offset.x, getWidth() - 10 * value).coerceAtLeast(-(controller.mazeModel.width - 10) * value)
-                    offset.y = min(offset.y, getHeight() - 10 * value).coerceAtLeast(-(controller.mazeModel.height - 10) * value)
-                }
                 controller.updateZoom(value)
             }
         }
@@ -115,7 +110,6 @@ class MazePanel(internal val controller: UiController) : JPanel() {
                 val rotation = e?.wheelRotation ?: 0
                 if (rotation != 0) {
                     zoom -= rotation * 2 // stick to odd numbers and zoom faster than before
-                    centerMaze()
                 }
             }
         }
@@ -133,6 +127,7 @@ class MazePanel(internal val controller: UiController) : JPanel() {
         if (controller.mazeModel.mazeReceived && !this::image.isInitialized || imageZoom != zoom) {
             imageZoom = zoom
             image = createImage(controller.mazeModel.width * zoom, controller.mazeModel.height * zoom)
+            centerMaze()
             paintCompleteMaze(image.graphics)
         }
     }

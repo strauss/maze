@@ -7,9 +7,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import javax.swing.table.AbstractTableModel
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
 
 class UiPlayerInformation(
     initialPlayerSnapshot: PlayerSnapshot,
@@ -17,8 +14,6 @@ class UiPlayerInformation(
 ) {
 
     companion object {
-        private val BLACKISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.1f))
-        private val WHITEISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.9f))
         private const val MARKER_ALPHA = 192
     }
 
@@ -35,24 +30,6 @@ class UiPlayerInformation(
 
     val id
         get() = snapshot.id
-
-    private fun determineBgColorByLuminance(color: Color): Color {
-        /**
-         * Converts a normalized RBG component to "linear"
-         */
-        fun lin(c: Double): Double = if (c <= 0.04045) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)
-        fun contrast(lum1: Double, lum2: Double) = (max(lum1, lum2) + 0.05) / (min(lum1, lum2) + 0.05)
-
-        val linRed: Double = lin(color.red / 255.0)
-        val linGreen: Double = lin(color.green / 255.0)
-        val linBlue: Double = lin(color.blue / 255.0)
-
-        val luminance = 0.2126 * linRed + 0.7152 * linGreen + 0.0722 * linBlue
-        val contrastToBlack = contrast(luminance, 0.1)
-        val contrastToWhite = contrast(luminance, 0.9)
-
-        return if (contrastToBlack > contrastToWhite) BLACKISH else WHITEISH
-    }
 
     private fun Color.changeAlpha(alpha: Int) = Color(this.red, this.green, this.blue, alpha)
 
@@ -94,6 +71,8 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
     private val idToIndexMap: MutableMap<Int, Int> = HashMap()
     private val uiPlayerInformationList: MutableList<UiPlayerInformation> = ArrayList()
 
+    private lateinit var colorDistribution: List<Color>
+
     private var scoreRepresentationMode = ScoreRepresentationMode.SERVER
 
     operator fun get(index: Int): UiPlayerInformation? {
@@ -116,7 +95,7 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
             val newIndex = idToIndexMap.size
             idToIndexMap[snapshot.id] = newIndex
             uiPlayerInformationList.add(newValue)
-            redistributePlayerColorsByRainbow()
+            redistributePlayerColorsByDistribution()
             fireTableRowsUpdated(0, newIndex - 1)
             fireTableRowsInserted(newIndex, newIndex)
         } else {
@@ -177,9 +156,12 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
             1 -> valueAt.snapshot.nick
 
             // Score
-            2 -> when (scoreRepresentationMode) {
-                ScoreRepresentationMode.SERVER -> valueAt.snapshot.score.toString()
-                ScoreRepresentationMode.CLIENT -> valueAt.snapshot.localScore.toString()
+            2 -> {
+                val scoreToDisplay = when (scoreRepresentationMode) {
+                    ScoreRepresentationMode.SERVER -> valueAt.snapshot.score
+                    ScoreRepresentationMode.CLIENT -> valueAt.snapshot.localScore
+                }
+                String.format("%,d", scoreToDisplay)
             }
 
             // ms/step
@@ -230,25 +212,18 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
         addOrUpdate(newPlayerSnapshot)
     }
 
-    internal fun redistributePlayerColorsByRainbow() {
-        // assign new colors
-        val playerCount: Int = rowCount
-        var hue = 0.485f
-        val maxHue = 1.360f
-        val maxB = 0.9f
-        val minB = 0.7f
-        var deltaHue = maxHue - hue
-        if (playerCount > 1) {
-            deltaHue /= (playerCount - 1).toFloat()
+    internal fun redistributePlayerColorsByDistribution() {
+        if (!this::colorDistribution.isInitialized) {
+            colorDistribution = getColorDistribution(false, 360, 180)
         }
+        if (colorDistribution.size < uiPlayerInformationList.size) {
+            colorDistribution = getColorDistribution(false, colorDistribution.size * 2, colorDistribution.size)
+        }
+        val delta: Int = colorDistribution.size / uiPlayerInformationList.size
+        var colorIndex = 0
         for (playerInformation: UiPlayerInformation in uiPlayerInformationList) {
-            val desiredColor = Color(Color.HSBtoRGB(hue, 1.0f, maxB))
-            val green: Int = desiredColor.green
-            val relativeGreen: Float = green / 255f
-            val brightness: Float = maxB - (maxB - minB) * relativeGreen
-            val actualColor = Color(Color.HSBtoRGB(hue, 1.0f, brightness))
-            playerInformation.color = actualColor
-            hue += deltaHue
+            playerInformation.color = colorDistribution[colorIndex]
+            colorIndex += delta
         }
     }
 }
