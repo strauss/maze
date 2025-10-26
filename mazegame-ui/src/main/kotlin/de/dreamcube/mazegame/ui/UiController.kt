@@ -42,6 +42,9 @@ class UiController {
     internal val gameSpeed: Int
         get() = if (this::client.isInitialized) client.gameSpeed else -1
 
+    internal val ownId: Int
+        get() = if (this::client.isInitialized) client.ownPlayer.id else -1
+
     /**
      * The client, but only if the connection is established.
      */

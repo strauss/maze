@@ -62,6 +62,12 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
         mainSplitPane.resizeWeight = 0.1
 
+
+        val borderColor = UIManager.getColor("Separator.foreground")
+        val fancyBorderTop = BorderFactory.createMatteBorder(1, 0, 0, 0, borderColor)
+        mainSplitPane.border = fancyBorderTop
+        mainSplitPane.isOpaque = true
+
         val glassPane = GlassPane(controller)
         controller.glassPane = glassPane
         controller.addPlayerSelectionListener(glassPane)
@@ -143,6 +149,9 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
                         leftSplitPane.remove(scorePanel)
                         leftSplitPane.add(connectionSettingsPanel, JSplitPane.TOP)
                         leaveButton.isVisible = false
+                        if (serverControlPanelInPlace) {
+                            showOrHideServerControlPanel()
+                        }
                         repaint()
                     }
                 }

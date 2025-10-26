@@ -29,6 +29,13 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         layout = MigLayout("insets 5, wrap 2", "[grow,fill][grow,fill]")
         initGameControlElements()
         initBaitControlElements()
+        initPlayerControlElements()
+        // TODO: contest control
+
+        val borderColor = UIManager.getColor("Separator.foreground")
+        val fancyBorder = BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor)
+        border = fancyBorder
+        isOpaque = true
     }
 
     private fun initGameControlElements() {
@@ -148,9 +155,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     baitTransformButton.isEnabled = true
                 }
             }
-
         }
-        add(baitTransformButton, "sg unity")
 
         // Put bait
         val putBaitButton = JButton("Put")
@@ -194,6 +199,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             disposer.addDisposeAction { kfm.removeKeyEventDispatcher(escDispatcher) }
         }
         add(putBaitButton, "sg unity")
+        add(baitTransformButton, "sg unity")
 
         // Bait rush
         val baitRushButton = JButton("Bait Rush")
@@ -213,6 +219,121 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             }
         }
         add(baitRushButton, "span 2")
+    }
+
+    private fun initPlayerControlElements() {
+        // Header
+        val playerHeader = JLabel("Player control")
+        playerHeader.font = playerHeader.font.deriveFont(Font.BOLD)
+        add(playerHeader, "span 2")
+
+        // Kill
+        val killButton = object : JButton("Kill"), PlayerSelectionListener {
+            override fun onPlayerSelected(player: UiPlayerInformation) {
+                isEnabled = true
+            }
+
+            override fun onPlayerSelectionCleared() {
+                isEnabled = false
+            }
+        }
+        controller.addPlayerSelectionListener(killButton)
+        killButton.isEnabled = false
+        killButton.addActionListener { _ ->
+            killButton.isEnabled = false
+            serverController.launch {
+                try {
+                    val selectedPlayerIndex = controller.scoreTable.selectedRow
+                    val selectedPlayerId: Int? = controller.uiPlayerCollection[selectedPlayerIndex]?.id
+                    if (selectedPlayerId != null) {
+                        if (selectedPlayerId == controller.ownId) {
+                            withContext(Dispatchers.Swing) {
+                                JOptionPane.showMessageDialog(
+                                    this@ServerControlPanel,
+                                    "Killing yourself would result in connection loss and is therefore prevented.\nUse the 'Leave' button, if you are sure!",
+                                    "Command not feasible",
+                                    JOptionPane.WARNING_MESSAGE
+                                )
+                                killButton.isEnabled = true
+                            }
+                            return@launch
+                        }
+                        serverController.kill(selectedPlayerId)
+                    }
+                } catch (ex: ClientRequestException) {
+                    withContext(Dispatchers.Swing) {
+                        showErrorMessage(ex)
+                    }
+                }
+            }
+        }
+
+        // Teleport
+        val teleportButton = object : JButton("Teleport"), PlayerSelectionListener {
+            override fun onPlayerSelected(player: UiPlayerInformation) {
+                isEnabled = true
+            }
+
+            override fun onPlayerSelectionCleared() {
+                isEnabled = false
+            }
+        }
+        controller.addPlayerSelectionListener(teleportButton)
+        teleportButton.isEnabled = false
+        teleportButton.addActionListener { _ ->
+            teleportButton.isEnabled = false
+            killButton.isEnabled = false
+            controller.hintOnStatusBar("Select position")
+
+            val disposer = Disposer()
+
+            val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
+                disposer.close()
+                val selectedPlayerIndex = controller.scoreTable.selectedRow
+                val selectedPlayerId: Int? = controller.uiPlayerCollection[selectedPlayerIndex]?.id
+                if (selectedPlayerId != null) {
+                    serverController.launch {
+                        try {
+                            serverController.teleport(selectedPlayerId, x, y)
+                        } catch (ex: ClientRequestException) {
+                            withContext(Dispatchers.Swing) {
+                                showErrorMessage(ex)
+                            }
+                        }
+                        withContext(Dispatchers.Swing) {
+                            teleportButton.isEnabled = true
+                            killButton.isEnabled = true
+                            controller.clearHintOnStatusBar()
+                        }
+                    }
+                }
+            }
+            controller.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
+            disposer.addDisposeAction { controller.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
+
+            val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
+            val escDispatcher = KeyEventDispatcher { e ->
+                if (e?.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
+                    disposer.close()
+                    controller.clearHintOnStatusBar()
+                    teleportButton.isEnabled = true
+                    killButton.isEnabled = true
+                    true
+                }
+                false
+            }
+            kfm.addKeyEventDispatcher(escDispatcher)
+            disposer.addDisposeAction { kfm.removeKeyEventDispatcher(escDispatcher) }
+        }
+        add(teleportButton)
+        add(killButton)
+
+        // Player info
+        // TODO: Make it so
+
+        // Spawn
+        // TODO: Make it so
+
     }
 
     private fun showErrorMessage(ex: ClientRequestException) {

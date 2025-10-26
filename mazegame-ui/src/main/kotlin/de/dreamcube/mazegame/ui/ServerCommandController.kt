@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import de.dreamcube.mazegame.common.api.JwtToken
 import de.dreamcube.mazegame.common.api.PutBaitCommandDto
 import de.dreamcube.mazegame.common.api.ReducedServerInformationDto
+import de.dreamcube.mazegame.common.api.TeleportCommandDto
 import de.dreamcube.mazegame.common.maze.BaitType
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -170,5 +171,28 @@ class ServerCommandController(
         val httpClient: HttpClient = createDisposableHttpClient()
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
     }
+
+    suspend fun kill(playerId: Int) {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/control/kill/$playerId"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
+    }
+
+    suspend fun teleport(playerId: Int, x: Int, y: Int) {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/control/teleport"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        val teleportCommand = TeleportCommandDto(playerId, x, y)
+        httpClient.use {
+            it.post(httpAddress) {
+                bearerAuth(token)
+                contentType(ContentType.Application.Json)
+                setBody(teleportCommand)
+            }
+        }
+    }
+
+    // TODO: player information
 
 }
