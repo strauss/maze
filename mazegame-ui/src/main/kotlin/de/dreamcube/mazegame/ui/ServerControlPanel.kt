@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.common.maze.BaitType
+import de.dreamcube.mazegame.common.util.Disposer
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -10,6 +11,9 @@ import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Font
+import java.awt.KeyEventDispatcher
+import java.awt.KeyboardFocusManager
+import java.awt.event.KeyEvent
 import javax.swing.*
 
 class ServerControlPanel(private val controller: UiController) : JPanel() {
@@ -150,8 +154,45 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
 
         // Put bait
         val putBaitButton = JButton("Put")
-        putBaitButton.isEnabled = false
-        // TODO implement it
+        putBaitButton.addActionListener { _ ->
+            putBaitButton.isEnabled = false
+            controller.hintOnStatusBar("Select position")
+
+            val disposer = Disposer()
+
+            val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
+                disposer.close()
+                val baitType: BaitType = baitTypeSelection.selectedItem as BaitType
+                serverController.launch {
+                    try {
+                        serverController.baitPut(baitType, x, y)
+                    } catch (ex: ClientRequestException) {
+                        withContext(Dispatchers.Swing) {
+                            showErrorMessage(ex)
+                        }
+                    }
+                    withContext(Dispatchers.Swing) {
+                        putBaitButton.isEnabled = true
+                        controller.clearHintOnStatusBar()
+                    }
+                }
+            }
+            controller.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
+            disposer.addDisposeAction { controller.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
+
+            val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
+            val escDispatcher = KeyEventDispatcher { e ->
+                if (e?.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
+                    disposer.close()
+                    controller.clearHintOnStatusBar()
+                    putBaitButton.isEnabled = true
+                    true
+                }
+                false
+            }
+            kfm.addKeyEventDispatcher(escDispatcher)
+            disposer.addDisposeAction { kfm.removeKeyEventDispatcher(escDispatcher) }
+        }
         add(putBaitButton, "sg unity")
 
         // Bait rush
@@ -175,6 +216,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
     }
 
     private fun showErrorMessage(ex: ClientRequestException) {
+        LOGGER.error(ex.message)
         JOptionPane.showMessageDialog(
             this@ServerControlPanel,
             ex.message,

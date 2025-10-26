@@ -19,6 +19,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
     private val zoomLabel = JLabel()
     private val positionLabel = JLabel()
     private val serverControlButton = JButton("⎈")
+    private val hintLabel = JLabel()
 
     init {
         controller.statusBar = this
@@ -54,6 +55,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
 
         invalidPositionStatus()
 
+        gameStatusPanel.add(hintLabel)
         gameStatusPanel.add(positionLabel)
         gameStatusPanel.add(zoomLabel)
         gameStatusPanel.add(gameSpeedLabel)
@@ -96,6 +98,10 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
 
     internal fun onNoServerControl() {
         serverControlButton.isVisible = false
+    }
+
+    internal fun changeHintText(hintText: String) {
+        hintLabel.text = hintText
     }
 
     override fun onConnectionStatusChange(

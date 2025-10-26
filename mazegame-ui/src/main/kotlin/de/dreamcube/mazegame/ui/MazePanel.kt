@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.*
 import java.awt.event.*
+import java.util.*
 import javax.swing.JPanel
 import kotlin.math.min
 
@@ -35,6 +36,8 @@ class MazePanel(private val controller: UiController) : JPanel() {
 
     private var pressPoint: Point? = null
 
+    private val mazeCellSelectionListeners: MutableList<MazeCellSelectionListener> = LinkedList()
+
     internal fun reset() {
         // Erase the image with a transparent rectangle
         image.graphics.color = Color(0xff, 0xff, 0xff, 0x00)
@@ -57,6 +60,14 @@ class MazePanel(private val controller: UiController) : JPanel() {
             override fun mouseClicked(e: MouseEvent?) {
                 if (controller.mazeModel.mazeReceived && e?.button == MouseEvent.BUTTON1 && e.clickCount == 2) {
                     centerMaze()
+                    return
+                }
+                if (controller.mazeModel.mazeReceived && e?.button == MouseEvent.BUTTON1 && e.clickCount == 1) {
+                    val x = (e.x - offset.x) / zoom
+                    val y = (e.y - offset.y) / zoom
+                    if (x >= 0 && y >= 0 && x < controller.mazeModel.width && y < controller.mazeModel.height) {
+                        fireMazeCellSelection(x, y)
+                    }
                 }
             }
 
@@ -198,6 +209,20 @@ class MazePanel(private val controller: UiController) : JPanel() {
             .coerceAtMost(getHeight() - 10 * zoom)
             .coerceAtLeast(-(controller.mazeModel.height - 10) * zoom)
         repaint()
+    }
+
+    internal fun addMazeCellSelectionListener(mazeCellSelectionListener: MazeCellSelectionListener) {
+        mazeCellSelectionListeners.add(mazeCellSelectionListener)
+    }
+
+    internal fun removeMazeCellSelectionListener(mazeCellSelectionListener: MazeCellSelectionListener) {
+        mazeCellSelectionListeners.remove(mazeCellSelectionListener)
+    }
+
+    internal fun fireMazeCellSelection(x: Int, y: Int) {
+        for (mazeCellSelectionListener in mazeCellSelectionListeners) {
+            mazeCellSelectionListener.onMazeCellSelected(x, y)
+        }
     }
 
 }

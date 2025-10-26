@@ -3,6 +3,7 @@ package de.dreamcube.mazegame.ui
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import de.dreamcube.mazegame.common.api.JwtToken
+import de.dreamcube.mazegame.common.api.PutBaitCommandDto
 import de.dreamcube.mazegame.common.api.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.BaitType
 import io.ktor.client.*
@@ -11,6 +12,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -146,6 +148,20 @@ class ServerCommandController(
         val httpAddress = "$baseUrl/server/$gamePort/control/$suffix"
         val httpClient: HttpClient = createDisposableHttpClient()
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
+    }
+
+    suspend fun baitPut(baitType: BaitType, x: Int, y: Int) {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/control/put-bait"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        val putBaitCommand = PutBaitCommandDto(baitType, x, y)
+        httpClient.use {
+            it.post(httpAddress) {
+                bearerAuth(token)
+                contentType(ContentType.Application.Json)
+                setBody(putBaitCommand)
+            }
+        }
     }
 
     suspend fun baitRush() {

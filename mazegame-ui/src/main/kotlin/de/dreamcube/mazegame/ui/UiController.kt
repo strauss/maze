@@ -174,6 +174,14 @@ class UiController {
         mainFrame.showOrHideServerControlPanel()
     }
 
+    internal fun hintOnStatusBar(hintText: String) {
+        statusBar.changeHintText(hintText)
+    }
+
+    internal fun clearHintOnStatusBar() {
+        statusBar.changeHintText("")
+    }
+
 }
 
 fun main() {
