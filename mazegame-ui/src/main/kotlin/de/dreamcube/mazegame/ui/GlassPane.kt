@@ -4,11 +4,17 @@ import java.awt.*
 import javax.swing.JComponent
 import javax.swing.SwingUtilities
 
-class GlassPane(val mazePanel: MazePanel) : JComponent() {
+class GlassPane(private val controller: UiController) : JComponent() {
+
+    private val mazePanel: MazePanel
+        get() = controller.mazePanel
+
     private val zoom
         get() = mazePanel.zoom
+
     private val offset
         get() = mazePanel.offset
+
     private val qualityHints: RenderingHints = createRenderingHints(
         RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON,
         RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY
@@ -32,13 +38,13 @@ class GlassPane(val mazePanel: MazePanel) : JComponent() {
 
     internal fun markPlayer(player: UiPlayerInformation) {
         playerToMark = player
-        mazePanel.controller.updatePositionStatus(player.snapshot.x, player.snapshot.y)
+        controller.updatePositionStatus(player.snapshot.x, player.snapshot.y)
         repaint()
     }
 
     internal fun clearMark() {
         playerToMark = null
-        mazePanel.controller.updatePositionStatus(-1, -1)
+        controller.updatePositionStatus(-1, -1)
         repaint()
     }
 

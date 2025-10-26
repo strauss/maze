@@ -41,6 +41,9 @@ class UiController {
     internal lateinit var mazePanel: MazePanel
     internal lateinit var glassPane: GlassPane
     internal lateinit var statusBar: StatusBar
+    internal lateinit var mainFrame: MainFrame
+    internal lateinit var messagePane: MessagePane
+    internal lateinit var scoreTable: ScoreTable
     internal var completeServerAddressString: String = "-"
     internal var strategyName: String? = null
     internal var flavorText: String? = null
@@ -83,7 +86,7 @@ class UiController {
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
         uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
         clientTerminationHandle = client.start()
-
+        messagePane.clear()
         sendClientChatMessage("Connection established")
         completeServerAddressString = "@$address:$port"
         this.strategyName = strategyName
@@ -105,6 +108,12 @@ class UiController {
         if (this::client.isInitialized && client.isLoggedIn) {
             client.logout()
         }
+    }
+
+    internal fun reset() {
+        mazePanel.reset()
+        messagePane.reset()
+        scoreTable.reset()
     }
 
     internal suspend fun queryForGameInformation(address: String, port: Int): List<ReducedServerInformationDto> {

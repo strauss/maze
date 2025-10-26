@@ -8,7 +8,7 @@ import java.awt.event.*
 import javax.swing.JPanel
 import kotlin.math.min
 
-class MazePanel(internal val controller: UiController) : JPanel() {
+class MazePanel(private val controller: UiController) : JPanel() {
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazePanel::class.java)
         internal const val INITIAL_ZOOM = 17

@@ -36,6 +36,7 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
     private val playerIds: MutableSet<Int> = HashSet()
 
     init {
+        controller.messagePane = this
         val baseStyle = addStyle("base", null)
         StyleConstants.setFontFamily(baseStyle, "Arial")
         StyleConstants.setFontSize(baseStyle, 18)
@@ -115,7 +116,6 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
             removeStyleForPlayer(playerId)
         }
         playerIds.clear()
-        clear() // TODO: nachdem irgendwann™ mal der UI-Code vernünftig aufgeräumt wurde, kann beim Login der clear aufgerufen werden.
     }
 
     internal fun clear() {

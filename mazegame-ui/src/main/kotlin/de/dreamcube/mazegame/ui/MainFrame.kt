@@ -29,6 +29,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
     private val statusBar = StatusBar(controller)
 
     init {
+        controller.mainFrame = this
         defaultCloseOperation = DO_NOTHING_ON_CLOSE
 
         // Fill the UI
@@ -37,7 +38,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         contentPane.add(statusBar, BorderLayout.SOUTH)
 
         val scoreTable = ScoreTable(controller)
-        scorePanel = ScorePanel(scoreTable)
+        scorePanel = ScorePanel(controller)
 
         val messageScrollPane = createScrollableMessagePane()
         val messagePanel = JPanel()
@@ -59,7 +60,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         mainSplitPane.resizeWeight = 0.1
 
         controller.mazePanel = mazePanel
-        val glassPane = GlassPane(mazePanel)
+        val glassPane = GlassPane(controller)
         controller.glassPane = glassPane
         this.glassPane = glassPane
         glassPane.isVisible = true
@@ -116,9 +117,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
 
                 ConnectionStatus.DEAD -> {
                     if (connectionCounter > 0) {
-                        mazePanel.reset()
-                        messagePane.reset()
-                        scorePanel.scoreTable.reset()
+                        controller.reset()
 
                         // The ui should enable a new connection
                         leftSplitPane.remove(scorePanel)

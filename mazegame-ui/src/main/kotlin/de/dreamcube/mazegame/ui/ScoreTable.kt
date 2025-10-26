@@ -20,6 +20,7 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
     val uiPlayerInformationModel: UiPlayerCollection
 
     init {
+        controller.scoreTable = this
         columnSelectionAllowed = false
         rowSelectionAllowed = true
         rowHeight += 4
