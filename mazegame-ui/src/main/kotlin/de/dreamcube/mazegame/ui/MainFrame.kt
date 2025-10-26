@@ -58,12 +58,13 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         mainSplitPane.add(leftSplitPane, JSplitPane.LEFT)
 
         mazePanel = MazePanel(controller)
+        mazePanel.addMazeCellSelectionListener(scoreTable)
         mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
         mainSplitPane.resizeWeight = 0.1
 
-        controller.mazePanel = mazePanel
         val glassPane = GlassPane(controller)
         controller.glassPane = glassPane
+        controller.addPlayerSelectionListener(glassPane)
         this.glassPane = glassPane
         glassPane.isVisible = true
 

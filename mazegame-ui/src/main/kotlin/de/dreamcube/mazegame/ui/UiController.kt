@@ -51,6 +51,8 @@ class UiController {
 
     internal var serverController: ServerCommandController? = null
 
+    private val playerSelectionListeners: MutableList<PlayerSelectionListener> = LinkedList()
+
     private val serverControllerActive: Boolean
         get() = serverController != null
 
@@ -180,6 +182,26 @@ class UiController {
 
     internal fun clearHintOnStatusBar() {
         statusBar.changeHintText("")
+    }
+
+    fun addPlayerSelectionListener(playerSelectionListener: PlayerSelectionListener) {
+        playerSelectionListeners.add(playerSelectionListener)
+    }
+
+    fun removePlayerSelectionListener(playerSelectionListener: PlayerSelectionListener) {
+        playerSelectionListeners.remove(playerSelectionListener)
+    }
+
+    fun firePlayerSelected(player: UiPlayerInformation) {
+        for (playerSelectionListener in playerSelectionListeners) {
+            playerSelectionListener.onPlayerSelected(player)
+        }
+    }
+
+    fun firePlayerSelectionCleared() {
+        for (playerSelectionListener in playerSelectionListeners) {
+            playerSelectionListener.onPlayerSelectionCleared()
+        }
     }
 
 }

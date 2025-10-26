@@ -4,7 +4,7 @@ import java.awt.*
 import javax.swing.JComponent
 import javax.swing.SwingUtilities
 
-class GlassPane(private val controller: UiController) : JComponent() {
+class GlassPane(private val controller: UiController) : JComponent(), PlayerSelectionListener {
 
     private val mazePanel: MazePanel
         get() = controller.mazePanel
@@ -36,19 +36,27 @@ class GlassPane(private val controller: UiController) : JComponent() {
         }
     }
 
-    internal fun markPlayer(player: UiPlayerInformation) {
+    private fun markPlayer(player: UiPlayerInformation) {
         playerToMark = player
         controller.updatePositionStatus(player.snapshot.x, player.snapshot.y)
         repaint()
     }
 
-    internal fun clearMark() {
+    private fun clearMark() {
         playerToMark = null
         controller.updatePositionStatus(-1, -1)
         repaint()
     }
 
     internal fun reset() {
+        clearMark()
+    }
+
+    override fun onPlayerSelected(player: UiPlayerInformation) {
+        markPlayer(player)
+    }
+
+    override fun onPlayerSelectionCleared() {
         clearMark()
     }
 

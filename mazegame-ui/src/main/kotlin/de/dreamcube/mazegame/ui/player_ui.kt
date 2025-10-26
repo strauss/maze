@@ -82,14 +82,14 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
         return uiPlayerInformationList[index]
     }
 
-    fun getById(id: Int): UiPlayerInformation? = idToIndexMap[id]?.let /*us*/ { get(it) }
+    fun getById(id: Int): UiPlayerInformation? = getIndex(id)?.let /*us*/ { get(it) }
 
     /**
      * If the player represented by the [snapshot] is not included yet, it is added to the collection. Otherwise, it is just updated. The function
      * should be called, whenever a new player joins or a player's score changes.
      */
     internal fun addOrUpdate(snapshot: PlayerSnapshot) {
-        val currentIndex: Int? = idToIndexMap[snapshot.id]
+        val currentIndex: Int? = getIndex(snapshot.id)
         if (currentIndex == null) {
             val newValue = UiPlayerInformation(snapshot)
             val newIndex = idToIndexMap.size
@@ -109,7 +109,7 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
      * Removes the player represented by the [snapshot] from the collection.
      */
     internal fun remove(snapshot: PlayerSnapshot) {
-        val currentIndex: Int? = idToIndexMap[snapshot.id]
+        val currentIndex: Int? = getIndex(snapshot.id)
         if (currentIndex == null) {
             return
         }
@@ -126,6 +126,8 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
             index += 1
         }
     }
+
+    internal fun getIndex(id: Int): Int? = idToIndexMap[id]
 
     internal fun toggleScoreRepresentation() {
         scoreRepresentationMode = scoreRepresentationMode.toggle()

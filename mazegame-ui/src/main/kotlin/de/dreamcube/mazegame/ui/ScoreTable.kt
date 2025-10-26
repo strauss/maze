@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 
-class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnectionListener {
+class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnectionListener, MazeCellSelectionListener {
 
     val scoreFont: Font = Font(font.name, Font.PLAIN, 16)
 
@@ -108,12 +108,12 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
         if (selectedRow >= 0) {
             val selectedPlayer: UiPlayerInformation? = uiPlayerInformationModel[selectedRow]
             if (selectedPlayer != null) {
-                controller.glassPane.markPlayer(selectedPlayer)
+                controller.firePlayerSelected(selectedPlayer)
             } else {
-                controller.glassPane.clearMark()
+                controller.firePlayerSelectionCleared()
             }
         } else {
-            controller.glassPane.clearMark()
+            controller.firePlayerSelectionCleared()
         }
     }
 
@@ -130,6 +130,24 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
         controller.uiScope.launch {
             adjustPreferredViewportSize()
+        }
+    }
+
+    override fun onMazeCellSelected(x: Int, y: Int) {
+        // Clear selection if selected at position
+        if (selectedRow >= 0) {
+            val selectedPlayer: UiPlayerInformation? = uiPlayerInformationModel[selectedRow]
+            if (selectedPlayer != null && x == selectedPlayer.snapshot.view.x && y == selectedPlayer.snapshot.view.y) {
+                clearSelection()
+                return
+            }
+        }
+
+        // Select, if position contains a player
+        val mazeField: MazeModel.Companion.MazeField = controller.mazeModel[x, y]
+        if (mazeField is MazeModel.Companion.PathMazeField && mazeField.occupationStatus == MazeModel.Companion.PathOccupationStatus.PLAYER) {
+            val playerToSelect: PlayerSnapshot? = mazeField.player
+            playerToSelect?.let { controller.uiPlayerCollection.getIndex(it.id) }?.let { selectionModel.setSelectionInterval(it, it) }
         }
     }
 }

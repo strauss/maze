@@ -53,6 +53,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
     }
 
     init {
+        controller.mazePanel = this
         minimumSize = Dimension(12 * zoom, 9 * zoom)
         preferredSize = Dimension(45 * zoom, 35 * zoom)
 
