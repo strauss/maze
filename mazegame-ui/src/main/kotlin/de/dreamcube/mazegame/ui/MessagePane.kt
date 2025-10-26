@@ -115,6 +115,10 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
             removeStyleForPlayer(playerId)
         }
         playerIds.clear()
+        clear() // TODO: nachdem irgendwann™ mal der UI-Code vernünftig aufgeräumt wurde, kann beim Login der clear aufgerufen werden.
+    }
+
+    internal fun clear() {
         styledDocument.remove(0, styledDocument.length)
         caretPosition = 0
     }

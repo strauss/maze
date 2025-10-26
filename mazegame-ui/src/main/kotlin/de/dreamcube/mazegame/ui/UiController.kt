@@ -83,6 +83,8 @@ class UiController {
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
         uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
         clientTerminationHandle = client.start()
+
+        sendClientChatMessage("Connection established")
         completeServerAddressString = "@$address:$port"
         this.strategyName = strategyName
         runBlocking {
@@ -95,6 +97,7 @@ class UiController {
             client.logout()
             completeServerAddressString = ""
             strategyName = null
+            sendClientChatMessage("Disconnected")
         }
     }
 
@@ -149,6 +152,15 @@ class UiController {
             statusBar.invalidPositionStatus()
         } else {
             statusBar.updatePositionStatus(x, y)
+        }
+    }
+
+    /**
+     * Triggers an event for displaying a client chat message. Only works, after the client object is created. Won't work, if it is "DEAD".
+     */
+    fun sendClientChatMessage(message: String) {
+        if (this::client.isInitialized) {
+            client.eventHandler.fireClientInfo(message)
         }
     }
 

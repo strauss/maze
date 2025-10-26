@@ -203,6 +203,9 @@ abstract class Strategy : NoEventListener {
     }
 
     private suspend fun execute(move: Move) {
+        if (!mazeClient.isLoggedIn) {
+            return
+        }
         when (move) {
             Move.STEP -> mazeClient.sendMessage(createStepMessage())
             Move.TURN_L -> mazeClient.sendMessage(createTurnLeftMessage())
