@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.common.api.PlayerInformationDto
+import de.dreamcube.mazegame.common.api.ServerInformationDto
 import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.util.Disposer
 import io.ktor.client.plugins.*
@@ -40,6 +41,10 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
     private val serverController: ServerCommandController
         get() = controller.serverController ?: throw IllegalStateException("The server controller vanished.")
 
+    private val selectableNicks = JComboBox<String>()
+    private val spawnButton = JButton("Spawn")
+    lateinit var availableServersideNicks: List<String>
+
     init {
         layout = MigLayout("insets 5, wrap 2", "[grow,fill][grow,fill]")
         initGameControlElements()
@@ -51,6 +56,31 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         val fancyBorder = BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor)
         border = fancyBorder
         isOpaque = true
+        spawnButton.isEnabled = false
+        serverController.launch {
+            try {
+                val serverInformation: ServerInformationDto = serverController.serverInformation()
+                availableServersideNicks = serverInformation.gameInformation.availableBotNames
+                withContext(Dispatchers.Swing) {
+                    val model: DefaultComboBoxModel<String> = selectableNicks.model as DefaultComboBoxModel
+                    if (model.size > 0) {
+                        model.removeAllElements()
+                    }
+                    if (availableServersideNicks.isEmpty()) {
+                        spawnButton.isEnabled = false
+                    } else {
+                        model.addAll(availableServersideNicks)
+                        selectableNicks.selectedIndex = 0
+                        spawnButton.isEnabled = true
+                    }
+                }
+            } catch (ex: ResponseException) {
+                withContext(Dispatchers.Swing) {
+                    showErrorMessage(ex)
+                    spawnButton.isEnabled = false
+                }
+            }
+        }
     }
 
     private fun initGameControlElements() {
@@ -67,7 +97,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             serverController.launch {
                 try {
                     serverController.go()
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -87,7 +117,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             serverController.launch {
                 try {
                     serverController.clear()
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -107,7 +137,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             serverController.launch {
                 try {
                     serverController.stop()
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -127,7 +157,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             serverController.launch {
                 try {
                     serverController.stop(true)
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -165,7 +195,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             serverController.launch {
                 try {
                     serverController.baitTransform(baitType)
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -203,7 +233,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 serverController.launch {
                     try {
                         serverController.baitPut(baitType, x, y)
-                    } catch (ex: ClientRequestException) {
+                    } catch (ex: ResponseException) {
                         withContext(Dispatchers.Swing) {
                             showErrorMessage(ex)
                         }
@@ -246,7 +276,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             serverController.launch {
                 try {
                     serverController.baitRush()
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -299,7 +329,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                         }
                         serverController.kill(selectedPlayerId)
                     }
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }
@@ -339,7 +369,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     serverController.launch {
                         try {
                             serverController.teleport(selectedPlayerId, x, y)
-                        } catch (ex: ClientRequestException) {
+                        } catch (ex: ResponseException) {
                             withContext(Dispatchers.Swing) {
                                 showErrorMessage(ex)
                             }
@@ -402,11 +432,30 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         controller.addPlayerSelectionListener(updateButton)
 
         // Spawn
-        // TODO: Make it so
-
+        add(selectableNicks, SPAN_2)
+        spawnButton.addActionListener {
+            val selectedNick: String? = selectableNicks.selectedItem as String?
+            if (selectedNick == null) {
+                return@addActionListener
+            }
+            spawnButton.isEnabled = false
+            serverController.launch {
+                try {
+                    serverController.spawn(selectedNick)
+                } catch (ex: ResponseException) {
+                    withContext(Dispatchers.Swing) {
+                        showErrorMessage(ex)
+                    }
+                }
+                withContext(Dispatchers.Swing) {
+                    spawnButton.isEnabled = true
+                }
+            }
+        }
+        add(spawnButton, SPAN_2)
     }
 
-    private fun showErrorMessage(ex: ClientRequestException) {
+    private fun showErrorMessage(ex: ResponseException) {
         LOGGER.error(ex.message)
         JOptionPane.showMessageDialog(
             this@ServerControlPanel,
@@ -517,7 +566,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     withContext(Dispatchers.Swing) {
                         update(playerInformation)
                     }
-                } catch (ex: ClientRequestException) {
+                } catch (ex: ResponseException) {
                     withContext(Dispatchers.Swing) {
                         showErrorMessage(ex)
                     }

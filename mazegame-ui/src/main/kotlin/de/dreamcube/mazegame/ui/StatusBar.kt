@@ -82,7 +82,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
             return
         }
         controller.uiScope.launch {
-            zoomLabel.text = "Z: $zoom"
+            zoomLabel.text = "Zoom: $zoom"
         }
     }
 
@@ -116,13 +116,13 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
             strategyLabel.text = controller.strategyName?.let { "as $it (${controller.getStrategyTypeForStatusBar()})" } ?: ""
             botFlavorTextLabel.text = controller.strategyName?.flavorText() ?: ""
             zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${controller.mazePanel.zoom}"
-            gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "${controller.gameSpeed} ms"
+            gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Speed: ${controller.gameSpeed} ms"
             serverControlButton.isEnabled = controller.isLoggedIn
         }
     }
 
     override fun onSpeedChanged(oldSpeed: Int, newSpeed: Int) {
         // TODO: as soon as the server is capable of speed changes, we should test this
-        gameSpeedLabel.text = "Speed: ${controller.gameSpeed}"
+        gameSpeedLabel.text = "Speed: ${controller.gameSpeed} ms"
     }
 }

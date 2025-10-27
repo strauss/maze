@@ -197,4 +197,18 @@ class ServerCommandController(
         return httpClient.use { it.get(httpAddress) { bearerAuth(token) }.body() }
     }
 
+    suspend fun serverInformation(): ServerInformationDto {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/info"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        return httpClient.use { it.get(httpAddress) { bearerAuth(token) } }.body()
+    }
+
+    suspend fun spawn(nick: String) {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/control/spawn/$nick"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
+    }
+
 }
