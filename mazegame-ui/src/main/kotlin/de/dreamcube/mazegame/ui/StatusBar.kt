@@ -7,6 +7,7 @@ import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import kotlinx.coroutines.launch
 import java.awt.BorderLayout
 import java.awt.FlowLayout
+import java.awt.event.KeyEvent
 import javax.swing.*
 
 class StatusBar(private val controller: UiController) : JPanel(), ClientConnectionStatusListener, SpeedChangedListener {
@@ -65,6 +66,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         serverControlButton.addActionListener { _ ->
             controller.toggleServerControlView()
         }
+        serverControlButton.mnemonic = KeyEvent.VK_H
 
         //3rd
         add(gameStatusPanel, BorderLayout.EAST)

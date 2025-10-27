@@ -76,7 +76,9 @@ class MazePanel(private val controller: UiController) : JPanel() {
              * For dragging the maze, we store the source point, where we started.
              */
             override fun mousePressed(e: MouseEvent?) {
-                pressPoint = e?.point
+                if (e != null && e.button != MouseEvent.BUTTON1) {
+                    pressPoint = e.point
+                }
             }
 
             /**
@@ -91,7 +93,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
              * The real drag action begins here :-D
              */
             override fun mouseDragged(e: MouseEvent?) {
-                if (controller.mazeModel.mazeReceived && pressPoint != null && e != null) {
+                if (e != null && controller.mazeModel.mazeReceived && pressPoint != null) {
                     offset.x += e.getX() - pressPoint!!.x
                     offset.y += e.getY() - pressPoint!!.y
                     pressPoint = e.getPoint()

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ItemEvent
+import java.awt.event.KeyEvent
 import javax.swing.*
 
 class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), ClientConnectionStatusListener {
@@ -163,6 +164,7 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         // Query button for managed connection
         add(JPanel()) // Dummy panel without content
         queryButton.preferredSize = Dimension(addressField.preferredSize.width, queryButton.preferredSize.height)
+        queryButton.mnemonic = KeyEvent.VK_R
         add(queryButton)
         queryButton.addActionListener { _ ->
             val address = addressField.text
@@ -280,6 +282,7 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
                 }
             }
         }
+        serverControlActivateButton.mnemonic = KeyEvent.VK_A
 
         // Strategy stuff
         val strategyHeader = JLabel("Strategy")
@@ -324,6 +327,7 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
                 connectButton.isEnabled = false
             }
         }
+        connectButton.mnemonic = KeyEvent.VK_C
 
         // TODO: here we could add an animated whatever to indicate, that the connection is being established
 

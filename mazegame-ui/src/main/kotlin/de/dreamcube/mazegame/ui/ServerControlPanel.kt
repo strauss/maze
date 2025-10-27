@@ -20,6 +20,16 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
 
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(ServerControlPanel::class.java)
+
+        private class DisposeOnEscape(val disposer: Disposer) : KeyEventDispatcher {
+            override fun dispatchKeyEvent(e: KeyEvent?): Boolean {
+                if (e?.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
+                    disposer.close()
+                    return true
+                }
+                return false
+            }
+        }
     }
 
     private val serverController: ServerCommandController
@@ -46,6 +56,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
 
         // Go command
         val goButton = JButton("Go")
+        goButton.mnemonic = KeyEvent.VK_G
         goButton.addActionListener { _ ->
             goButton.isEnabled = false
             serverController.launch {
@@ -65,6 +76,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
 
         // Clear command
         val clearButton = JButton("Clear")
+        clearButton.mnemonic = KeyEvent.VK_C
         clearButton.addActionListener { _ ->
             clearButton.isEnabled = false
             serverController.launch {
@@ -84,6 +96,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
 
         // Stop command
         val stopButton = JButton("Stop")
+        stopButton.mnemonic = KeyEvent.VK_S
         stopButton.addActionListener { _ ->
             stopButton.isEnabled = false
             serverController.launch {
@@ -103,6 +116,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
 
         // Stop now command
         val stopNowButton = JButton("Stop now")
+        stopNowButton.mnemonic = KeyEvent.VK_N
         stopNowButton.addActionListener { _ ->
             stopNowButton.isEnabled = false
             serverController.launch {
@@ -158,15 +172,28 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         }
 
         // Put bait
-        val putBaitButton = JButton("Put")
+        val putBaitButton = object : JButton("Put"), PlayerSelectionListener {
+            override fun onPlayerSelected(player: UiPlayerInformation) {
+                isEnabled = false
+            }
+
+            override fun onPlayerSelectionCleared() {
+                isEnabled = true
+            }
+        }
+        controller.addPlayerSelectionListener(putBaitButton)
+        putBaitButton.mnemonic = KeyEvent.VK_P
         putBaitButton.addActionListener { _ ->
             putBaitButton.isEnabled = false
             controller.hintOnStatusBar("Select position")
 
             val disposer = Disposer()
+            disposer.addDisposeAction {
+                putBaitButton.isEnabled = true
+                controller.clearHintOnStatusBar()
+            }
 
             val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
-                disposer.close()
                 val baitType: BaitType = baitTypeSelection.selectedItem as BaitType
                 serverController.launch {
                     try {
@@ -177,8 +204,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                         }
                     }
                     withContext(Dispatchers.Swing) {
-                        putBaitButton.isEnabled = true
-                        controller.clearHintOnStatusBar()
+                        disposer.close()
                     }
                 }
             }
@@ -186,23 +212,30 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             disposer.addDisposeAction { controller.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
 
             val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
-            val escDispatcher = KeyEventDispatcher { e ->
-                if (e?.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
-                    disposer.close()
-                    controller.clearHintOnStatusBar()
-                    putBaitButton.isEnabled = true
-                    true
-                }
-                false
-            }
+            val escDispatcher = DisposeOnEscape(disposer)
             kfm.addKeyEventDispatcher(escDispatcher)
             disposer.addDisposeAction { kfm.removeKeyEventDispatcher(escDispatcher) }
+
+            val playerSelectionListener = object : PlayerSelectionListener {
+                override fun onPlayerSelected(player: UiPlayerInformation) {
+                    disposer.close()
+                    // the disposer explicitly enables it, but in this case we need it disabled
+                    putBaitButton.isEnabled = false
+                }
+
+                override fun onPlayerSelectionCleared() {
+                    // irrelevant
+                }
+            }
+            controller.addPlayerSelectionListener(playerSelectionListener)
+            disposer.addDisposeAction { controller.removePlayerSelectionListener(playerSelectionListener) }
         }
         add(putBaitButton, "sg unity")
         add(baitTransformButton, "sg unity")
 
         // Bait rush
         val baitRushButton = JButton("Bait Rush")
+        baitRushButton.mnemonic = KeyEvent.VK_B
         baitRushButton.addActionListener { _ ->
             baitRushButton.isEnabled = false
             serverController.launch {
@@ -237,6 +270,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 isEnabled = false
             }
         }
+        killButton.mnemonic = KeyEvent.VK_K
         controller.addPlayerSelectionListener(killButton)
         killButton.isEnabled = false
         killButton.addActionListener { _ ->
@@ -278,6 +312,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 isEnabled = false
             }
         }
+        teleportButton.mnemonic = KeyEvent.VK_T
         controller.addPlayerSelectionListener(teleportButton)
         teleportButton.isEnabled = false
         teleportButton.addActionListener { _ ->
@@ -286,9 +321,13 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             controller.hintOnStatusBar("Select position")
 
             val disposer = Disposer()
+            disposer.addDisposeAction {
+                teleportButton.isEnabled = true
+                killButton.isEnabled = true
+                controller.clearHintOnStatusBar()
+            }
 
             val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
-                disposer.close()
                 val selectedPlayerIndex = controller.scoreTable.selectedRow
                 val selectedPlayerId: Int? = controller.uiPlayerCollection[selectedPlayerIndex]?.id
                 if (selectedPlayerId != null) {
@@ -301,9 +340,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                             }
                         }
                         withContext(Dispatchers.Swing) {
-                            teleportButton.isEnabled = true
-                            killButton.isEnabled = true
-                            controller.clearHintOnStatusBar()
+                            disposer.close()
                         }
                     }
                 }
@@ -312,18 +349,23 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             disposer.addDisposeAction { controller.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
 
             val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
-            val escDispatcher = KeyEventDispatcher { e ->
-                if (e?.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
-                    disposer.close()
-                    controller.clearHintOnStatusBar()
-                    teleportButton.isEnabled = true
-                    killButton.isEnabled = true
-                    true
-                }
-                false
-            }
+            val escDispatcher = DisposeOnEscape(disposer)
             kfm.addKeyEventDispatcher(escDispatcher)
             disposer.addDisposeAction { kfm.removeKeyEventDispatcher(escDispatcher) }
+
+            val playerSelectionListener = object : PlayerSelectionListener {
+                override fun onPlayerSelected(player: UiPlayerInformation) {
+                    // irrelevant
+                }
+
+                override fun onPlayerSelectionCleared() {
+                    disposer.close()
+                    // the disposer explicitly enables it, but in this case we need it disabled
+                    teleportButton.isEnabled = false
+                }
+            }
+            controller.addPlayerSelectionListener(playerSelectionListener)
+            disposer.addDisposeAction { controller.removePlayerSelectionListener(playerSelectionListener) }
         }
         add(teleportButton)
         add(killButton)
