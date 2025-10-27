@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.ui
 
+import de.dreamcube.mazegame.common.api.PlayerInformationDto
 import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.util.Disposer
 import io.ktor.client.plugins.*
@@ -16,10 +17,14 @@ import java.awt.KeyboardFocusManager
 import java.awt.event.KeyEvent
 import javax.swing.*
 
+private const val SG_UNITY = "sg unity"
+private const val SPAN_2 = "span 2"
+
 class ServerControlPanel(private val controller: UiController) : JPanel() {
 
     companion object {
-        val LOGGER: Logger = LoggerFactory.getLogger(ServerControlPanel::class.java)
+        private const val NO_TEXT = "-"
+        private val LOGGER: Logger = LoggerFactory.getLogger(ServerControlPanel::class.java)
 
         private class DisposeOnEscape(val disposer: Disposer) : KeyEventDispatcher {
             override fun dispatchKeyEvent(e: KeyEvent?): Boolean {
@@ -52,7 +57,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         // Header
         val gameHeader = JLabel("Game control")
         gameHeader.font = gameHeader.font.deriveFont(Font.BOLD)
-        add(gameHeader, "span 2")
+        add(gameHeader, SPAN_2)
 
         // Go command
         val goButton = JButton("Go")
@@ -72,7 +77,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 }
             }
         }
-        add(goButton, "sg unity")
+        add(goButton, SG_UNITY)
 
         // Clear command
         val clearButton = JButton("Clear")
@@ -92,7 +97,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 }
             }
         }
-        add(clearButton, "sg unity")
+        add(clearButton, SG_UNITY)
 
         // Stop command
         val stopButton = JButton("Stop")
@@ -112,7 +117,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 }
             }
         }
-        add(stopButton, "sg unity")
+        add(stopButton, SG_UNITY)
 
         // Stop now command
         val stopNowButton = JButton("Stop now")
@@ -132,14 +137,14 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 }
             }
         }
-        add(stopNowButton, "sg unity")
+        add(stopNowButton, SG_UNITY)
     }
 
     private fun initBaitControlElements() {
         // Header
         val baitHeader = JLabel("Bait control")
         baitHeader.font = baitHeader.font.deriveFont(Font.BOLD)
-        add(baitHeader, "span 2")
+        add(baitHeader, SPAN_2)
 
         // bait selection
         val baitTypeSelection = JComboBox<BaitType>()
@@ -150,7 +155,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         model.addAll(BaitType.entries)
         baitTypeSelection.selectedItem = BaitType.COFFEE
         baitTypeSelection.isEditable = false
-        add(baitTypeSelection, "span 2")
+        add(baitTypeSelection, SPAN_2)
 
         // Transform
         val baitTransformButton = JButton("Transform")
@@ -230,8 +235,8 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             controller.addPlayerSelectionListener(playerSelectionListener)
             disposer.addDisposeAction { controller.removePlayerSelectionListener(playerSelectionListener) }
         }
-        add(putBaitButton, "sg unity")
-        add(baitTransformButton, "sg unity")
+        add(putBaitButton, SG_UNITY)
+        add(baitTransformButton, SG_UNITY)
 
         // Bait rush
         val baitRushButton = JButton("Bait Rush")
@@ -251,14 +256,14 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 }
             }
         }
-        add(baitRushButton, "span 2")
+        add(baitRushButton, SPAN_2)
     }
 
     private fun initPlayerControlElements() {
         // Header
         val playerHeader = JLabel("Player control")
         playerHeader.font = playerHeader.font.deriveFont(Font.BOLD)
-        add(playerHeader, "span 2")
+        add(playerHeader, SPAN_2)
 
         // Kill
         val killButton = object : JButton("Kill"), PlayerSelectionListener {
@@ -370,8 +375,31 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         add(teleportButton)
         add(killButton)
 
-        // Player info
-        // TODO: Make it so
+        val playerInfo = PlayerInfoPanel()
+        add(playerInfo, SPAN_2)
+        controller.addPlayerSelectionListener(playerInfo)
+
+        val updateButton = object : JButton("Update"), PlayerSelectionListener {
+            private var selectedId = -1
+
+            init {
+                isEnabled = false
+                addActionListener { playerInfo.queryAndUpdate(selectedId) }
+            }
+
+            override fun onPlayerSelected(player: UiPlayerInformation) {
+                isEnabled = true
+                selectedId = player.id
+            }
+
+            override fun onPlayerSelectionCleared() {
+                isEnabled = false
+                selectedId = -1
+            }
+        }
+
+        add(updateButton, SPAN_2)
+        controller.addPlayerSelectionListener(updateButton)
 
         // Spawn
         // TODO: Make it so
@@ -386,5 +414,115 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             "Command failed",
             JOptionPane.ERROR_MESSAGE
         )
+    }
+
+    private inner class PlayerInfoPanel() : JPanel(), PlayerSelectionListener {
+        private val nickLabel = JLabel("Nick")
+        private val nickText = JLabel(NO_TEXT)
+        private val idLabel = JLabel("ID")
+        private val idText = JLabel(NO_TEXT)
+        private val scoreLabel = JLabel("Score")
+        private val scoreText = JLabel(NO_TEXT)
+        private val serverSidedLabel = JLabel("Server-sided")
+        private val serverSidedText = JLabel(NO_TEXT)
+        private val delayOffsetLabel = JLabel("Delay offset")
+        private val delayOffsetText = JLabel(NO_TEXT)
+        private val playTimeTotalLabel = JLabel("Playtime (total)")
+        private val playTimeTotalText = JLabel(NO_TEXT)
+        private val playTimeCurrentLabel = JLabel("Playtime (current)")
+        private val playTimeCurrentText = JLabel(NO_TEXT)
+        private val ppmLabel = JLabel("Points per minute")
+        private val ppmText = JLabel(NO_TEXT)
+        private val msPerStepLabel = JLabel("ms/Step")
+        private val msPerStepText = JLabel(NO_TEXT)
+
+        init {
+            layout = MigLayout("insets 5, wrap 2", "[grow,fill][grow,fill]")
+
+            nickLabel.font = nickLabel.font.deriveFont(Font.BOLD)
+            add(nickLabel, SG_UNITY)
+            add(nickText, SG_UNITY)
+
+            idLabel.font = idLabel.font.deriveFont(Font.BOLD)
+            add(idLabel, SG_UNITY)
+            add(idText, SG_UNITY)
+
+            scoreLabel.font = scoreLabel.font.deriveFont(Font.BOLD)
+            add(scoreLabel, SG_UNITY)
+            add(scoreText, SG_UNITY)
+
+            serverSidedLabel.font = serverSidedLabel.font.deriveFont(Font.BOLD)
+            add(serverSidedLabel, SG_UNITY)
+            add(serverSidedText, SG_UNITY)
+
+            delayOffsetLabel.font = delayOffsetLabel.font.deriveFont(Font.BOLD)
+            add(delayOffsetLabel, SG_UNITY)
+            add(delayOffsetText, SG_UNITY)
+
+            playTimeTotalLabel.font = playTimeTotalLabel.font.deriveFont(Font.BOLD)
+            add(playTimeTotalLabel, SG_UNITY)
+            add(playTimeTotalText, SG_UNITY)
+
+            playTimeCurrentLabel.font = playTimeCurrentLabel.font.deriveFont(Font.BOLD)
+            add(playTimeCurrentLabel, SG_UNITY)
+            add(playTimeCurrentText, SG_UNITY)
+
+            ppmLabel.font = ppmLabel.font.deriveFont(Font.BOLD)
+            add(ppmLabel, SG_UNITY)
+            add(ppmText, SG_UNITY)
+
+            msPerStepLabel.font = msPerStepLabel.font.deriveFont(Font.BOLD)
+            add(msPerStepLabel, SG_UNITY)
+            add(msPerStepText, SG_UNITY)
+        }
+
+        fun clear() {
+            nickText.text = NO_TEXT
+            idText.text = NO_TEXT
+            scoreText.text = NO_TEXT
+            serverSidedText.text = NO_TEXT
+            delayOffsetText.text = NO_TEXT
+            playTimeTotalText.text = NO_TEXT
+            playTimeCurrentText.text = NO_TEXT
+            ppmText.text = NO_TEXT
+            msPerStepText.text = NO_TEXT
+        }
+
+        private fun update(pi: PlayerInformationDto) {
+            nickText.text = pi.nick
+            idText.text = pi.id.toString()
+            scoreText.text = pi.score.toString()
+            serverSidedText.text = pi.serverSided.toString()
+            delayOffsetText.text = pi.delayOffset.toString()
+            playTimeTotalText.text = pi.totalPlayTime.time
+            playTimeCurrentText.text = pi.currentPlayTime.time
+            ppmText.text = pi.currentPointsPerMinute.toString()
+            msPerStepText.text = pi.currentAvgMoveTimeInMs.toString()
+        }
+
+        override fun onPlayerSelected(player: UiPlayerInformation) {
+            queryAndUpdate(player.id)
+        }
+
+        override fun onPlayerSelectionCleared() {
+            controller.uiScope.launch {
+                clear()
+            }
+        }
+
+        fun queryAndUpdate(id: Int) {
+            serverController.launch {
+                try {
+                    val playerInformation: PlayerInformationDto = serverController.playerInformation(id)
+                    withContext(Dispatchers.Swing) {
+                        update(playerInformation)
+                    }
+                } catch (ex: ClientRequestException) {
+                    withContext(Dispatchers.Swing) {
+                        showErrorMessage(ex)
+                    }
+                }
+            }
+        }
     }
 }

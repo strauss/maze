@@ -2,10 +2,7 @@ package de.dreamcube.mazegame.ui
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import de.dreamcube.mazegame.common.api.JwtToken
-import de.dreamcube.mazegame.common.api.PutBaitCommandDto
-import de.dreamcube.mazegame.common.api.ReducedServerInformationDto
-import de.dreamcube.mazegame.common.api.TeleportCommandDto
+import de.dreamcube.mazegame.common.api.*
 import de.dreamcube.mazegame.common.maze.BaitType
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -193,6 +190,11 @@ class ServerCommandController(
         }
     }
 
-    // TODO: player information
+    suspend fun playerInformation(playerId: Int): PlayerInformationDto {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/info/player/$playerId"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        return httpClient.use { it.get(httpAddress) { bearerAuth(token) }.body() }
+    }
 
 }
