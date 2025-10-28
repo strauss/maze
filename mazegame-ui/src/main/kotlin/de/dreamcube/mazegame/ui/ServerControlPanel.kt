@@ -1,8 +1,10 @@
 package de.dreamcube.mazegame.ui
 
+import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.common.api.PlayerInformationDto
 import de.dreamcube.mazegame.common.api.ServerInformationDto
 import de.dreamcube.mazegame.common.maze.BaitType
+import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.util.Disposer
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.Dispatchers
@@ -264,6 +266,19 @@ class ServerControlPanel() : JPanel() {
             }
             UiController.addPlayerSelectionListener(playerSelectionListener)
             disposer.addDisposeAction { UiController.removePlayerSelectionListener(playerSelectionListener) }
+
+            val connectionStatusListener = object : ClientConnectionStatusListener {
+                override fun onConnectionStatusChange(
+                    oldStatus: ConnectionStatus,
+                    newStatus: ConnectionStatus
+                ) {
+                    if (newStatus == ConnectionStatus.DEAD) {
+                        disposer.close()
+                    }
+                }
+            }
+            UiController.client.eventHandler.addEventListener(connectionStatusListener)
+            disposer.addDisposeAction { UiController.client.eventHandler.removeEventListener(connectionStatusListener) }
         }
         add(putBaitButton, SG_UNITY)
         add(baitTransformButton, SG_UNITY)
@@ -401,6 +416,20 @@ class ServerControlPanel() : JPanel() {
             }
             UiController.addPlayerSelectionListener(playerSelectionListener)
             disposer.addDisposeAction { UiController.removePlayerSelectionListener(playerSelectionListener) }
+
+            val connectionStatusListener = object : ClientConnectionStatusListener {
+                override fun onConnectionStatusChange(
+                    oldStatus: ConnectionStatus,
+                    newStatus: ConnectionStatus
+                ) {
+                    if (newStatus == ConnectionStatus.DEAD) {
+                        disposer.close()
+                        teleportButton.isEnabled = false
+                    }
+                }
+            }
+            UiController.client.eventHandler.addEventListener(connectionStatusListener)
+            disposer.addDisposeAction { UiController.client.eventHandler.removeEventListener(connectionStatusListener) }
         }
         add(teleportButton)
         add(killButton)
@@ -560,6 +589,10 @@ class ServerControlPanel() : JPanel() {
         }
 
         fun queryAndUpdate(id: Int) {
+            if (!UiController.serverControllerActive) {
+                // This case happens, if a previous connection had a server controller and the current one doesn't.
+                return
+            }
             serverController.launch {
                 try {
                     val playerInformation: PlayerInformationDto = serverController.playerInformation(id)

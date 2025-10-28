@@ -47,7 +47,7 @@ object UiController {
     /**
      * The client, but only if the connection is established.
      */
-    private lateinit var client: MazeClient
+    internal lateinit var client: MazeClient
 
     private lateinit var clientTerminationHandle: Deferred<Unit>
 
@@ -55,7 +55,7 @@ object UiController {
 
     private val playerSelectionListeners: MutableList<PlayerSelectionListener> = LinkedList()
 
-    private val serverControllerActive: Boolean
+    internal val serverControllerActive: Boolean
         get() = serverController != null
 
     internal val isLoggedIn: Boolean
