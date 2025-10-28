@@ -3,9 +3,6 @@ plugins {
     alias(libs.plugins.jetbrains.dokka)
 }
 
-group = "de.dreamcube"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }
