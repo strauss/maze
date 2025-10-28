@@ -10,6 +10,7 @@ import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isHumanStrategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import de.dreamcube.mazegame.ui.UiController.connect
 import kotlinx.coroutines.*
 import kotlinx.coroutines.swing.Swing
 import org.slf4j.Logger
@@ -17,10 +18,8 @@ import org.slf4j.LoggerFactory
 import java.awt.EventQueue
 import java.util.*
 
-class UiController {
-    companion object {
-        private val LOGGER: Logger = LoggerFactory.getLogger(UiController::class.java)
-    }
+object UiController {
+    private val LOGGER: Logger = LoggerFactory.getLogger(UiController::class.java)
 
     val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Swing)
     val bgScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -212,5 +211,5 @@ class UiController {
 fun main() {
     Strategy.scanAndAddStrategiesBlocking()
     FlatLightLaf.setup()
-    EventQueue.invokeLater { MainFrame(UiController()) }
+    EventQueue.invokeLater { MainFrame(UiController) }
 }

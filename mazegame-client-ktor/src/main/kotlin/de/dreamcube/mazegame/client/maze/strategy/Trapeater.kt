@@ -3,10 +3,7 @@ package de.dreamcube.mazegame.client.maze.strategy
 import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.BaitEventListener
-import de.dreamcube.mazegame.client.maze.events.PlayerMovementListener
 import de.dreamcube.mazegame.common.maze.BaitType
-import de.dreamcube.mazegame.common.maze.PlayerPosition
-import de.dreamcube.mazegame.common.maze.TeleportType
 
 /**
  * [Trapeater] strategy. Uses A* for pathfinding. Target selection happens through manhattan distance. Players and other baits are completely ignored.
@@ -15,7 +12,7 @@ import de.dreamcube.mazegame.common.maze.TeleportType
  */
 @Bot("trapeater", flavor = "I eat traps for breakfast!")
 @Suppress("unused")
-class Trapeater : SingleTargetAStar(), BaitEventListener, PlayerMovementListener {
+class Trapeater : SingleTargetAStar(), BaitEventListener {
 
     /**
      * The bait object for all traps currently in the maze.
@@ -27,15 +24,7 @@ class Trapeater : SingleTargetAStar(), BaitEventListener, PlayerMovementListener
             selectTarget()
             path.clear()
         }
-        if (currentTarget == null) {
-            return Move.DO_NOTHING
-        }
-        if (path.isNotEmpty()) {
-            return extractNextMoveFromPath()
-        }
-
-        // we have a target, but no path yet. A* baby!
-        return aStarSearch()
+        return super.getNextMove()
     }
 
     private fun selectTarget() {
@@ -66,40 +55,6 @@ class Trapeater : SingleTargetAStar(), BaitEventListener, PlayerMovementListener
         if (currentTarget == bait) {
             currentTarget = null
             path.clear()
-        }
-    }
-
-    override fun onPlayerAppear(playerSnapshot: PlayerSnapshot) {
-        // nothing
-    }
-
-    override fun onPlayerVanish(playerSnapshot: PlayerSnapshot) {
-        // nothing
-    }
-
-    override fun onPlayerStep(
-        oldPosition: PlayerPosition,
-        newPlayerSnapshot: PlayerSnapshot
-    ) {
-        // nothing
-    }
-
-    override fun onPlayerTurn(
-        oldPosition: PlayerPosition,
-        newPlayerSnapshot: PlayerSnapshot
-    ) {
-        // nothing
-    }
-
-    override fun onPlayerTeleport(
-        oldPosition: PlayerPosition,
-        newPlayerSnapshot: PlayerSnapshot,
-        teleportType: TeleportType?,
-        causingPlayerId: Int?
-    ) {
-        // If we teleport, we drop the target and select a new one
-        if (newPlayerSnapshot.id == mazeClient.id) {
-            currentTarget = null
         }
     }
 }

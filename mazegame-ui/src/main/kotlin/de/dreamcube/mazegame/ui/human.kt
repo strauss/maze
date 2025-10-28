@@ -1,11 +1,14 @@
 package de.dreamcube.mazegame.ui
 
+import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.strategy.Bot
 import de.dreamcube.mazegame.client.maze.strategy.Move
+import de.dreamcube.mazegame.client.maze.strategy.SingleTargetAStar
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.ViewDirection
+import kotlinx.coroutines.runBlocking
 import java.awt.KeyEventDispatcher
 import java.awt.KeyboardFocusManager
 import java.awt.event.KeyEvent
@@ -126,6 +129,34 @@ class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
             else -> {
                 // do nothing
             }
+        }
+    }
+}
+
+@Suppress("unused")
+@Bot("clickAndCollect", isHuman = true, flavor = "Click on bait, I will collect it!")
+class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellSelectionListener {
+
+    val controller = UiController
+
+    override fun onConnectionStatusChange(
+        oldStatus: ConnectionStatus,
+        newStatus: ConnectionStatus
+    ) {
+        when (newStatus) {
+            ConnectionStatus.PLAYING -> controller.mazePanel.addMazeCellSelectionListener(this)
+            ConnectionStatus.DEAD -> controller.mazePanel.removeMazeCellSelectionListener(this)
+            else -> {
+                // do nothing
+            }
+        }
+    }
+
+    override fun onMazeCellSelected(x: Int, y: Int) {
+        val bait: Bait? = runBlocking { mazeClient.getBaitAt(x, y) }
+        bait?.let {
+            currentTarget = it
+            path.clear()
         }
     }
 

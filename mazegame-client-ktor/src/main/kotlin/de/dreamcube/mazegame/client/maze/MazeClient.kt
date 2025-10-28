@@ -283,6 +283,11 @@ class MazeClient @JvmOverloads constructor(
     }
 
     /**
+     * Retrieves the bait at [x]/[y] or null if there is none.
+     */
+    suspend fun getBaitAt(x: Int, y: Int): Bait? = baits.getBait(x, y)
+
+    /**
      * Gets a thread- and coroutine-safe snapshot of all players as list of [PlayerSnapshot]. This function is intended for Kotlin callers.
      */
     suspend fun getPlayerSnapshotsAsync(): List<PlayerSnapshot> {

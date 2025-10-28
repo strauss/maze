@@ -1,9 +1,12 @@
 package de.dreamcube.mazegame.client.maze.strategy
 
 import de.dreamcube.mazegame.client.maze.Bait
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.MazeEventListener
+import de.dreamcube.mazegame.client.maze.events.PlayerMovementListener
 import de.dreamcube.mazegame.client.maze.strategy.maze_representations.Maze
 import de.dreamcube.mazegame.common.maze.PlayerPosition
+import de.dreamcube.mazegame.common.maze.TeleportType
 import de.dreamcube.mazegame.common.maze.ViewDirection
 import java.util.*
 import kotlin.math.abs
@@ -11,7 +14,7 @@ import kotlin.math.abs
 /**
  * AStar search for reaching a preselected target bait. A very bad foundation for "good" bots, but suitable for trapeaters and other shenanigans.
  */
-abstract class SingleTargetAStar : Strategy(), MazeEventListener {
+abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovementListener {
     /**
      * Internal representation of the maze.
      */
@@ -27,7 +30,19 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener {
      */
     protected val path: MutableList<PlayerPosition> = ArrayList()
 
-    protected fun aStarSearch(): Move {
+    override fun getNextMove(): Move {
+        if (currentTarget == null) {
+            return Move.DO_NOTHING
+        }
+        if (path.isNotEmpty()) {
+            return extractNextMoveFromPath()
+        }
+
+        // we have a target, but no path yet. A* baby!
+        return aStarSearch()
+    }
+
+    private fun aStarSearch(): Move {
         val marker = HashSet<PlayerPosition>()
         val queue = PriorityQueue<SearchState>(compareBy { it.costSoFar + it.estimatedCost })
         val costs = HashMap<PlayerPosition, Int>()
@@ -76,12 +91,15 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener {
             path.add(currentPosition)
             currentPosition = parent[currentPosition]
         }
-
         return extractNextMoveFromPath()
     }
 
     protected fun extractNextMoveFromPath(): Move {
         val lastPosition = path.removeLast()
+        if (path.isEmpty()) {
+            currentTarget = null
+            return Move.DO_NOTHING
+        }
         return getMove(lastPosition, path.last())
     }
 
@@ -117,5 +135,40 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener {
 
     override fun onMazeReceived(width: Int, height: Int, mazeLines: List<String>) {
         maze = Maze(width, height, mazeLines)
+    }
+
+    override fun onPlayerAppear(playerSnapshot: PlayerSnapshot) {
+        // nothing
+    }
+
+    override fun onPlayerVanish(playerSnapshot: PlayerSnapshot) {
+        // nothing
+    }
+
+    override fun onPlayerStep(
+        oldPosition: PlayerPosition,
+        newPlayerSnapshot: PlayerSnapshot
+    ) {
+        // nothing
+    }
+
+    override fun onPlayerTurn(
+        oldPosition: PlayerPosition,
+        newPlayerSnapshot: PlayerSnapshot
+    ) {
+        // nothing
+    }
+
+    override fun onPlayerTeleport(
+        oldPosition: PlayerPosition,
+        newPlayerSnapshot: PlayerSnapshot,
+        teleportType: TeleportType?,
+        causingPlayerId: Int?
+    ) {
+        // If we teleport, we drop the target and select a new one
+        if (newPlayerSnapshot.id == mazeClient.id) {
+            currentTarget = null
+            path.clear()
+        }
     }
 }
