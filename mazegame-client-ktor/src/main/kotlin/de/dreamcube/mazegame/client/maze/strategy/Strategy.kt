@@ -187,7 +187,7 @@ abstract class Strategy : NoEventListener {
         // call strategy
         val move: Move = getNextMove()
         if (move == Move.DO_NOTHING) {
-            val waitFor = max(mazeClient.gameSpeed, mazeClient.ownPlayer.moveTime.toInt())
+            val waitFor = max(mazeClient.gameSpeed, 10)
             mazeClient.scope.launch {
                 delay(waitFor.toLong())
                 makeNextMove()
