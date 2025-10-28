@@ -21,7 +21,7 @@ import javax.swing.*
 private const val SG_UNITY = "sg unity"
 private const val SPAN_2 = "span 2"
 
-class ServerControlPanel(private val controller: UiController) : JPanel() {
+class ServerControlPanel() : JPanel() {
 
     companion object {
         private const val NO_TEXT = "-"
@@ -39,7 +39,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
     }
 
     private val serverController: ServerCommandController
-        get() = controller.serverController ?: throw IllegalStateException("The server controller vanished.")
+        get() = UiController.serverController ?: throw IllegalStateException("The server controller vanished.")
 
     private val selectableNicks = JComboBox<String>()
     private val spawnButton = JButton("Spawn")
@@ -216,16 +216,16 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                 isEnabled = true
             }
         }
-        controller.addPlayerSelectionListener(putBaitButton)
+        UiController.addPlayerSelectionListener(putBaitButton)
         putBaitButton.mnemonic = KeyEvent.VK_P
         putBaitButton.addActionListener { _ ->
             putBaitButton.isEnabled = false
-            controller.hintOnStatusBar("Select position")
+            UiController.hintOnStatusBar("Select position")
 
             val disposer = Disposer()
             disposer.addDisposeAction {
                 putBaitButton.isEnabled = true
-                controller.clearHintOnStatusBar()
+                UiController.clearHintOnStatusBar()
             }
 
             val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
@@ -243,8 +243,8 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     }
                 }
             }
-            controller.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
-            disposer.addDisposeAction { controller.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
+            UiController.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
+            disposer.addDisposeAction { UiController.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
 
             val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
             val escDispatcher = DisposeOnEscape(disposer)
@@ -262,8 +262,8 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     // irrelevant
                 }
             }
-            controller.addPlayerSelectionListener(playerSelectionListener)
-            disposer.addDisposeAction { controller.removePlayerSelectionListener(playerSelectionListener) }
+            UiController.addPlayerSelectionListener(playerSelectionListener)
+            disposer.addDisposeAction { UiController.removePlayerSelectionListener(playerSelectionListener) }
         }
         add(putBaitButton, SG_UNITY)
         add(baitTransformButton, SG_UNITY)
@@ -306,16 +306,16 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             }
         }
         killButton.mnemonic = KeyEvent.VK_K
-        controller.addPlayerSelectionListener(killButton)
+        UiController.addPlayerSelectionListener(killButton)
         killButton.isEnabled = false
         killButton.addActionListener { _ ->
             killButton.isEnabled = false
             serverController.launch {
                 try {
-                    val selectedPlayerIndex = controller.scoreTable.selectedRow
-                    val selectedPlayerId: Int? = controller.uiPlayerCollection[selectedPlayerIndex]?.id
+                    val selectedPlayerIndex = UiController.scoreTable.selectedRow
+                    val selectedPlayerId: Int? = UiController.uiPlayerCollection[selectedPlayerIndex]?.id
                     if (selectedPlayerId != null) {
-                        if (selectedPlayerId == controller.ownId) {
+                        if (selectedPlayerId == UiController.ownId) {
                             withContext(Dispatchers.Swing) {
                                 JOptionPane.showMessageDialog(
                                     this@ServerControlPanel,
@@ -348,23 +348,23 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
             }
         }
         teleportButton.mnemonic = KeyEvent.VK_T
-        controller.addPlayerSelectionListener(teleportButton)
+        UiController.addPlayerSelectionListener(teleportButton)
         teleportButton.isEnabled = false
         teleportButton.addActionListener { _ ->
             teleportButton.isEnabled = false
             killButton.isEnabled = false
-            controller.hintOnStatusBar("Select position")
+            UiController.hintOnStatusBar("Select position")
 
             val disposer = Disposer()
             disposer.addDisposeAction {
                 teleportButton.isEnabled = true
                 killButton.isEnabled = true
-                controller.clearHintOnStatusBar()
+                UiController.clearHintOnStatusBar()
             }
 
             val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
-                val selectedPlayerIndex = controller.scoreTable.selectedRow
-                val selectedPlayerId: Int? = controller.uiPlayerCollection[selectedPlayerIndex]?.id
+                val selectedPlayerIndex = UiController.scoreTable.selectedRow
+                val selectedPlayerId: Int? = UiController.uiPlayerCollection[selectedPlayerIndex]?.id
                 if (selectedPlayerId != null) {
                     serverController.launch {
                         try {
@@ -380,8 +380,8 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     }
                 }
             }
-            controller.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
-            disposer.addDisposeAction { controller.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
+            UiController.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
+            disposer.addDisposeAction { UiController.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
 
             val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
             val escDispatcher = DisposeOnEscape(disposer)
@@ -399,15 +399,15 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
                     teleportButton.isEnabled = false
                 }
             }
-            controller.addPlayerSelectionListener(playerSelectionListener)
-            disposer.addDisposeAction { controller.removePlayerSelectionListener(playerSelectionListener) }
+            UiController.addPlayerSelectionListener(playerSelectionListener)
+            disposer.addDisposeAction { UiController.removePlayerSelectionListener(playerSelectionListener) }
         }
         add(teleportButton)
         add(killButton)
 
         val playerInfo = PlayerInfoPanel()
         add(playerInfo, SPAN_2)
-        controller.addPlayerSelectionListener(playerInfo)
+        UiController.addPlayerSelectionListener(playerInfo)
 
         val updateButton = object : JButton("Update"), PlayerSelectionListener {
             private var selectedId = -1
@@ -429,7 +429,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         }
 
         add(updateButton, SPAN_2)
-        controller.addPlayerSelectionListener(updateButton)
+        UiController.addPlayerSelectionListener(updateButton)
 
         // Spawn
         add(selectableNicks, SPAN_2)
@@ -554,7 +554,7 @@ class ServerControlPanel(private val controller: UiController) : JPanel() {
         }
 
         override fun onPlayerSelectionCleared() {
-            controller.uiScope.launch {
+            UiController.uiScope.launch {
                 clear()
             }
         }

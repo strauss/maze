@@ -56,16 +56,11 @@ enum class ScoreRepresentationMode {
 /**
  * This collection serves as [AbstractTableModel] for the score view. It also serves as data structure for maintaining client-side player information.
  */
-class UiPlayerCollection(private val controller: UiController) : AbstractTableModel(), PlayerConnectionListener, ScoreChangeListener {
+class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, ScoreChangeListener {
 
     companion object {
         val COLUMN_NAMES: List<String> = listOf("ID", "Nick", "Score", "ms/Step", "Pts/min")
         private val LOGGER: Logger = LoggerFactory.getLogger(UiPlayerCollection::class.java)
-    }
-
-    init {
-        controller.uiPlayerCollection = this
-        controller.prepareEventListener(this)
     }
 
     private val idToIndexMap: MutableMap<Int, Int> = HashMap()
@@ -74,6 +69,11 @@ class UiPlayerCollection(private val controller: UiController) : AbstractTableMo
     private lateinit var colorDistribution: List<Color>
 
     private var scoreRepresentationMode = ScoreRepresentationMode.SERVER
+
+    init {
+        UiController.uiPlayerCollection = this
+        UiController.prepareEventListener(this)
+    }
 
     operator fun get(index: Int): UiPlayerInformation? {
         if (index < 0 || index >= uiPlayerInformationList.size) {

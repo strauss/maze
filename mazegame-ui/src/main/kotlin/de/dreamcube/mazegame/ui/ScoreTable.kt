@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 
-class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnectionListener, MazeCellSelectionListener {
+class ScoreTable() : JTable(), PlayerConnectionListener, MazeCellSelectionListener {
 
     val scoreFont: Font = Font(font.name, Font.PLAIN, 16)
 
@@ -20,7 +20,7 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
     val uiPlayerInformationModel: UiPlayerCollection
 
     init {
-        controller.scoreTable = this
+        UiController.scoreTable = this
         columnSelectionAllowed = false
         rowSelectionAllowed = true
         rowHeight += 4
@@ -75,7 +75,7 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
         selectionModel.selectionMode = ListSelectionModel.SINGLE_SELECTION
         selectionModel.addListSelectionListener(this)
 
-        uiPlayerInformationModel = UiPlayerCollection(controller)
+        uiPlayerInformationModel = UiPlayerCollection()
         model = uiPlayerInformationModel
 
         for ((index, columnHeader) in UiPlayerCollection.COLUMN_NAMES.withIndex()) {
@@ -92,7 +92,7 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
             currentColumn.cellRenderer = cellRenderer
         }
         adjustPreferredViewportSize()
-        controller.prepareEventListener(this)
+        UiController.prepareEventListener(this)
     }
 
     internal fun reset() {
@@ -108,17 +108,17 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
         if (selectedRow >= 0) {
             val selectedPlayer: UiPlayerInformation? = uiPlayerInformationModel[selectedRow]
             if (selectedPlayer != null) {
-                controller.firePlayerSelected(selectedPlayer)
+                UiController.firePlayerSelected(selectedPlayer)
             } else {
-                controller.firePlayerSelectionCleared()
+                UiController.firePlayerSelectionCleared()
             }
         } else {
-            controller.firePlayerSelectionCleared()
+            UiController.firePlayerSelectionCleared()
         }
     }
 
     override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             adjustPreferredViewportSize()
         }
     }
@@ -128,7 +128,7 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
     }
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             adjustPreferredViewportSize()
         }
     }
@@ -144,10 +144,10 @@ class ScoreTable(internal val controller: UiController) : JTable(), PlayerConnec
         }
 
         // Select, if position contains a player
-        val mazeField: MazeModel.Companion.MazeField = controller.mazeModel[x, y]
+        val mazeField: MazeModel.Companion.MazeField = UiController.mazeModel[x, y]
         if (mazeField is MazeModel.Companion.PathMazeField && mazeField.occupationStatus == MazeModel.Companion.PathOccupationStatus.PLAYER) {
             val playerToSelect: PlayerSnapshot? = mazeField.player
-            playerToSelect?.let { controller.uiPlayerCollection.getIndex(it.id) }?.let { selectionModel.setSelectionInterval(it, it) }
+            playerToSelect?.let { UiController.uiPlayerCollection.getIndex(it.id) }?.let { selectionModel.setSelectionInterval(it, it) }
         }
     }
 }

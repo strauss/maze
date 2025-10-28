@@ -9,7 +9,7 @@ import java.util.*
 import javax.swing.JPanel
 import kotlin.math.min
 
-class MazePanel(private val controller: UiController) : JPanel() {
+class MazePanel() : JPanel() {
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazePanel::class.java)
         internal const val INITIAL_ZOOM = 17
@@ -21,8 +21,8 @@ class MazePanel(private val controller: UiController) : JPanel() {
         private set(value) {
             if (value in MIN_ZOOM..MAX_ZOOM) {
                 field = value
-                controller.glassPane.repaint()
-                controller.updateZoom(value)
+                UiController.glassPane.repaint()
+                UiController.updateZoom(value)
             }
         }
 
@@ -49,24 +49,24 @@ class MazePanel(private val controller: UiController) : JPanel() {
         imageZoom = 0
         offset = Point(0, 0)
         pressPoint = null
-        controller.glassPane.reset()
+        UiController.glassPane.reset()
     }
 
     init {
-        controller.mazePanel = this
+        UiController.mazePanel = this
         minimumSize = Dimension(12 * zoom, 9 * zoom)
         preferredSize = Dimension(45 * zoom, 35 * zoom)
 
         val mouseListener: MouseListener = object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
-                if (controller.mazeModel.mazeReceived && e?.button == MouseEvent.BUTTON1 && e.clickCount == 2) {
+                if (UiController.mazeModel.mazeReceived && e?.button == MouseEvent.BUTTON1 && e.clickCount == 2) {
                     centerMaze()
                     return
                 }
-                if (controller.mazeModel.mazeReceived && e?.button == MouseEvent.BUTTON1 && e.clickCount == 1) {
+                if (UiController.mazeModel.mazeReceived && e?.button == MouseEvent.BUTTON1 && e.clickCount == 1) {
                     val x = (e.x - offset.x) / zoom
                     val y = (e.y - offset.y) / zoom
-                    if (x >= 0 && y >= 0 && x < controller.mazeModel.width && y < controller.mazeModel.height) {
+                    if (x >= 0 && y >= 0 && x < UiController.mazeModel.width && y < UiController.mazeModel.height) {
                         fireMazeCellSelection(x, y)
                     }
                 }
@@ -93,24 +93,24 @@ class MazePanel(private val controller: UiController) : JPanel() {
              * The real drag action begins here :-D
              */
             override fun mouseDragged(e: MouseEvent?) {
-                if (e != null && controller.mazeModel.mazeReceived && pressPoint != null) {
+                if (e != null && UiController.mazeModel.mazeReceived && pressPoint != null) {
                     offset.x += e.getX() - pressPoint!!.x
                     offset.y += e.getY() - pressPoint!!.y
                     pressPoint = e.getPoint()
 
                     offset.x = min(offset.x, getWidth() - 10 * zoom)
-                        .coerceAtLeast(-(controller.mazeModel.width - 10) * zoom)
+                        .coerceAtLeast(-(UiController.mazeModel.width - 10) * zoom)
                     offset.y = min(offset.y, getHeight() - 10 * zoom)
-                        .coerceAtLeast(-(controller.mazeModel.height - 10) * zoom)
+                        .coerceAtLeast(-(UiController.mazeModel.height - 10) * zoom)
                     repaint()
                 }
             }
 
             override fun mouseMoved(e: MouseEvent?) {
-                if (controller.glassPane.playerToMark == null) {
+                if (UiController.glassPane.playerToMark == null) {
                     val x = (e?.x ?: 0) - offset.x
                     val y = (e?.y ?: 0) - offset.y
-                    controller.updatePositionStatus(x / zoom, y / zoom)
+                    UiController.updatePositionStatus(x / zoom, y / zoom)
                 }
             }
         }
@@ -120,7 +120,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
 
         // Change zoom with mouse wheel ... we don't need no dialog shenanigans
         addMouseWheelListener { e ->
-            if (controller.mazeModel.mazeReceived) {
+            if (UiController.mazeModel.mazeReceived) {
                 val rotation = e?.wheelRotation ?: 0
                 if (rotation != 0) {
                     zoom -= rotation * 2 // stick to odd numbers and zoom faster than before
@@ -130,7 +130,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
     }
 
     override fun paint(g: Graphics) {
-        if (controller.mazeModel.mazeReceived) {
+        if (UiController.mazeModel.mazeReceived) {
             super.paint(g)
             checkImage()
             g.drawImage(image, offset.x, offset.y, this)
@@ -138,16 +138,16 @@ class MazePanel(private val controller: UiController) : JPanel() {
     }
 
     internal fun checkImage() {
-        if (controller.mazeModel.mazeReceived && !this::image.isInitialized || imageZoom != zoom) {
+        if (UiController.mazeModel.mazeReceived && !this::image.isInitialized || imageZoom != zoom) {
             imageZoom = zoom
-            image = createImage(controller.mazeModel.width * zoom, controller.mazeModel.height * zoom)
+            image = createImage(UiController.mazeModel.width * zoom, UiController.mazeModel.height * zoom)
             centerMaze()
             paintCompleteMaze(image.graphics)
         }
     }
 
     private fun paintCompleteMaze(g: Graphics) {
-        val maze: MazeModel = controller.mazeModel
+        val maze: MazeModel = UiController.mazeModel
         for (y in 0..<maze.height) {
             for (x in 0..<maze.width) {
                 val mazeField: MazeModel.Companion.MazeField = maze[x, y]
@@ -159,7 +159,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
     fun updatePosition(x: Int, y: Int) {
         checkImage()
         val g: Graphics = image.graphics
-        val mazeField: MazeModel.Companion.MazeField = controller.mazeModel[x, y]
+        val mazeField: MazeModel.Companion.MazeField = UiController.mazeModel[x, y]
         internalUpdatePosition(g, x, y, mazeField)
     }
 
@@ -193,7 +193,7 @@ class MazePanel(private val controller: UiController) : JPanel() {
     private fun drawPlayer(mazeField: MazeModel.Companion.PathMazeField, g: Graphics, x: Int, y: Int) {
         val player: PlayerSnapshot? = mazeField.player
         player?.let { p ->
-            val playerColor: Color? = controller.uiPlayerCollection.getById(p.id)?.color
+            val playerColor: Color? = UiController.uiPlayerCollection.getById(p.id)?.color
             playerColor?.let { color ->
                 DrawablePlayer(color, p.viewDirection).drawAt(g, x, y, zoom)
             }
@@ -205,12 +205,12 @@ class MazePanel(private val controller: UiController) : JPanel() {
     }
 
     private fun centerMaze() {
-        offset.x = ((getWidth() - controller.mazeModel.width * zoom) / 2)
+        offset.x = ((getWidth() - UiController.mazeModel.width * zoom) / 2)
             .coerceAtMost(getWidth() - 10 * zoom)
-            .coerceAtLeast(-(controller.mazeModel.width - 10) * zoom)
-        offset.y = ((getHeight() - controller.mazeModel.height * zoom) / 2)
+            .coerceAtLeast(-(UiController.mazeModel.width - 10) * zoom)
+        offset.y = ((getHeight() - UiController.mazeModel.height * zoom) / 2)
             .coerceAtMost(getHeight() - 10 * zoom)
-            .coerceAtLeast(-(controller.mazeModel.height - 10) * zoom)
+            .coerceAtLeast(-(UiController.mazeModel.height - 10) * zoom)
         repaint()
     }
 

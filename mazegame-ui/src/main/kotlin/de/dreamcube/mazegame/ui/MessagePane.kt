@@ -12,7 +12,7 @@ import javax.swing.text.BadLocationException
 import javax.swing.text.Style
 import javax.swing.text.StyleConstants
 
-class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoListener, PlayerConnectionListener {
+class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
 
     companion object {
         private const val OTHER_CLIENT_STYLE_PREFIX = "bot_"
@@ -36,7 +36,7 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
     private val playerIds: MutableSet<Int> = HashSet()
 
     init {
-        controller.messagePane = this
+        UiController.messagePane = this
         val baseStyle = addStyle("base", null)
         StyleConstants.setFontFamily(baseStyle, "Arial")
         StyleConstants.setFontSize(baseStyle, 18)
@@ -48,11 +48,11 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
         StyleConstants.setForeground(serverStyle, SERVER_COLOR)
         messageStyle = addStyle("message", baseStyle)
         StyleConstants.setForeground(messageStyle, MESSAGE_COLOR)
-        controller.prepareEventListener(this)
+        UiController.prepareEventListener(this)
     }
 
     override fun onClientInfo(message: String) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             try {
                 styledDocument.insertString(styledDocument.length, "Client: ", clientStyle)
                 appendChatMessage(message)
@@ -63,7 +63,7 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
     }
 
     override fun onServerInfo(message: String) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             try {
                 styledDocument.insertString(styledDocument.length, "Server: ", serverStyle)
                 appendChatMessage(message)
@@ -74,7 +74,7 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
     }
 
     override fun onPlayerChat(playerId: Int, playerNick: String, message: String, whisper: Boolean) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             try {
                 val otherClientStyle: Style
                 if (whisper) {
@@ -83,7 +83,7 @@ class MessagePane(private val controller: UiController) : JTextPane(), ChatInfoL
                 } else {
                     otherClientStyle = addStyle(OTHER_CLIENT_STYLE_PREFIX + playerId, clientStyle)
                 }
-                StyleConstants.setForeground(otherClientStyle, controller.uiPlayerCollection.getById(playerId)?.color ?: Color.black)
+                StyleConstants.setForeground(otherClientStyle, UiController.uiPlayerCollection.getById(playerId)?.color ?: Color.black)
                 styledDocument.insertString(styledDocument.length, "$playerNick: ", otherClientStyle)
                 appendChatMessage(message)
             } catch (ex: BadLocationException) {

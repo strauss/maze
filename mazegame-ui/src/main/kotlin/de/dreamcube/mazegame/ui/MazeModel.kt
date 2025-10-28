@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MazeModel(private val controller: UiController) : MazeEventListener, BaitEventListener, PlayerMovementListener, ClientConnectionStatusListener {
+class MazeModel() : MazeEventListener, BaitEventListener, PlayerMovementListener, ClientConnectionStatusListener {
 
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeModel::class.java)
@@ -46,7 +46,7 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
     }
 
     init {
-        controller.prepareEventListener(this)
+        UiController.prepareEventListener(this)
     }
 
     internal var width: Int = 0
@@ -105,7 +105,7 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         val mazeField = this[bait.x, bait.y]
         if (mazeField is PathMazeField) {
             mazeField.bait = bait.type
-            controller.triggerMazeUpdate(bait.x, bait.y)
+            UiController.triggerMazeUpdate(bait.x, bait.y)
         }
     }
 
@@ -113,7 +113,7 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         val mazeField = this[bait.x, bait.y]
         if (mazeField is PathMazeField) {
             mazeField.bait = null
-            controller.triggerMazeUpdate(bait.x, bait.y)
+            UiController.triggerMazeUpdate(bait.x, bait.y)
         }
     }
 
@@ -138,7 +138,7 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         if (mazeField is PathMazeField) {
             mazeField.player = playerSnapshot
             if (mazeField.occupationStatus == PathOccupationStatus.PLAYER) {
-                controller.triggerMazeUpdate(playerSnapshot.x, playerSnapshot.y)
+                UiController.triggerMazeUpdate(playerSnapshot.x, playerSnapshot.y)
             }
         }
     }
@@ -147,7 +147,7 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         val mazeField = this[playerSnapshot.x, playerSnapshot.y]
         if (mazeField is PathMazeField) {
             mazeField.player = null
-            controller.triggerMazeUpdate(playerSnapshot.x, playerSnapshot.y)
+            UiController.triggerMazeUpdate(playerSnapshot.x, playerSnapshot.y)
         }
     }
 
@@ -174,18 +174,18 @@ class MazeModel(private val controller: UiController) : MazeEventListener, BaitE
         val previousMazeField = this[oldPosition.x, oldPosition.y]
         if (previousMazeField is PathMazeField) {
             previousMazeField.player = null
-            controller.triggerMazeUpdate(oldPosition.x, oldPosition.y)
+            UiController.triggerMazeUpdate(oldPosition.x, oldPosition.y)
         }
         val mazeField = this[newPlayerSnapshot.x, newPlayerSnapshot.y]
         if (mazeField is PathMazeField) {
             mazeField.player = newPlayerSnapshot
-            controller.triggerMazeUpdate(newPlayerSnapshot.x, newPlayerSnapshot.y)
+            UiController.triggerMazeUpdate(newPlayerSnapshot.x, newPlayerSnapshot.y)
 
             // If we have a marked player, we write their maze coordinates to the status bar
-            val playerToMark: UiPlayerInformation? = controller.glassPane.playerToMark
+            val playerToMark: UiPlayerInformation? = UiController.glassPane.playerToMark
             if (playerToMark != null && playerToMark.id == newPlayerSnapshot.id) {
-                controller.uiScope.launch {
-                    controller.updatePositionStatus(newPlayerSnapshot.x, newPlayerSnapshot.y)
+                UiController.uiScope.launch {
+                    UiController.updatePositionStatus(newPlayerSnapshot.x, newPlayerSnapshot.y)
                 }
             }
         }

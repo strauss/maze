@@ -4,10 +4,10 @@ import java.awt.*
 import javax.swing.JComponent
 import javax.swing.SwingUtilities
 
-class GlassPane(private val controller: UiController) : JComponent(), PlayerSelectionListener {
+class GlassPane() : JComponent(), PlayerSelectionListener {
 
     private val mazePanel: MazePanel
-        get() = controller.mazePanel
+        get() = UiController.mazePanel
 
     private val zoom
         get() = mazePanel.zoom
@@ -38,13 +38,13 @@ class GlassPane(private val controller: UiController) : JComponent(), PlayerSele
 
     private fun markPlayer(player: UiPlayerInformation) {
         playerToMark = player
-        controller.updatePositionStatus(player.snapshot.x, player.snapshot.y)
+        UiController.updatePositionStatus(player.snapshot.x, player.snapshot.y)
         repaint()
     }
 
     private fun clearMark() {
         playerToMark = null
-        controller.updatePositionStatus(-1, -1)
+        UiController.updatePositionStatus(-1, -1)
         repaint()
     }
 

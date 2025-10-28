@@ -6,10 +6,10 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 
-class ScorePanel(private val controller: UiController) : JPanel() {
+class ScorePanel() : JPanel() {
 
     private val scoreTable: ScoreTable
-        get() = controller.scoreTable
+        get() = UiController.scoreTable
 
     init {
         layout = BorderLayout()
@@ -28,7 +28,7 @@ class ScorePanel(private val controller: UiController) : JPanel() {
         add(anotherPanel, BorderLayout.SOUTH)
 
         toggleButton.addActionListener {
-            controller.uiPlayerCollection.toggleScoreRepresentation()
+            UiController.uiPlayerCollection.toggleScoreRepresentation()
         }
     }
 

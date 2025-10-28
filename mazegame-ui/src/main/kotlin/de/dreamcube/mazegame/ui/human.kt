@@ -137,15 +137,13 @@ class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
 @Bot("clickAndCollect", isHuman = true, flavor = "Click on bait, I will collect it!")
 class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellSelectionListener {
 
-    val controller = UiController
-
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
     ) {
         when (newStatus) {
-            ConnectionStatus.PLAYING -> controller.mazePanel.addMazeCellSelectionListener(this)
-            ConnectionStatus.DEAD -> controller.mazePanel.removeMazeCellSelectionListener(this)
+            ConnectionStatus.PLAYING -> UiController.mazePanel.addMazeCellSelectionListener(this)
+            ConnectionStatus.DEAD -> UiController.mazePanel.removeMazeCellSelectionListener(this)
             else -> {
                 // do nothing
             }

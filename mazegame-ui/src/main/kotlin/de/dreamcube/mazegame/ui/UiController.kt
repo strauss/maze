@@ -27,7 +27,7 @@ object UiController {
     private val uiEventListeners: MutableList<EventListener> = LinkedList()
     internal lateinit var uiPlayerCollection: UiPlayerCollection
 
-    val mazeModel = MazeModel(this)
+    val mazeModel = MazeModel()
     internal lateinit var mazePanel: MazePanel
     internal lateinit var glassPane: GlassPane
     internal lateinit var statusBar: StatusBar
@@ -211,5 +211,5 @@ object UiController {
 fun main() {
     Strategy.scanAndAddStrategiesBlocking()
     FlatLightLaf.setup()
-    EventQueue.invokeLater { MainFrame(UiController) }
+    EventQueue.invokeLater { MainFrame() }
 }

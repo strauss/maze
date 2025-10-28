@@ -10,7 +10,7 @@ import java.awt.FlowLayout
 import java.awt.event.KeyEvent
 import javax.swing.*
 
-class StatusBar(private val controller: UiController) : JPanel(), ClientConnectionStatusListener, SpeedChangedListener {
+class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListener {
 
     private val connectionStatusLabel = JLabel()
     private val serverAddressLabel = JLabel()
@@ -23,7 +23,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
     private val hintLabel = JLabel()
 
     init {
-        controller.statusBar = this
+        UiController.statusBar = this
         val borderColor = UIManager.getColor("Separator.foreground")
 
         layout = BorderLayout()
@@ -31,7 +31,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         // Connection information
         val connectionPanel = JPanel()
         connectionPanel.layout = FlowLayout()
-        connectionStatusLabel.text = controller.connectionStatus.toString()
+        connectionStatusLabel.text = UiController.connectionStatus.toString()
         serverAddressLabel.text = "-"
         strategyLabel.text = ""
         connectionPanel.add(connectionStatusLabel)
@@ -64,7 +64,7 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         serverControlButton.isVisible = false
         serverControlButton.isEnabled = false
         serverControlButton.addActionListener { _ ->
-            controller.toggleServerControlView()
+            UiController.toggleServerControlView()
         }
         serverControlButton.mnemonic = KeyEvent.VK_H
 
@@ -74,14 +74,14 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         val topLine = BorderFactory.createMatteBorder(1, 0, 0, 0, borderColor)
         border = topLine
         isOpaque = true
-        controller.prepareEventListener(this)
+        UiController.prepareEventListener(this)
     }
 
     internal fun updateZoom(zoom: Int) {
-        if (controller.connectionStatus == ConnectionStatus.DEAD) {
+        if (UiController.connectionStatus == ConnectionStatus.DEAD) {
             return
         }
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             zoomLabel.text = "Zoom: $zoom"
         }
     }
@@ -110,19 +110,19 @@ class StatusBar(private val controller: UiController) : JPanel(), ClientConnecti
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
     ) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             connectionStatusLabel.text = newStatus.toString()
-            serverAddressLabel.text = controller.completeServerAddressString
-            strategyLabel.text = controller.strategyName?.let { "as $it (${controller.getStrategyTypeForStatusBar()})" } ?: ""
-            botFlavorTextLabel.text = controller.strategyName?.flavorText() ?: ""
-            zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${controller.mazePanel.zoom}"
-            gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Speed: ${controller.gameSpeed} ms"
-            serverControlButton.isEnabled = controller.isLoggedIn
+            serverAddressLabel.text = UiController.completeServerAddressString
+            strategyLabel.text = UiController.strategyName?.let { "as $it (${UiController.getStrategyTypeForStatusBar()})" } ?: ""
+            botFlavorTextLabel.text = UiController.strategyName?.flavorText() ?: ""
+            zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${UiController.mazePanel.zoom}"
+            gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Speed: ${UiController.gameSpeed} ms"
+            serverControlButton.isEnabled = UiController.isLoggedIn
         }
     }
 
     override fun onSpeedChanged(oldSpeed: Int, newSpeed: Int) {
         // TODO: as soon as the server is capable of speed changes, we should test this
-        gameSpeedLabel.text = "Speed: ${controller.gameSpeed} ms"
+        gameSpeedLabel.text = "Speed: ${UiController.gameSpeed} ms"
     }
 }

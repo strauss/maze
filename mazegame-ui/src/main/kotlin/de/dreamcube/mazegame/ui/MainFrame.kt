@@ -13,25 +13,25 @@ import java.awt.event.WindowEvent
 import javax.swing.*
 import kotlin.system.exitProcess
 
-class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnectionListener {
+class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnectionListener {
     companion object {
         private const val TITLE = "Maze-Game Client KT"
     }
 
     private val mainSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
-    private val connectionSettingsPanel = ConnectionSettingsPanel(controller)
+    private val connectionSettingsPanel = ConnectionSettingsPanel()
     private val leftSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
     private val scorePanel: ScorePanel
     private lateinit var messagePane: MessagePane
     private val mazePanel: MazePanel
     private var connectionCounter: Int = 0
     private val leaveButton = JButton("Leave")
-    private val statusBar = StatusBar(controller)
+    private val statusBar = StatusBar()
     private var serverControlPanel: ServerControlPanel? = null
     private var serverControlPanelInPlace: Boolean = false
 
     init {
-        controller.mainFrame = this
+        UiController.mainFrame = this
         defaultCloseOperation = DO_NOTHING_ON_CLOSE
 
         // Fill the UI
@@ -39,8 +39,8 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         contentPane.add(mainSplitPane, BorderLayout.CENTER)
         contentPane.add(statusBar, BorderLayout.SOUTH)
 
-        val scoreTable = ScoreTable(controller)
-        scorePanel = ScorePanel(controller)
+        val scoreTable = ScoreTable()
+        scorePanel = ScorePanel()
 
         val messageScrollPane = createScrollableMessagePane()
         val messagePanel = JPanel()
@@ -48,7 +48,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         messagePanel.add(messageScrollPane, BorderLayout.CENTER)
 
         leaveButton.addActionListener { _ ->
-            controller.disconnect()
+            UiController.disconnect()
         }
         messagePanel.add(leaveButton, BorderLayout.SOUTH)
         leaveButton.isVisible = false
@@ -57,7 +57,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         leftSplitPane.resizeWeight = 0.4
         mainSplitPane.add(leftSplitPane, JSplitPane.LEFT)
 
-        mazePanel = MazePanel(controller)
+        mazePanel = MazePanel()
         mazePanel.addMazeCellSelectionListener(scoreTable)
         mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
         mainSplitPane.resizeWeight = 0.1
@@ -68,26 +68,26 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         mainSplitPane.border = fancyBorderTop
         mainSplitPane.isOpaque = true
 
-        val glassPane = GlassPane(controller)
-        controller.glassPane = glassPane
-        controller.addPlayerSelectionListener(glassPane)
+        val glassPane = GlassPane()
+        UiController.glassPane = glassPane
+        UiController.addPlayerSelectionListener(glassPane)
         this.glassPane = glassPane
         glassPane.isVisible = true
 
-        controller.prepareEventListener(this)
+        UiController.prepareEventListener(this)
 
         // close operation
         addWindowListener(object : WindowAdapter() {
 
             override fun windowClosing(e: WindowEvent?) {
-                controller.bgScope.launch {
+                UiController.bgScope.launch {
                     launch {
                         // Force exit after 5 seconds
                         delay(5000L)
                         exitProcess(0)
                     }
                     // clean disconnect and exit
-                    controller.onExit()
+                    UiController.onExit()
                     exitProcess(0)
                 }
             }
@@ -97,14 +97,14 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         // Size and position
         setSize(800, 600)
         isLocationByPlatform = true
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             pack()
             isVisible = true
         }
     }
 
     fun createScrollableMessagePane(): JScrollPane {
-        messagePane = MessagePane(controller)
+        messagePane = MessagePane()
         messagePane.isEditable = false
         messagePane.preferredSize = Dimension(450, 300)
         messagePane.isVisible = false
@@ -113,7 +113,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
 
     fun showOrHideServerControlPanel() {
         if (serverControlPanel == null) {
-            serverControlPanel = ServerControlPanel(controller)
+            serverControlPanel = ServerControlPanel()
         }
         if (serverControlPanelInPlace) {
             contentPane.remove(serverControlPanel)
@@ -132,7 +132,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
     ) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             when (newStatus) {
                 ConnectionStatus.LOGGED_IN -> {
                     leftSplitPane.remove(connectionSettingsPanel)
@@ -143,7 +143,7 @@ class MainFrame(private val controller: UiController) : JFrame(TITLE), ClientCon
 
                 ConnectionStatus.DEAD -> {
                     if (connectionCounter > 0) {
-                        controller.reset()
+                        UiController.reset()
 
                         // The ui should enable a new connection
                         leftSplitPane.remove(scorePanel)

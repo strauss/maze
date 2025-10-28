@@ -19,7 +19,7 @@ import java.awt.event.ItemEvent
 import java.awt.event.KeyEvent
 import javax.swing.*
 
-class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), ClientConnectionStatusListener {
+class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     companion object {
         private const val TEXT_FIELD_COLUMNS: Int = 20
         private val LOGGER: Logger = LoggerFactory.getLogger(ConnectionSettingsPanel::class.java)
@@ -171,7 +171,7 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
             val port = portField.text
             if (address.isNotBlank() && port.isNotBlank()) {
                 queryButton.isEnabled = false
-                controller.bgScope.launch {
+                UiController.bgScope.launch {
                     try {
                         val gameInformationList: List<ReducedServerInformationDto> =
                             ServerCommandController.queryForGameInformation(address, port.toInt())
@@ -254,9 +254,9 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         add(serverControlActivateButton)
         serverControlActivateButton.addActionListener { _ ->
             serverControlActivateButton.isEnabled = false
-            controller.bgScope.launch {
+            UiController.bgScope.launch {
                 try {
-                    controller.activateServerController(
+                    UiController.activateServerController(
                         addressField.text,
                         portField.text.toInt(),
                         String(serverControlPasswordField.password),
@@ -269,7 +269,7 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
                     }
                 } catch (ex: ClientRequestException) {
                     LOGGER.error("Connection to server failed: ${ex.message}")
-                    controller.deactivateServerController()
+                    UiController.deactivateServerController()
                     withContext(Dispatchers.Swing) {
                         serverControlActivateButton.isEnabled = true
                         JOptionPane.showMessageDialog(
@@ -309,15 +309,16 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         add(connectButton)
 
         connectButton.addActionListener { _ ->
-            val readyToConnect = controller.connectionStatus == ConnectionStatus.NOT_CONNECTED || controller.connectionStatus == ConnectionStatus.DEAD
+            val readyToConnect =
+                UiController.connectionStatus == ConnectionStatus.NOT_CONNECTED || UiController.connectionStatus == ConnectionStatus.DEAD
             if (readyToConnect &&
                 addressField.text.isNotBlank() &&
                 gamePortField.text.isNotBlank() &&
                 (strategySelection.selectedItem as String?)?.isNotBlank() ?: false &&
                 nickField.text.isNotBlank()
             ) {
-                controller.bgScope.launch {
-                    controller.connect(
+                UiController.bgScope.launch {
+                    UiController.connect(
                         addressField.text,
                         gamePortField.text.toInt(),
                         strategySelection.selectedItem as String,
@@ -333,11 +334,11 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
 
         add(JPanel(), "growy")
 
-        controller.prepareEventListener(this)
+        UiController.prepareEventListener(this)
     }
 
     private fun handleNick(selectedStrategy: String, spectatorName: String?) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             if (selectedStrategy.isSpectatorStrategy() && spectatorName != null) {
                 nickField.text = spectatorName
                 nickField.isEnabled = false
@@ -403,13 +404,13 @@ class ConnectionSettingsPanel(private val controller: UiController) : JPanel(), 
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
     ) {
-        controller.uiScope.launch {
+        UiController.uiScope.launch {
             when (newStatus) {
                 ConnectionStatus.CONNECTED -> this@ConnectionSettingsPanel.isEnabled = false
                 ConnectionStatus.DEAD -> {
                     this@ConnectionSettingsPanel.isEnabled = true
                     connectButton.isEnabled = true
-                    controller.deactivateServerController()
+                    UiController.deactivateServerController()
                     serverControlPasswordField.text = ""
                     serverControlPasswordField.isEnabled = true
                     serverControlActivateButton.isEnabled = true
