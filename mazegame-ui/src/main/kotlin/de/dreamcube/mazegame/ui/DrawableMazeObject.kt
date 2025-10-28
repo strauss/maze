@@ -104,22 +104,22 @@ class DrawablePlayer(private val color: Color, private val viewDirection: ViewDi
         private val EDGE_COLOR: Color = Color.black
     }
 
-    override fun drawAt(g: Graphics, mazeX: Int, mazeY: Int, zoom: Int) {
+    override fun drawAt(g: Graphics, x: Int, y: Int, zoom: Int) {
         val w: Int
         g.color = color
 
-        val x: Int = mazeX * zoom + 1
-        val y: Int = mazeY * zoom + 1
-        g.fillRect(x, y, zoom - 2, zoom - 2)
+        val xx: Int = x * zoom + 1
+        val yy: Int = y * zoom + 1
+        g.fillRect(xx, yy, zoom - 2, zoom - 2)
         val r = zoom / 3
         w = (zoom - r - 2) / 2
         g.color = DrawablePath.PATH_COLOR
 
         when (viewDirection) {
-            ViewDirection.NORTH -> cutNorth(g, x, y, w, r, zoom)
-            ViewDirection.EAST -> cutEast(g, x, y, w, r, zoom)
-            ViewDirection.SOUTH -> cutSouth(g, x, y, w, r, zoom)
-            ViewDirection.WEST -> cutWest(g, x, y, w, r, zoom)
+            ViewDirection.NORTH -> cutNorth(g, xx, yy, w, r, zoom)
+            ViewDirection.EAST -> cutEast(g, xx, yy, w, r, zoom)
+            ViewDirection.SOUTH -> cutSouth(g, xx, yy, w, r, zoom)
+            ViewDirection.WEST -> cutWest(g, xx, yy, w, r, zoom)
 
         }
     }

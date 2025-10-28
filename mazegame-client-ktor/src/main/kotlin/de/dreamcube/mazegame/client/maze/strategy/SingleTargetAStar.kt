@@ -68,7 +68,8 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
                 break
             }
             // follow-up states
-            val followUpPositions = listOf(currentPosition.whenRight(), currentPosition.whenLeft(), currentPosition.whenStep())
+            val followUpPositions =
+                listOf(currentPosition.whenRight(), currentPosition.whenLeft(), currentPosition.whenStep())
             for (nextPosition in followUpPositions) {
                 if (!walkable(nextPosition)) continue
 
@@ -127,7 +128,7 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
     }
 
     private fun walkable(position: PlayerPosition): Boolean =
-        position.x >= 0 && position.y >= 0 && maze[position.x, position.y] == Maze.Companion.FieldValue.PATH
+        position.x >= 0 && position.y >= 0 && maze[position.x, position.y] == Maze.FieldValue.PATH
 
     private data class SearchState(val position: PlayerPosition, val costSoFar: Int, val estimatedCost: Int)
 

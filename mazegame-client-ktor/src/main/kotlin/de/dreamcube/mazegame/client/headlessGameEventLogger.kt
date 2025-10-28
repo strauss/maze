@@ -89,7 +89,7 @@ object HeadlessPlayerScoreLogger : ScoreChangeListener {
 
     override fun onScoreChange(oldScore: Int, newPlayerSnapshot: PlayerSnapshot) {
         val scoreDifference: Int = newPlayerSnapshot.score - oldScore
-        val collectedBaitType: BaitType? = BaitType.Companion.byScore(scoreDifference)
+        val collectedBaitType: BaitType? = BaitType.byScore(scoreDifference)
         val scoreReason: String = when (collectedBaitType) {
             null -> ""
             BaitType.TRAP -> " They ran into a trap."

@@ -18,31 +18,30 @@ class MazeModel() : MazeEventListener, BaitEventListener, PlayerMovementListener
 
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeModel::class.java)
+    }
 
-        enum class PathOccupationStatus {
-            EMPTY, PLAYER, BAIT, CROWDED
-        }
+    enum class PathOccupationStatus {
+        EMPTY, PLAYER, BAIT, CROWDED
+    }
 
-        sealed interface MazeField
-        object UnknownMazeField : MazeField
-        object OutsideMazeField : MazeField
-        object WallMazeField : MazeField
+    sealed interface MazeField
+    object UnknownMazeField : MazeField
+    object OutsideMazeField : MazeField
+    object WallMazeField : MazeField
 
-        class PathMazeField() : MazeField {
-            var bait: BaitType? = null
-                internal set
-            var player: PlayerSnapshot? = null
-                internal set
-            val occupationStatus
-                get() =
-                    when {
-                        bait == null && player == null -> PathOccupationStatus.EMPTY
-                        bait != null && player == null -> PathOccupationStatus.BAIT
-                        bait == null && player != null -> PathOccupationStatus.PLAYER
-                        else -> PathOccupationStatus.CROWDED // this should not happen, but you never know
-                    }
-        }
-
+    class PathMazeField() : MazeField {
+        var bait: BaitType? = null
+            internal set
+        var player: PlayerSnapshot? = null
+            internal set
+        val occupationStatus
+            get() =
+                when {
+                    bait == null && player == null -> PathOccupationStatus.EMPTY
+                    bait != null && player == null -> PathOccupationStatus.BAIT
+                    bait == null && player != null -> PathOccupationStatus.PLAYER
+                    else -> PathOccupationStatus.CROWDED // this should not happen, but you never know
+                }
     }
 
     init {

@@ -100,7 +100,8 @@ class ScoreTable() : JTable(), PlayerConnectionListener, MazeCellSelectionListen
     }
 
     private fun adjustPreferredViewportSize() {
-        preferredScrollableViewportSize = Dimension(90 * UiPlayerCollection.COLUMN_NAMES.size, rowHeight * model.rowCount)
+        preferredScrollableViewportSize =
+            Dimension(90 * UiPlayerCollection.COLUMN_NAMES.size, rowHeight * model.rowCount)
     }
 
     override fun valueChanged(e: ListSelectionEvent?) {
@@ -144,10 +145,11 @@ class ScoreTable() : JTable(), PlayerConnectionListener, MazeCellSelectionListen
         }
 
         // Select, if position contains a player
-        val mazeField: MazeModel.Companion.MazeField = UiController.mazeModel[x, y]
-        if (mazeField is MazeModel.Companion.PathMazeField && mazeField.occupationStatus == MazeModel.Companion.PathOccupationStatus.PLAYER) {
+        val mazeField: MazeModel.MazeField = UiController.mazeModel[x, y]
+        if (mazeField is MazeModel.PathMazeField && mazeField.occupationStatus == MazeModel.PathOccupationStatus.PLAYER) {
             val playerToSelect: PlayerSnapshot? = mazeField.player
-            playerToSelect?.let { UiController.uiPlayerCollection.getIndex(it.id) }?.let { selectionModel.setSelectionInterval(it, it) }
+            playerToSelect?.let { UiController.uiPlayerCollection.getIndex(it.id) }
+                ?.let { selectionModel.setSelectionInterval(it, it) }
         }
     }
 }

@@ -150,7 +150,7 @@ class MazePanel() : JPanel() {
         val maze: MazeModel = UiController.mazeModel
         for (y in 0..<maze.height) {
             for (x in 0..<maze.width) {
-                val mazeField: MazeModel.Companion.MazeField = maze[x, y]
+                val mazeField: MazeModel.MazeField = maze[x, y]
                 internalUpdatePosition(g, x, y, mazeField)
             }
         }
@@ -159,30 +159,30 @@ class MazePanel() : JPanel() {
     fun updatePosition(x: Int, y: Int) {
         checkImage()
         val g: Graphics = image.graphics
-        val mazeField: MazeModel.Companion.MazeField = UiController.mazeModel[x, y]
+        val mazeField: MazeModel.MazeField = UiController.mazeModel[x, y]
         internalUpdatePosition(g, x, y, mazeField)
     }
 
-    private fun internalUpdatePosition(g: Graphics, x: Int, y: Int, mazeField: MazeModel.Companion.MazeField) {
+    private fun internalUpdatePosition(g: Graphics, x: Int, y: Int, mazeField: MazeModel.MazeField) {
         when (mazeField) {
-            is MazeModel.Companion.PathMazeField -> drawPath(g, x, y, mazeField)
-            is MazeModel.Companion.WallMazeField -> DrawableWall.drawAt(g, x, y, zoom)
-            is MazeModel.Companion.OutsideMazeField -> DrawableOutside.drawAt(g, x, y, zoom)
-            is MazeModel.Companion.UnknownMazeField -> DrawableUnknown.drawAt(g, x, y, zoom)
+            is MazeModel.PathMazeField -> drawPath(g, x, y, mazeField)
+            is MazeModel.WallMazeField -> DrawableWall.drawAt(g, x, y, zoom)
+            is MazeModel.OutsideMazeField -> DrawableOutside.drawAt(g, x, y, zoom)
+            is MazeModel.UnknownMazeField -> DrawableUnknown.drawAt(g, x, y, zoom)
         }
     }
 
-    private fun drawPath(g: Graphics, x: Int, y: Int, mazeField: MazeModel.Companion.PathMazeField) {
+    private fun drawPath(g: Graphics, x: Int, y: Int, mazeField: MazeModel.PathMazeField) {
         // always draw the path, no matter what is on it
         DrawablePath.drawAt(g, x, y, zoom)
         when (mazeField.occupationStatus) {
-            MazeModel.Companion.PathOccupationStatus.EMPTY -> {
+            MazeModel.PathOccupationStatus.EMPTY -> {
                 // we already drew the path, so we skip here
             }
 
-            MazeModel.Companion.PathOccupationStatus.BAIT -> drawBait(mazeField, g, x, y)
-            MazeModel.Companion.PathOccupationStatus.PLAYER -> drawPlayer(mazeField, g, x, y)
-            MazeModel.Companion.PathOccupationStatus.CROWDED -> {
+            MazeModel.PathOccupationStatus.BAIT -> drawBait(mazeField, g, x, y)
+            MazeModel.PathOccupationStatus.PLAYER -> drawPlayer(mazeField, g, x, y)
+            MazeModel.PathOccupationStatus.CROWDED -> {
                 LOGGER.warn("Crowded field detected at ($x : $y).")
                 drawBait(mazeField, g, x, y)
                 drawPlayer(mazeField, g, x, y)
@@ -190,7 +190,7 @@ class MazePanel() : JPanel() {
         }
     }
 
-    private fun drawPlayer(mazeField: MazeModel.Companion.PathMazeField, g: Graphics, x: Int, y: Int) {
+    private fun drawPlayer(mazeField: MazeModel.PathMazeField, g: Graphics, x: Int, y: Int) {
         val player: PlayerSnapshot? = mazeField.player
         player?.let { p ->
             val playerColor: Color? = UiController.uiPlayerCollection.getById(p.id)?.color
@@ -200,7 +200,7 @@ class MazePanel() : JPanel() {
         }
     }
 
-    private fun drawBait(mazeField: MazeModel.Companion.PathMazeField, g: Graphics, x: Int, y: Int) {
+    private fun drawBait(mazeField: MazeModel.PathMazeField, g: Graphics, x: Int, y: Int) {
         mazeField.bait?.drawable()?.drawAt(g, x, y, zoom)
     }
 
