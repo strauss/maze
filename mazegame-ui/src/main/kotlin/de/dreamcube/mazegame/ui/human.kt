@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.Bait
+import de.dreamcube.mazegame.client.maze.events.BaitEventListener
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.strategy.Bot
 import de.dreamcube.mazegame.client.maze.strategy.Move
@@ -135,7 +136,8 @@ class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
 
 @Suppress("unused")
 @Bot("clickAndCollect", isHuman = true, flavor = "Click on bait, I will collect it!")
-class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellSelectionListener {
+class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellSelectionListener,
+    BaitEventListener {
 
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
@@ -154,6 +156,17 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
         val bait: Bait? = runBlocking { mazeClient.getBaitAt(x, y) }
         bait?.let {
             currentTarget = it
+            path.clear()
+        }
+    }
+
+    override fun onBaitAppeared(bait: Bait) {
+        // ignore
+    }
+
+    override fun onBaitVanished(bait: Bait) {
+        if (currentTarget == bait) {
+            currentTarget = null
             path.clear()
         }
     }
