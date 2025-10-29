@@ -14,6 +14,15 @@ subprojects {
 
 javaPlatform { allowDependencies() }   // erlaubt echte Abhängigkeitsangaben
 
+publishing {
+    publications {
+        create<MavenPublication>("bom") {
+            from(components["javaPlatform"])
+            artifactId = "mazegame"
+        }
+    }
+}
+
 dependencies {
     /* -------- BOM-Importe direkt als API-Abhängigkeiten -------- */
     api(platform("org.jetbrains.kotlin:kotlin-bom:${libs.versions.kotlin.get()}"))
