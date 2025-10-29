@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    `java-library`
     alias(libs.plugins.jetbrains.dokka)
     `maven-publish`
 }
