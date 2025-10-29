@@ -3,10 +3,14 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.jetbrains.dokka)
+    `maven-publish`
 }
 
-group = "de.dreamcube"
-version = "1.0-SNAPSHOT"
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        the<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension>().jvmToolchain(21)
+    }
+}
 
 javaPlatform { allowDependencies() }   // erlaubt echte Abhängigkeitsangaben
 
@@ -21,6 +25,8 @@ dependencies {
         api(libs.slf4j.api)
         api(libs.logback.classic)
         api(libs.jwt)
+        api("org.jetbrains.kotlin:kotlin-stdlib")
+        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
         // ---- optionale Test-Libs ----------
         api(libs.junit.jupiter)

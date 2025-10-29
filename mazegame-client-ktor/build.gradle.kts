@@ -5,6 +5,19 @@ plugins {
     application
     alias(libs.plugins.shadow.jar)
     alias(libs.plugins.jetbrains.dokka)
+    `maven-publish`
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 repositories {
@@ -32,7 +45,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("de.dreamcube.mazegame.client.HeadlessLauncherKt")
 }
 
 tasks.withType<ShadowJar> {

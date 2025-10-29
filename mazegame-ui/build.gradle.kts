@@ -1,5 +1,23 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm")
+    application
+    alias(libs.plugins.shadow.jar)
+    alias(libs.plugins.jetbrains.dokka)
+    `maven-publish`
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 repositories {
@@ -25,6 +43,15 @@ dependencies {
     implementation(projects.mazegameClientKtor)
 
     testImplementation(kotlin("test"))
+}
+
+application {
+    mainClass.set("de.dreamcube.mazegame.ui.UiControllerKt")
+}
+
+tasks.withType<ShadowJar> {
+    archiveBaseName.set(project.name)
+    mergeServiceFiles()
 }
 
 tasks.test {

@@ -1,6 +1,19 @@
 plugins {
     kotlin("jvm")
     alias(libs.plugins.jetbrains.dokka)
+    `maven-publish`
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 repositories {

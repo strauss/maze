@@ -4,6 +4,19 @@ plugins {
     kotlin("jvm")
     application
     alias(libs.plugins.shadow.jar)
+    `maven-publish`
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
 }
 
 repositories {
