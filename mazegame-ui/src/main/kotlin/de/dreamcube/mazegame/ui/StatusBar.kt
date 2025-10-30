@@ -6,6 +6,7 @@ import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import kotlinx.coroutines.launch
 import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.event.KeyEvent
 import javax.swing.*
@@ -37,7 +38,6 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         connectionPanel.add(connectionStatusLabel)
         connectionPanel.add(serverAddressLabel)
         connectionPanel.add(strategyLabel)
-        connectionPanel.border = BorderFactory.createMatteBorder(0, 0, 0, 1, borderColor)
         // 1st
         add(connectionPanel, BorderLayout.WEST)
 
@@ -45,14 +45,14 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         val botFlavorPanel = JPanel()
         botFlavorPanel.layout = FlowLayout()
         botFlavorTextLabel.text = ""
-        botFlavorPanel.border = BorderFactory.createMatteBorder(0, 0, 0, 1, borderColor)
         botFlavorPanel.add(botFlavorTextLabel)
         // 2nd
         add(botFlavorPanel, BorderLayout.CENTER)
 
         // Game status stuff
         val gameStatusPanel = JPanel()
-        gameStatusPanel.layout = FlowLayout()
+        gameStatusPanel.layout = FlowLayout(FlowLayout.RIGHT)
+        gameStatusPanel.preferredSize = Dimension(300, gameStatusPanel.preferredSize.height)
 
         invalidPositionStatus()
         gameStatusPanel.add(hintLabel)
