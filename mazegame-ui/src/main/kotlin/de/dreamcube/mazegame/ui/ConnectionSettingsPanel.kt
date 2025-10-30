@@ -248,7 +248,8 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(serverControlPasswordLabel)
         add(serverControlPasswordField)
 
-        serverControlActivateButton.preferredSize = Dimension(addressField.preferredSize.width, serverControlActivateButton.preferredSize.height)
+        serverControlActivateButton.preferredSize =
+            Dimension(addressField.preferredSize.width, serverControlActivateButton.preferredSize.height)
         serverControlActivateButton.isEnabled = false
         add(JPanel()) // Dummy panel without content
         add(serverControlActivateButton)
@@ -270,6 +271,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 } catch (ex: ClientRequestException) {
                     LOGGER.error("Connection to server failed: ${ex.message}")
                     UiController.deactivateServerController()
+                    UiController.deactivateControlButton()
                     withContext(Dispatchers.Swing) {
                         serverControlActivateButton.isEnabled = true
                         JOptionPane.showMessageDialog(
@@ -291,7 +293,8 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
 
         add(strategyLabel)
         fillStrategySelection()
-        strategySelection.preferredSize = Dimension(addressField.preferredSize.width, strategySelection.preferredSize.height)
+        strategySelection.preferredSize =
+            Dimension(addressField.preferredSize.width, strategySelection.preferredSize.height)
         add(strategySelection)
         strategySelection.addItemListener { event: ItemEvent ->
             if (event.stateChange == ItemEvent.SELECTED) {
@@ -411,6 +414,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                     this@ConnectionSettingsPanel.isEnabled = true
                     connectButton.isEnabled = true
                     UiController.deactivateServerController()
+                    UiController.deactivateControlButton()
                     serverControlPasswordField.text = ""
                     serverControlPasswordField.isEnabled = true
                     serverControlActivateButton.isEnabled = true

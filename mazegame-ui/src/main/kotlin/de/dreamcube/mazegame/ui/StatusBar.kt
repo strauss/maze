@@ -93,11 +93,11 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         positionLabel.text = "(-/-)"
     }
 
-    internal fun onServerControl() {
+    internal fun activateControlButton() {
         serverControlButton.isVisible = true
     }
 
-    internal fun onNoServerControl() {
+    internal fun deactivateControlButton() {
         serverControlButton.isVisible = false
     }
 

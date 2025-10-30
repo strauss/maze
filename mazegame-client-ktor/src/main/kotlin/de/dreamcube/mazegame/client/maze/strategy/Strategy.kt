@@ -17,6 +17,7 @@ import org.reflections.util.ConfigurationBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
+import javax.swing.JPanel
 import kotlin.math.max
 
 /**
@@ -32,6 +33,8 @@ import kotlin.math.max
  * - [ScoreChangeListener] for score-related events
  * - [ChatInfoListener] for chat messages, including whispers (allows for bots to talk with each other)
  * - [ErrorInfoListener] for server error messages (e.g., allows for reacting on wall crashes, like in [Aimless])
+ * - [ClientConnectionStatusListener] for reacting to connection status events
+ * - [SpeedChangedListener] for reacting to changes in game speed
  *
  * The strategy is automatically registered for all relevant event listeners when the client is initialized.
  * See [EventHandler.addEventListener] for details.
@@ -217,18 +220,34 @@ abstract class Strategy : NoEventListener {
     }
 
     /**
-     * Override this method to initialize the custom strategy. Does nothing in the superclass. The method is not abstract for backwards compatibility
-     * reasons.
+     * With this function, you can provide a control panel. This panel is placed on the right side. You can use it
+     * for controlling bot parameters at runtime or, for displaying additional information. If you plan on creating a
+     * visualization, you don't need to put a button for it in here, the UI will do it for you.
+     *
+     * Although you provide a UI element with this method, never open up your own UI elements directly. The bot is
+     * intended to run headless (without UI) and embedded into a UI. If you randomly open up windows, the bot won't be
+     * able to run inside a server.
+     *
+     * If you don't want or need a control panel, just leave the function alone. It will return null and therefore not
+     * enable the control panel for your bot.
      */
-    protected fun initializeStrategy() {
-        // still does nothing ... and will always be good at it!
+    open fun getControlPanel(): JPanel? {
+        return null
     }
 
     /**
-     * Is called before the strategy is terminated by the client.
+     * This function allows you for providing a visualization for your bot. If left alone, null is returned and your
+     * bot won't have a visualization.
      */
-    protected fun beforeGoodBye() {
-        // does nothing by default
+    open fun getVisualizationComponent(): VisualizationComponent? {
+        return null
+    }
+
+    /**
+     * Override this method to initialize the custom strategy. Does nothing in the superclass.
+     */
+    protected open fun initializeStrategy() {
+        // still does nothing ... and will always be good at it!
     }
 
     /**

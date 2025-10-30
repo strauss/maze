@@ -3,6 +3,7 @@ package de.dreamcube.mazegame.ui
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
+import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,8 +28,11 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
     private var connectionCounter: Int = 0
     private val leaveButton = JButton("Leave")
     private val statusBar = StatusBar()
+    private val controlPane = JPanel()
+    private val botControlPanel = JPanel()
+    private val visualizationButton = JButton("Visualization")
     private var serverControlPanel: ServerControlPanel? = null
-    private var serverControlPanelInPlace: Boolean = false
+    private var controlPanelInPlace: Boolean = false
 
     init {
         UiController.mainFrame = this
@@ -62,6 +66,8 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
         mainSplitPane.resizeWeight = 0.1
 
+        controlPane.layout = BorderLayout()
+        botControlPanel.layout = BorderLayout()
 
         val borderColor = UIManager.getColor("Separator.foreground")
         val fancyBorderTop = BorderFactory.createMatteBorder(1, 0, 0, 0, borderColor)
@@ -103,28 +109,37 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         }
     }
 
-    fun createScrollableMessagePane(): JScrollPane {
+    private fun createScrollableMessagePane(): JScrollPane {
         messagePane = MessagePane()
         messagePane.isEditable = false
         messagePane.preferredSize = Dimension(450, 300)
         return JScrollPane(messagePane)
     }
 
-    fun showOrHideServerControlPanel() {
-        if (serverControlPanel == null) {
-            serverControlPanel = ServerControlPanel()
-        }
-        if (serverControlPanelInPlace) {
-            contentPane.remove(serverControlPanel)
-            serverControlPanel?.isVisible = false
-            serverControlPanelInPlace = false
+    internal fun showOrHideControlPanel() {
+        if (controlPanelInPlace) {
+            contentPane.remove(controlPane)
+            controlPane.isVisible = false
+            controlPanelInPlace = false
         } else {
-            contentPane.add(serverControlPanel!!, BorderLayout.EAST)
-            serverControlPanel?.isVisible = true
-            serverControlPanelInPlace = true
+            contentPane.add(controlPane, BorderLayout.EAST)
+            controlPane.isVisible = true
+            controlPanelInPlace = true
         }
         revalidate()
         repaint()
+    }
+
+    internal fun initServerControlPanel() {
+        if (serverControlPanel == null) {
+            serverControlPanel = ServerControlPanel()
+        }
+        controlPane.add(serverControlPanel!!, BorderLayout.NORTH)
+    }
+
+    internal fun clearControlPanel() {
+        botControlPanel.removeAll()
+        controlPane.removeAll()
     }
 
     override fun onConnectionStatusChange(
@@ -133,6 +148,24 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
     ) {
         UiController.uiScope.launch {
             when (newStatus) {
+                ConnectionStatus.CONNECTED -> {
+                    val strategy: Strategy = UiController.client.strategy
+                    var botControlActive = false
+                    strategy.getControlPanel()?.let {
+                        botControlPanel.add(it, BorderLayout.CENTER)
+                        botControlActive = true
+                    }
+                    strategy.getVisualizationComponent()?.let {
+                        // TODO: handle visualization stuff
+                        botControlPanel.add(visualizationButton, BorderLayout.SOUTH)
+                        botControlActive = true
+                    }
+                    if (botControlActive) {
+                        controlPane.add(botControlPanel, BorderLayout.CENTER)
+                        UiController.activateControlButton()
+                    }
+                }
+
                 ConnectionStatus.LOGGED_IN -> {
                     leftSplitPane.remove(connectionSettingsPanel)
                     leftSplitPane.add(scorePanel, JSplitPane.TOP)
@@ -148,8 +181,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                         leftSplitPane.remove(scorePanel)
                         leftSplitPane.add(connectionSettingsPanel, JSplitPane.TOP)
                         leaveButton.isVisible = false
-                        if (serverControlPanelInPlace) {
-                            showOrHideServerControlPanel()
+                        clearControlPanel()
+                        if (controlPanelInPlace) {
+                            showOrHideControlPanel()
                         }
                         repaint()
                     }

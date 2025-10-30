@@ -162,20 +162,30 @@ object UiController {
     internal fun deactivateServerController() {
         serverController?.cancel()
         serverController = null
-        statusBar.onNoServerControl()
     }
 
-    internal suspend fun activateServerController(serverAddress: String, serverPort: Int, serverPassword: String, gamePort: Int) {
+    internal suspend fun activateServerController(
+        serverAddress: String,
+        serverPort: Int,
+        serverPassword: String,
+        gamePort: Int
+    ) {
         serverController = ServerCommandController(bgScope, serverAddress, serverPort, serverPassword, gamePort)
         serverController?.loginOrRefreshToken()
-        statusBar.onServerControl()
+        mainFrame.initServerControlPanel()
+        activateControlButton()
+    }
+
+    internal fun activateControlButton() {
+        statusBar.activateControlButton()
+    }
+
+    internal fun deactivateControlButton() {
+        statusBar.deactivateControlButton()
     }
 
     internal fun toggleServerControlView() {
-        if (!serverControllerActive) {
-            return
-        }
-        mainFrame.showOrHideServerControlPanel()
+        mainFrame.showOrHideControlPanel()
     }
 
     internal fun hintOnStatusBar(hintText: String) {
