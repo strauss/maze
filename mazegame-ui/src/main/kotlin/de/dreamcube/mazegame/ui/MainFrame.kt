@@ -107,7 +107,6 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         messagePane = MessagePane()
         messagePane.isEditable = false
         messagePane.preferredSize = Dimension(450, 300)
-        messagePane.isVisible = false
         return JScrollPane(messagePane)
     }
 
@@ -168,7 +167,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
     }
 
     override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        messagePane.isVisible = true
+        // do nothing
     }
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {

@@ -15,6 +15,17 @@ import java.awt.KeyboardFocusManager
 import java.awt.event.KeyEvent
 
 @Suppress("unused")
+@Bot("spectator", isSpectator = true, flavor = "Who will win? Nobody knows!")
+class Spectator : Strategy() {
+
+    /**
+     * A spectator does ... nothing
+     */
+    override fun getNextMove(): Move = Move.DO_NOTHING
+
+}
+
+@Suppress("unused")
 @Bot("humanFirstPerson", isHuman = true, flavor = "User arrow keys: left/right for turn and up for step")
 class HumanPlayerFirstPerson : Strategy(), ClientConnectionStatusListener {
 

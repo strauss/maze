@@ -1,8 +1,6 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
-import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
-import kotlinx.coroutines.launch
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
@@ -12,7 +10,7 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 
-class ScoreTable() : JTable(), PlayerConnectionListener, MazeCellSelectionListener {
+class ScoreTable() : JTable(), MazeCellSelectionListener {
 
     val scoreFont: Font = Font(font.name, Font.PLAIN, 16)
 
@@ -91,17 +89,10 @@ class ScoreTable() : JTable(), PlayerConnectionListener, MazeCellSelectionListen
                 }
             currentColumn.cellRenderer = cellRenderer
         }
-        adjustPreferredViewportSize()
-        UiController.prepareEventListener(this)
     }
 
     internal fun reset() {
         uiPlayerInformationModel.reset()
-    }
-
-    private fun adjustPreferredViewportSize() {
-        preferredScrollableViewportSize =
-            Dimension(90 * UiPlayerCollection.COLUMN_NAMES.size, rowHeight * model.rowCount)
     }
 
     override fun valueChanged(e: ListSelectionEvent?) {
@@ -115,22 +106,6 @@ class ScoreTable() : JTable(), PlayerConnectionListener, MazeCellSelectionListen
             }
         } else {
             UiController.firePlayerSelectionCleared()
-        }
-    }
-
-    override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        UiController.uiScope.launch {
-            adjustPreferredViewportSize()
-        }
-    }
-
-    override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        // ignore
-    }
-
-    override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
-        UiController.uiScope.launch {
-            adjustPreferredViewportSize()
         }
     }
 

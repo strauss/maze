@@ -55,7 +55,6 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         gameStatusPanel.layout = FlowLayout()
 
         invalidPositionStatus()
-
         gameStatusPanel.add(hintLabel)
         gameStatusPanel.add(positionLabel)
         gameStatusPanel.add(zoomLabel)
@@ -113,7 +112,8 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         UiController.uiScope.launch {
             connectionStatusLabel.text = newStatus.toString()
             serverAddressLabel.text = UiController.completeServerAddressString
-            strategyLabel.text = UiController.strategyName?.let { "as $it (${UiController.getStrategyTypeForStatusBar()})" } ?: ""
+            strategyLabel.text =
+                UiController.strategyName?.let { "as $it (${UiController.getStrategyTypeForStatusBar()})" } ?: ""
             botFlavorTextLabel.text = UiController.strategyName?.flavorText() ?: ""
             zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${UiController.mazePanel.zoom}"
             gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Speed: ${UiController.gameSpeed} ms"
