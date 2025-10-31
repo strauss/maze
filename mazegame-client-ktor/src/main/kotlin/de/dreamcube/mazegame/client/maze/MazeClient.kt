@@ -30,7 +30,8 @@ class MazeClient @JvmOverloads constructor(
         private const val NO_ID: Int = -1
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeClient::class.java)
 
-        private val loggedInStates = setOf(ConnectionStatus.LOGGED_IN, ConnectionStatus.SPECTATING, ConnectionStatus.PLAYING)
+        private val loggedInStates =
+            setOf(ConnectionStatus.LOGGED_IN, ConnectionStatus.SPECTATING, ConnectionStatus.PLAYING)
     }
 
     lateinit var strategy: Strategy
@@ -271,13 +272,14 @@ class MazeClient @JvmOverloads constructor(
     /**
      * Gets a thread- and coroutine-safe snapshot of all [Bait]s. This function is intended for Kotlin callers.
      */
-    suspend fun getBaitsAsync(): List<Bait> {
+    suspend fun getBaits(): List<Bait> {
         return baits.elements()
     }
 
     /**
      * Gets a thread- and coroutine-safe snapshot of all [Bait]s. This function/method is intended for Java callers.
      */
+    @JvmName("getBaits")
     fun getBaitsBlocking(): List<Bait> {
         return runBlocking { baits.elements() }
     }
@@ -290,15 +292,46 @@ class MazeClient @JvmOverloads constructor(
     /**
      * Gets a thread- and coroutine-safe snapshot of all players as list of [PlayerSnapshot]. This function is intended for Kotlin callers.
      */
-    suspend fun getPlayerSnapshotsAsync(): List<PlayerSnapshot> {
+    suspend fun getPlayers(): List<PlayerSnapshot> {
         return players.elements()
     }
 
     /**
      * Gets a thread- and coroutine-safe snapshot of all players as list of [PlayerSnapshot]. This function/method is intended for Java callers.
      */
-    fun getPlayerSnapshotsBlocking(): List<PlayerSnapshot> {
+    @JvmName("getPlayers")
+    fun getPlayersBlocking(): List<PlayerSnapshot> {
         return runBlocking { players.elements() }
+    }
+
+    /**
+     * Sends a text message to all players (Java edition).
+     */
+    @JvmName("broadcast")
+    fun broadcastBlocking(message: String) {
+        runBlocking { broadcast(message) }
+    }
+
+    /**
+     * Sends a text message to all players (Kotlin edition).
+     */
+    suspend fun broadcast(message: String) {
+        sendMessage(createChatMessage(message.replace(';', ',')))
+    }
+
+    /**
+     * Sends a text message to all players (Java edition).
+     */
+    @JvmName("whisper")
+    fun whisperBlocking(message: String, receiverPlayerId: Int) {
+        runBlocking { whisper(message, receiverPlayerId) }
+    }
+
+    /**
+     * Sends a whisper message to the player with id [receiverPlayerId] (Kotlin edition).
+     */
+    suspend fun whisper(message: String, receiverPlayerId: Int) {
+        sendMessage(createWhisperMessage(message.replace(';', ','), receiverPlayerId))
     }
 
 }
