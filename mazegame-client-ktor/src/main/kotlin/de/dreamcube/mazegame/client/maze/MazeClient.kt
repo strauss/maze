@@ -8,6 +8,7 @@ import de.dreamcube.mazegame.common.maze.CommandExecutor
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.Message
 import de.dreamcube.mazegame.common.maze.PROTOCOL_VERSION
+import de.dreamcube.mazegame.common.maze.sanitizeAsChatMessage
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
@@ -316,7 +317,7 @@ class MazeClient @JvmOverloads constructor(
      * Sends a text message to all players (Kotlin edition).
      */
     suspend fun broadcast(message: String) {
-        sendMessage(createChatMessage(message.replace(';', ',')))
+        sendMessage(createChatMessage(message.sanitizeAsChatMessage()))
     }
 
     /**
@@ -331,7 +332,7 @@ class MazeClient @JvmOverloads constructor(
      * Sends a whisper message to the player with id [receiverPlayerId] (Kotlin edition).
      */
     suspend fun whisper(message: String, receiverPlayerId: Int) {
-        sendMessage(createWhisperMessage(message.replace(';', ','), receiverPlayerId))
+        sendMessage(createWhisperMessage(message.sanitizeAsChatMessage(), receiverPlayerId))
     }
 
 }

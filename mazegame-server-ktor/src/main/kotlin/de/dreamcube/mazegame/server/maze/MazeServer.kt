@@ -1,7 +1,9 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.api.FreeNickMapping
 import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.api.MazeServerConfigurationDto
+import de.dreamcube.mazegame.common.api.NickMappingsDto
 import de.dreamcube.mazegame.common.maze.*
 import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import de.dreamcube.mazegame.server.contest.ContestController
@@ -150,6 +152,11 @@ class MazeServer(
     internal val availableBotNames: Set<String>
 
     /**
+     * Maps bot names to possible nicknames.
+     */
+    internal val botNamesToPossibleNickNameMap: Map<String, Set<String>>
+
+    /**
      * Flag indicating if the auto trapeater is enabled.
      */
     internal var autoTrapeaterEnabled: Boolean
@@ -176,7 +183,8 @@ class MazeServer(
     internal var contestController: ContestController? = null
 
     init {
-        val mzg: MazeGenerator = WallBasedMazeGenerator(serverConfiguration.maze.generatorParameters.templateFillStartPoints)
+        val mzg: MazeGenerator =
+            WallBasedMazeGenerator(serverConfiguration.maze.generatorParameters.templateFillStartPoints)
         maze = mzg.generateMazeFromConfiguration(serverConfiguration.maze)
         positionProvider = PositionProvider(maze)
         LOGGER.info("Maze dimension: ${maze.width} x ${maze.height}")
@@ -196,6 +204,16 @@ class MazeServer(
             LOGGER.info("Auto trapeater is enabled: '$trapeaterName'")
         }
         gameEventsEnabled = serverConfiguration.game.events.enabled
+        botNamesToPossibleNickNameMap = buildMap {
+            val nickNameMappings: NickMappingsDto = serverConfiguration.serverBots.nickMappings
+            val specialBots = serverConfiguration.serverBots.specialBots
+            put(specialBots.dummy, nickNameMappings.dummyNames + specialBots.dummy)
+            put(specialBots.trapeater, nickNameMappings.trapeaterNames + specialBots.trapeater)
+            put(specialBots.frenzy, nickNameMappings.frenzyNames + specialBots.frenzy)
+            for (currentMapping: FreeNickMapping in nickNameMappings.freeNickMappings) {
+                put(currentMapping.botName, currentMapping.nickNames)
+            }
+        }
     }
 
     /**
@@ -344,7 +362,8 @@ class MazeServer(
     /**
      * Retrieves the client connection with the given [id], if it exists.
      */
-    internal suspend fun getClientConnection(id: Int?): ClientConnection? = clientConnectionMutex.withLock { clientConnectionsById[id] }
+    internal suspend fun getClientConnection(id: Int?): ClientConnection? =
+        clientConnectionMutex.withLock { clientConnectionsById[id] }
 
     /**
      * Spawns a [player] at the given [position].
@@ -404,7 +423,13 @@ class MazeServer(
             OccupationResult.SUCCESS to createPlayerTeleportMessage(player)
         }
 
-    suspend fun putBait(type: BaitType, x: Int, y: Int, visible: Boolean, reappearOffset: Long): Pair<OccupationResult, Message?> =
+    suspend fun putBait(
+        type: BaitType,
+        x: Int,
+        y: Int,
+        visible: Boolean,
+        reappearOffset: Long
+    ): Pair<OccupationResult, Message?> =
         withUnoccupiedPosition(x, y) {
             val newBait = ServerBait(type, x, y)
             if (!visible) {
@@ -613,7 +638,8 @@ class MazeServer(
                 add(createEmptyLastMessage())
             }
         }
-        val invisibleBaits = baitMutex.withLock { baitsById.values.asSequence().filter { !it.visibleToClients } }.count()
+        val invisibleBaits =
+            baitMutex.withLock { baitsById.values.asSequence().filter { !it.visibleToClients } }.count()
         LOGGER.info("Generated ${currentBaitCount.get()} baits ($invisibleBaits are invisible).")
         return messages
     }
@@ -727,7 +753,8 @@ class MazeServer(
      */
     internal fun internalSpawnServerSideBot(alias: String): ServerSideClient? {
         if (availableBotNames.contains(alias)) {
-            return ClientWrapper.createServerSideClient(alias, port)
+            val possibleNickNames: Set<String> = botNamesToPossibleNickNameMap[alias] ?: setOf(alias)
+            return ClientWrapper.createServerSideClient(alias, port, possibleNickNames.random())
         }
         return null
     }

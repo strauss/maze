@@ -4,12 +4,15 @@ import com.formdev.flatlaf.FlatLightLaf
 import de.dreamcube.mazegame.client.DuplicateNickHandler
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.MazeClient
+import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
+import de.dreamcube.mazegame.client.maze.events.ErrorInfoListener
 import de.dreamcube.mazegame.client.maze.events.EventListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isHumanStrategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.ui.UiController.connect
 import kotlinx.coroutines.*
 import kotlinx.coroutines.swing.Swing
@@ -17,6 +20,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.EventQueue
 import java.util.*
+import javax.swing.JOptionPane
 
 object UiController {
     private val LOGGER: Logger = LoggerFactory.getLogger(UiController::class.java)
@@ -87,6 +91,52 @@ object UiController {
         val config = MazeClientConfigurationDto(address, port, strategyName, displayName)
         client = MazeClient(config)
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
+
+        val loginProblemListener: EventListener = object : ErrorInfoListener, ClientConnectionStatusListener {
+            override fun onServerError(infoCode: InfoCode) {
+                when (infoCode) {
+                    InfoCode.WRONG_PARAMETER_VALUE -> {
+                        showErrorMessage("Nickname not allowed!")
+                        disconnect()
+                    }
+
+                    InfoCode.TOO_MANY_CLIENTS -> {
+                        showErrorMessage("Server is full!")
+                        disconnect()
+                    }
+
+                    InfoCode.LOGIN_TIMEOUT -> {
+                        showErrorMessage("Connection timed out!")
+                        disconnect()
+                    }
+
+                    else -> {
+                        // ignore
+                    }
+                }
+            }
+
+            private fun showErrorMessage(message: String) {
+                JOptionPane.showMessageDialog(
+                    mainFrame,
+                    message,
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE
+                )
+            }
+
+            override fun onConnectionStatusChange(
+                oldStatus: ConnectionStatus,
+                newStatus: ConnectionStatus
+            ) {
+                if (newStatus == ConnectionStatus.LOGGED_IN || newStatus == ConnectionStatus.DEAD) {
+                    client.eventHandler.removeEventListener(this)
+                }
+            }
+
+        }
+
+        client.eventHandler.addEventListener(loginProblemListener)
         uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
         clientTerminationHandle = client.start()
         messagePane.clear()

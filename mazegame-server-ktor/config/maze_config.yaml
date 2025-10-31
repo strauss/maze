@@ -60,6 +60,24 @@
       trapeater: trapeater
       frenzy: FrenzyFrede
       spectator: commander
+    nickMappings:
+      dummyNames:
+        - aimless
+        - simon
+        - yanni
+        - lost
+        - rüdiger
+        - clueless
+        - le_dieter
+      trapeaterNames:
+        - müllschlucker
+        - wall-e
+        - pacman
+      frenzyNames: [ ]
+      freeNickMappings:
+        - botName: chopstick
+          additionalNames:
+            - philosopher
   game:
     initialSpeed: fast
     events:

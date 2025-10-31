@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.InfoCode
+import de.dreamcube.mazegame.common.maze.isNickValid
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
 
@@ -38,6 +39,4 @@ class HelloCommand(clientConnection: ClientConnection, mazeServer: MazeServer, c
             mazeServer.registerClient(clientConnection, nick)
         }
     }
-
-    private fun isNickValid(nick: String): Boolean = "[a-zA-Z][a-zA-Z0-9]*".toRegex().matches(nick)
 }

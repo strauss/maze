@@ -1,6 +1,12 @@
 package de.dreamcube.mazegame.common.api
 
-data class ConnectionDto(val port: Int = 0, val maxClients: Int = 20, val loginTimeout: Long = 30_000L, val instantFlush: Boolean = false)
+data class ConnectionDto(
+    val port: Int = 0,
+    val maxClients: Int = 20,
+    val loginTimeout: Long = 30_000L,
+    val instantFlush: Boolean = false
+)
+
 data class GeneratorParametersDto(
     val width: Int = 40,
     val height: Int = 30,
@@ -30,7 +36,28 @@ data class SpecialBotsDto(
     }
 }
 
-data class ServerBotsDto(val autoLaunch: List<String> = listOf(), val specialBots: SpecialBotsDto = SpecialBotsDto())
+data class FreeNickMapping(val botName: String, private val additionalNames: Set<String> = setOf()) {
+    val nickNames: Set<String>
+        get() = additionalNames + botName
+}
+
+data class NickMappingsDto(
+    val dummyNames: Set<String>,
+    val trapeaterNames: Set<String>,
+    val frenzyNames: Set<String>,
+    val freeNickMappings: List<FreeNickMapping> = listOf()
+)
+
+data class ServerBotsDto(
+    val autoLaunch: List<String> = listOf(),
+    val specialBots: SpecialBotsDto = SpecialBotsDto(),
+    val nickMappings: NickMappingsDto = NickMappingsDto(
+        setOf(specialBots.dummy),
+        setOf(specialBots.trapeater),
+        setOf(specialBots.frenzy)
+    )
+)
+
 data class BaitGeneratorDto(val objectDivisor: Int = 26, val trapDivisor: Int = 4)
 data class SpecialEventsDto(
     val enabled: Boolean = false,

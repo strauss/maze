@@ -59,8 +59,12 @@ class ClientWrapper(val client: MazeClient) : ServerSideClient, ErrorInfoListene
         /**
          * Creates and wraps and starts a client with the given [aliasName], that automatically connects to localhost at the given [port].
          */
-        internal fun createServerSideClient(aliasName: String, port: Int): ClientWrapper {
-            val config = MazeClientConfigurationDto("localhost", port, aliasName)
+        internal fun createServerSideClient(
+            aliasName: String,
+            port: Int,
+            displayName: String = aliasName
+        ): ClientWrapper {
+            val config = MazeClientConfigurationDto("localhost", port, aliasName, displayName)
             val mazeClient = MazeClient(config)
             return ClientWrapper(mazeClient)
         }

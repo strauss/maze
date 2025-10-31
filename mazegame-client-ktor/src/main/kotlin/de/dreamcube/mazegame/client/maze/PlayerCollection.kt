@@ -12,7 +12,8 @@ import kotlinx.coroutines.sync.withLock
 class PlayerCollection {
 
     companion object {
-        private val MOVE_REASONS: Set<PlayerPositionChangeReason> = setOf(PlayerPositionChangeReason.MOVE, PlayerPositionChangeReason.TURN)
+        private val MOVE_REASONS: Set<PlayerPositionChangeReason> =
+            setOf(PlayerPositionChangeReason.MOVE, PlayerPositionChangeReason.TURN)
     }
 
     /**
@@ -107,7 +108,13 @@ class PlayerCollection {
         playerMutex.withLock {
             val player: Player = playerIdToPlayerMap[playerId] ?: return null
             val oldScore = player.score
-            player.score = newScore
+            if (newScore == 0 && player.pointsPerMinute > 0) {
+                // If the server resets the score, it is set to 0, but the ppm are higher than 0. This prevents trapeaters from being reset. Their ppm is
+                // usually negative. There might still be a tiny little chance, but it is assumed to be an irrelevant border case.
+                player.resetScore()
+            } else {
+                player.score = newScore
+            }
             if (virginScorePlayerIds.contains(playerId)) {
                 player.scoreOffset = newScore
                 virginScorePlayerIds.remove(playerId)
