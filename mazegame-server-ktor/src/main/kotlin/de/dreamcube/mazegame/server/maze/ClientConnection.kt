@@ -113,20 +113,28 @@ class ClientConnection(
      * If true, this connection belongs to the auto trapeater
      */
     val isAutoTrapeater: Boolean
-        get() = nick.startsWith(server.autoTrapeaterHandler.botAlias)
+        get() = server.autoTrapeaterHandler.client?.clientId == id
 
     /**
      * If true, this connection belongs to the frenzy bot
      */
     val isFrenzyBot: Boolean
-        get() = nick.startsWith(server.frenzyHandler.botAlias)
+        get() = server.frenzyHandler.client?.clientId == id
 
     val performDelayCompensation: Boolean
         get() {
             val serverConfiguration = server.serverConfiguration
-            val specialBots = serverConfiguration.serverBots.specialBots
-            return serverConfiguration.game.delayCompensation && !(isServerSided && specialBots.isSpecial(nick))
+            return serverConfiguration.game.delayCompensation && !(isServerSided && isSpecialNick(nick))
         }
+
+    private fun isSpecialNick(nick: String): Boolean {
+        for (specialNick in server.serverConfiguration.serverBots.specialBotNames) {
+            if (nick.startsWith(specialNick)) {
+                return true
+            }
+        }
+        return false
+    }
 
     suspend fun getDelayOffset(): Long = if (performDelayCompensation)
         delayCompensator.getTurnTimeOffset()

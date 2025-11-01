@@ -1,5 +1,7 @@
 package de.dreamcube.mazegame.common.api
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 data class ConnectionDto(
     val port: Int = 0,
     val maxClients: Int = 20,
@@ -24,17 +26,7 @@ data class SpecialBotsDto(
     val trapeater: String = "trapeater",
     val frenzy: String = "frenzy",
     val spectator: String = "spectator"
-) {
-    private val specialBots = listOf(dummy, trapeater, frenzy, spectator)
-    fun isSpecial(nick: String): Boolean {
-        for (it in specialBots) {
-            if (nick.startsWith(it)) {
-                return true
-            }
-        }
-        return false
-    }
-}
+)
 
 data class FreeNickMapping(val botName: String, private val additionalNames: Set<String> = setOf()) {
     val nickNames: Set<String>
@@ -56,7 +48,10 @@ data class ServerBotsDto(
         setOf(specialBots.trapeater),
         setOf(specialBots.frenzy)
     )
-)
+) {
+    @JsonIgnore
+    val specialBotNames: Set<String> = nickMappings.dummyNames + nickMappings.trapeaterNames + nickMappings.frenzyNames
+}
 
 data class BaitGeneratorDto(val objectDivisor: Int = 26, val trapDivisor: Int = 4)
 data class SpecialEventsDto(
