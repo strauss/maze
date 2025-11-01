@@ -54,9 +54,9 @@ class ServerControlPanel() : JPanel() {
         initPlayerControlElements()
         // TODO: contest control
 
-        val borderColor = UIManager.getColor("Separator.foreground")
-        val fancyBorder = BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor)
-        border = fancyBorder
+//        val borderColor = UIManager.getColor("Separator.foreground")
+//        val fancyBorder = BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor)
+//        border = fancyBorder
         isOpaque = true
         spawnButton.isEnabled = false
         serverController.launch {

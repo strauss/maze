@@ -113,9 +113,11 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         mainSplitPane.resizeWeight = 0.1
 
         controlPane.layout = BorderLayout()
+        val borderColor = UIManager.getColor("Separator.foreground")
+        val fancyBorderControlPane = BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor)
+        controlPane.border = fancyBorderControlPane
         botControlPanel.layout = BorderLayout()
 
-        val borderColor = UIManager.getColor("Separator.foreground")
         val fancyBorderTop = BorderFactory.createMatteBorder(1, 0, 0, 0, borderColor)
         mainSplitPane.border = fancyBorderTop
         mainSplitPane.isOpaque = true
