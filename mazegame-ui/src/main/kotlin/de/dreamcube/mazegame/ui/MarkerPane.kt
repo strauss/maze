@@ -1,11 +1,11 @@
 package de.dreamcube.mazegame.ui
 
+import de.dreamcube.mazegame.common.util.VisualizationHelper
 import java.awt.*
 import javax.swing.JComponent
 import javax.swing.SwingUtilities
 
-class GlassPane() : JComponent(), PlayerSelectionListener {
-
+class MarkerPane() : JComponent(), PlayerSelectionListener {
     private val mazePanel: MazePanel
         get() = UiController.mazePanel
 
@@ -15,10 +15,8 @@ class GlassPane() : JComponent(), PlayerSelectionListener {
     private val offset
         get() = mazePanel.offset
 
-    private val qualityHints: RenderingHints = createRenderingHints(
-        RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON,
-        RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY
-    )
+    private val qualityHints: RenderingHints = VisualizationHelper.createDefaultRenderingHints()
+
     internal var playerToMark: UiPlayerInformation? = null
 
     protected override fun paintComponent(g: Graphics?) {
@@ -60,12 +58,4 @@ class GlassPane() : JComponent(), PlayerSelectionListener {
         clearMark()
     }
 
-}
-
-internal fun createRenderingHints(vararg configuration: Pair<RenderingHints.Key, Any>): RenderingHints {
-    val result = RenderingHints(emptyMap<RenderingHints.Key, Any>())
-    for ((key, value) in configuration) {
-        result.put(key, value)
-    }
-    return result
 }

@@ -21,11 +21,24 @@ abstract class VisualizationComponent : JComponent(), NoEventListener {
      * The current zoom factor of the maze. Should only be set by the UI.
      */
     var zoom = 1
+        set(value) {
+            field = value
+            repaint()
+        }
 
     /**
-     * The offset of the origin point (top left corner). Should only be set by the UI.
+     * The offset of the origin point (top left corner).
      */
-    var offset: Point = Point(0, 0)
+    protected val offset: Point = Point(0, 0)
+
+    /**
+     * Update function for the offset. Should only be called by the UI
+     */
+    fun updateOffset(x: Int, y: Int) {
+        offset.x = x
+        offset.y = y
+        repaint()
+    }
 
     /**
      * Override this function to actually paint your visualization.

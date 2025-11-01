@@ -181,7 +181,7 @@ class MazeModel() : MazeEventListener, BaitEventListener, PlayerMovementListener
             UiController.triggerMazeUpdate(newPlayerSnapshot.x, newPlayerSnapshot.y)
 
             // If we have a marked player, we write their maze coordinates to the status bar
-            val playerToMark: UiPlayerInformation? = UiController.glassPane.playerToMark
+            val playerToMark: UiPlayerInformation? = UiController.markerPane.playerToMark
             if (playerToMark != null && playerToMark.id == newPlayerSnapshot.id) {
                 UiController.uiScope.launch {
                     UiController.updatePositionStatus(newPlayerSnapshot.x, newPlayerSnapshot.y)

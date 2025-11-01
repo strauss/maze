@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.client.maze.strategy
 
 import de.dreamcube.mazegame.client.maze.events.ErrorInfoListener
+import de.dreamcube.mazegame.client.maze.strategy.vizualisation.DebugVisualization
 import de.dreamcube.mazegame.common.maze.InfoCode
 import kotlin.random.Random
 
@@ -10,6 +11,8 @@ class Aimless : Strategy(), ErrorInfoListener {
 
     private var nextMove: Move? = null
     private val rng = Random
+
+    private val visualization = DebugVisualization()
 
     override fun getNextMove(): Move {
         botDelayInMs = rng.nextInt(mazeClient.gameSpeed)
@@ -31,6 +34,10 @@ class Aimless : Strategy(), ErrorInfoListener {
             val r = rng.nextDouble()
             nextMove = if (r < 0.5) Move.TURN_L else Move.TURN_R
         }
+    }
+
+    override fun getVisualizationComponent(): VisualizationComponent {
+        return visualization
     }
 
 }

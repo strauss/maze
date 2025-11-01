@@ -21,7 +21,7 @@ class MazePanel() : JPanel() {
         private set(value) {
             if (value in MIN_ZOOM..MAX_ZOOM) {
                 field = value
-                UiController.glassPane.repaint()
+                UiController.markerPane.repaint()
                 UiController.updateZoom(value)
             }
         }
@@ -47,9 +47,11 @@ class MazePanel() : JPanel() {
         // change all values
         zoom = INITIAL_ZOOM
         imageZoom = 0
-        offset = Point(0, 0)
+        offset.x = 0
+        offset.y = 0
+        UiController.updateOffset(offset.x, offset.y)
         pressPoint = null
-        UiController.glassPane.reset()
+        UiController.markerPane.reset()
     }
 
     init {
@@ -103,11 +105,12 @@ class MazePanel() : JPanel() {
                     offset.y = min(offset.y, getHeight() - 10 * zoom)
                         .coerceAtLeast(-(UiController.mazeModel.height - 10) * zoom)
                     repaint()
+                    UiController.updateOffset(offset.x, offset.y)
                 }
             }
 
             override fun mouseMoved(e: MouseEvent?) {
-                if (UiController.glassPane.playerToMark == null) {
+                if (UiController.markerPane.playerToMark == null) {
                     val x = (e?.x ?: 0) - offset.x
                     val y = (e?.y ?: 0) - offset.y
                     UiController.updatePositionStatus(x / zoom, y / zoom)
@@ -212,6 +215,7 @@ class MazePanel() : JPanel() {
             .coerceAtMost(getHeight() - 10 * zoom)
             .coerceAtLeast(-(UiController.mazeModel.height - 10) * zoom)
         repaint()
+        UiController.updateOffset(offset.x, offset.y)
     }
 
     internal fun addMazeCellSelectionListener(mazeCellSelectionListener: MazeCellSelectionListener) {

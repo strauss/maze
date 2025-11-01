@@ -11,6 +11,7 @@ import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isHumanStrategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
+import de.dreamcube.mazegame.client.maze.strategy.VisualizationComponent
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.ui.UiController.connect
@@ -33,7 +34,7 @@ object UiController {
 
     val mazeModel = MazeModel()
     internal lateinit var mazePanel: MazePanel
-    internal lateinit var glassPane: GlassPane
+    internal lateinit var markerPane: MarkerPane
     internal lateinit var statusBar: StatusBar
     internal lateinit var mainFrame: MainFrame
     internal lateinit var messagePane: MessagePane
@@ -58,6 +59,8 @@ object UiController {
     internal var serverController: ServerCommandController? = null
 
     private val playerSelectionListeners: MutableList<PlayerSelectionListener> = LinkedList()
+
+    internal var visualizationComponent: VisualizationComponent? = null
 
     internal val serverControllerActive: Boolean
         get() = serverController != null
@@ -186,10 +189,15 @@ object UiController {
         } ?: ""
     }
 
+    internal fun updateOffset(x: Int, y: Int) {
+        visualizationComponent?.updateOffset(x, y)
+    }
+
     internal fun updateZoom(zoom: Int) {
         if (this::statusBar.isInitialized) {
             statusBar.updateZoom(zoom)
         }
+        visualizationComponent?.zoom = zoom
     }
 
     internal fun updatePositionStatus(x: Int, y: Int) {
