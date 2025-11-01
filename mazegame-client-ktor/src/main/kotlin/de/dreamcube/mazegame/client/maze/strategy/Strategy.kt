@@ -6,7 +6,7 @@ import de.dreamcube.mazegame.client.maze.createTurnLeftMessage
 import de.dreamcube.mazegame.client.maze.createTurnRightMessage
 import de.dreamcube.mazegame.client.maze.events.*
 import de.dreamcube.mazegame.client.maze.events.EventListener
-import de.dreamcube.mazegame.common.maze.isBotNameValid
+import de.dreamcube.mazegame.common.maze.isNickValid
 import de.dreamcube.mazegame.common.maze.sanitizeAsFlavorText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,8 +71,8 @@ abstract class Strategy : NoEventListener {
                     val botAnnotation: Bot? = strategyClass.getAnnotation(Bot::class.java)
                     botAnnotation?.let {
                         val strategyName: String = it.value
-                        if (!isBotNameValid(strategyName)) {
-                            LOGGER.error("Strategy '$strategyName' has an invalid name and will be ignored. The name has to start with a letter and may only contain letters and digits. No fancy stuff!")
+                        if (!isNickValid(strategyName)) {
+                            LOGGER.error("Strategy '$strategyName' has an invalid name and will be ignored. The name has to start with a letter and may only contain letters, digits, '_', and '-'. No fancy stuff!")
                             continue
                         }
                         val spectator: Boolean = it.isSpectator

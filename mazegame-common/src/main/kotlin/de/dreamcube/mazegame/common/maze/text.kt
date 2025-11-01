@@ -2,18 +2,9 @@ package de.dreamcube.mazegame.common.maze
 
 import java.text.Normalizer
 
-private val BOT_REGEX = """^[a-zA-Z][a-zA-Z0-9]*""".toRegex()
 private val NICK_REGEX = """^[\p{L}&&\p{sc=Latin}](?:[\p{L}&&\p{sc=Latin}]|[0-9_-])*$""".toRegex()
 private val CHAT_BLACKLIST = """[^0-9_\-\p{Zs}[\p{L}&&\p{sc=Latin}][\p{Punct}&&[^;]]]""".toRegex()
 private const val FLAVOR_TEXT_MAX_LENGTH = 255
-
-/**
- * Checks if a bot name is valid. It may only contain plain letters and digits and has to start with a letter.
- */
-fun isBotNameValid(botName: String): Boolean {
-    val normalizedBotName: String = Normalizer.normalize(botName, Normalizer.Form.NFC)
-    return BOT_REGEX.matches(normalizedBotName)
-}
 
 /**
  * Checks, if a nickname is valid. Nicknames may include some special characters that are derived from latin characters.

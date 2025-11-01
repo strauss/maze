@@ -2,9 +2,11 @@ package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.ViewDirection
+import de.dreamcube.mazegame.common.util.VisualizationHelper
 import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics
+import java.awt.Graphics2D
 
 interface DrawableMazeObject {
     /**
@@ -72,7 +74,7 @@ abstract class DrawableBait(private val type: BaitType) : DrawableMazeObject {
         val baitFont = Font(BAIT_BASE_FONT.name, BAIT_BASE_FONT.style, zoom - 1)
         g.font = baitFont
         g.color = baitColor
-        g.drawString("${type.asChar}", x * zoom, y * zoom + zoom - 1)
+        VisualizationHelper.drawTextCentric(g as Graphics2D, "${type.asChar}", x * zoom, y * zoom, zoom, zoom)
     }
 }
 

@@ -1,6 +1,11 @@
 package de.dreamcube.mazegame.common.util
 
+import java.awt.Graphics2D
 import java.awt.RenderingHints
+import java.awt.font.FontRenderContext
+import java.awt.font.TextLayout
+import java.awt.geom.Rectangle2D
+import kotlin.math.round
 
 object VisualizationHelper {
 
@@ -20,6 +25,30 @@ object VisualizationHelper {
     @JvmStatic
     fun createDefaultRenderingHints() = createRenderingHints(
         RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON,
-        RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY
+        RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY,
+        RenderingHints.KEY_FRACTIONALMETRICS to RenderingHints.VALUE_FRACTIONALMETRICS_OFF
     )
+
+    /**
+     * Draws the given [text] centric inside the rectangle defined by the coordinates and the dimensions.
+     */
+    fun drawTextCentric(
+        g2: Graphics2D,
+        text: String,
+        x: Int,
+        y: Int,
+        recWith: Int,
+        recHeight: Int
+    ) {
+        g2.setRenderingHints(createDefaultRenderingHints())
+        val fontRenderContext: FontRenderContext = g2.fontRenderContext
+        val layout = TextLayout(text, g2.font, fontRenderContext)
+        val visualBounds: Rectangle2D = layout.bounds
+        val cx = x + recWith / 2 + 1
+        val cy = y + recHeight / 2 + 1
+        val xx = round(cx - (visualBounds.x + visualBounds.width / 2.0)).toFloat()
+        val yy = round(cy - (visualBounds.y + visualBounds.height / 2.0)).toFloat()
+
+        layout.draw(g2, xx, yy)
+    }
 }

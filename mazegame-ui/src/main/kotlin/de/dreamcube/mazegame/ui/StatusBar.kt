@@ -66,6 +66,9 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
             UiController.toggleServerControlView()
         }
         serverControlButton.mnemonic = KeyEvent.VK_H
+        val dummyPanel = JPanel()
+        dummyPanel.preferredSize = Dimension(2, dummyPanel.preferredSize.height)
+        gameStatusPanel.add(dummyPanel)
 
         //3rd
         add(gameStatusPanel, BorderLayout.EAST)
