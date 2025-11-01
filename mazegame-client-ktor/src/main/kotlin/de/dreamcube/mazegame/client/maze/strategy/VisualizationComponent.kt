@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.client.maze.strategy
 
 import de.dreamcube.mazegame.client.maze.events.NoEventListener
+import java.awt.Color
 import java.awt.Graphics
 import java.awt.Point
 import javax.swing.JComponent
@@ -16,6 +17,11 @@ abstract class VisualizationComponent : JComponent(), NoEventListener {
      * Is the visualization active or not. Should only be set by the UI.
      */
     var visualizationEnabled = false
+
+    /**
+     * This map contains the color distribution for all player ids. Should only be set by the UI.
+     */
+    var colorDistributionMap: Map<Int, Color> = mapOf()
 
     /**
      * The current zoom factor of the maze. Should only be set by the UI.
@@ -38,6 +44,13 @@ abstract class VisualizationComponent : JComponent(), NoEventListener {
         offset.x = x
         offset.y = y
         repaint()
+    }
+
+    /**
+     * Use this method to retrieve a player's color.
+     */
+    fun getPlayerColor(playerId: Int): Color {
+        return colorDistributionMap[playerId] ?: Color.BLACK
     }
 
     /**

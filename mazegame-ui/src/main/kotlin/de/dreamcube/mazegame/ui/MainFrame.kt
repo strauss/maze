@@ -261,6 +261,10 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                     leaveButton.isVisible = true
                 }
 
+                ConnectionStatus.PLAYING -> {
+                    UiController.startPlaying()
+                }
+
                 ConnectionStatus.DEAD -> {
                     if (connectionCounter > 0) {
                         UiController.reset()

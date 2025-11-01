@@ -223,9 +223,13 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
         }
         val delta: Int = colorDistribution.size / uiPlayerInformationList.size
         var colorIndex = 0
-        for (playerInformation: UiPlayerInformation in uiPlayerInformationList) {
-            playerInformation.color = colorDistribution[colorIndex]
-            colorIndex += delta
+        val colorDistributionMap: Map<Int, Color> = buildMap {
+            for (playerInformation: UiPlayerInformation in uiPlayerInformationList) {
+                playerInformation.color = colorDistribution[colorIndex]
+                colorIndex += delta
+                put(playerInformation.id, playerInformation.color)
+            }
         }
+        UiController.colorDistributionChanged(colorDistributionMap)
     }
 }

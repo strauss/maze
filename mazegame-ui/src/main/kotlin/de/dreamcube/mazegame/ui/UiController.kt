@@ -19,6 +19,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.swing.Swing
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.awt.Color
 import java.awt.EventQueue
 import java.util.*
 import javax.swing.JOptionPane
@@ -46,8 +47,7 @@ object UiController {
     internal val gameSpeed: Int
         get() = if (this::client.isInitialized) client.gameSpeed else -1
 
-    internal val ownId: Int
-        get() = if (this::client.isInitialized) client.ownPlayer.id else -1
+    internal var ownId: Int = -1
 
     /**
      * The client, but only if the connection is established.
@@ -232,6 +232,14 @@ object UiController {
         serverController?.loginOrRefreshToken()
         mainFrame.initServerControlPanel()
         activateControlButton()
+    }
+
+    internal fun startPlaying() {
+        ownId = client.ownPlayer.id
+    }
+
+    internal fun colorDistributionChanged(colorDistributionMap: Map<Int, Color>) {
+        visualizationComponent?.colorDistributionMap = colorDistributionMap
     }
 
     internal fun activateControlButton() {
