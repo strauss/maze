@@ -71,9 +71,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         }
 
         fun deactivate() {
-            UiController.client.strategy.getVisualizationComponent()?.visualizationEnabled = false
-            if (layeredGlassPane.getComponent(VIS_POS) != null) {
-                layeredGlassPane.remove(VIS_POS)
+            UiController.visualizationComponent?.let {
+                it.visualizationEnabled = false
+                layeredGlassPane.remove(it)
             }
             on = false
             text = VIS_BUTTON_TEXT_OFF
@@ -265,9 +265,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                     if (connectionCounter > 0) {
                         UiController.reset()
                         // remove visualization
-                        if (layeredGlassPane.getComponent(VIS_POS) != null) {
-                            layeredGlassPane.remove(VIS_POS)
-                        }
+                        UiController.visualizationComponent?.let { layeredGlassPane.remove(it) }
                         visualizationButton.text = VIS_BUTTON_TEXT_OFF
                         UiController.visualizationComponent = null
                         // The ui should enable a new connection
