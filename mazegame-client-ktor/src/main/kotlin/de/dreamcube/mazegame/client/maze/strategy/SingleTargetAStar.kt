@@ -138,28 +138,6 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
         maze = Maze(width, height, mazeLines)
     }
 
-    override fun onPlayerAppear(playerSnapshot: PlayerSnapshot) {
-        // nothing
-    }
-
-    override fun onPlayerVanish(playerSnapshot: PlayerSnapshot) {
-        // nothing
-    }
-
-    override fun onPlayerStep(
-        oldPosition: PlayerPosition,
-        newPlayerSnapshot: PlayerSnapshot
-    ) {
-        // nothing
-    }
-
-    override fun onPlayerTurn(
-        oldPosition: PlayerPosition,
-        newPlayerSnapshot: PlayerSnapshot
-    ) {
-        // nothing
-    }
-
     override fun onPlayerTeleport(
         oldPosition: PlayerPosition,
         newPlayerSnapshot: PlayerSnapshot,

@@ -48,18 +48,24 @@ interface PlayerConnectionListener : EventListener {
     /**
      * This function is called when the server reports, that a new player joined the game.
      */
-    fun onPlayerLogin(playerSnapshot: PlayerSnapshot)
+    fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 
     /**
      * This function is called when the server reports, that the "own" player joined the game. This function is called in addition to [onPlayerLogin].
      * It is useful for some strategies to obtain basic information about the player object of the own player.
      */
-    fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot)
+    fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 
     /**
      * This function is called, when the server reports, that a player left the game.
      */
-    fun onPlayerLogout(playerSnapshot: PlayerSnapshot)
+    fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 }
 
 /**
@@ -69,27 +75,42 @@ interface PlayerMovementListener : EventListener {
     /**
      * This function is called, when a player position is communicated for the first time. It happens shortly after joining.
      */
-    fun onPlayerAppear(playerSnapshot: PlayerSnapshot)
+    fun onPlayerAppear(playerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 
     /**
      * This function is called, when a player is about to leave the game. It happens right before leaving.
      */
-    fun onPlayerVanish(playerSnapshot: PlayerSnapshot)
+    fun onPlayerVanish(playerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 
     /**
      * This function is called, when a player successfully performed a step move.
      */
-    fun onPlayerStep(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot)
+    fun onPlayerStep(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 
     /**
      * This function is called, when a player successfully performed a turn move.
      */
-    fun onPlayerTurn(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot)
+    fun onPlayerTurn(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot) {
+        // does nothing by default
+    }
 
     /**
      * This function is called, when a player was teleported.
      */
-    fun onPlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, causingPlayerId: Int?)
+    fun onPlayerTeleport(
+        oldPosition: PlayerPosition,
+        newPlayerSnapshot: PlayerSnapshot,
+        teleportType: TeleportType?,
+        causingPlayerId: Int?
+    ) {
+        // does nothing by default
+    }
 }
 
 /**

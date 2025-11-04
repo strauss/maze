@@ -297,10 +297,6 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         leftSplitPane.resetToPreferredSizes()
     }
 
-    override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        // do nothing
-    }
-
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
         leftSplitPane.resetToPreferredSizes()
     }

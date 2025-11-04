@@ -5,6 +5,11 @@ import de.dreamcube.mazegame.client.maze.strategy.vizualisation.DebugVisualizati
 import de.dreamcube.mazegame.common.maze.InfoCode
 import kotlin.random.Random
 
+/**
+ * A dummy bot implementation. The design is based on the original dummy bot. It ships with a debug visualization,
+ * showcasing, how visualizations can be done in general. It can also be used as fallback strategy by incorporating
+ * a reference of [Aimless] in your own strategy.
+ */
 @Bot("dummy", flavor = "I run against walls!")
 @Suppress("unused")
 class Aimless : Strategy(), ErrorInfoListener {
@@ -16,17 +21,7 @@ class Aimless : Strategy(), ErrorInfoListener {
 
     override fun getNextMove(): Move {
         botDelayInMs = rng.nextInt(mazeClient.gameSpeed)
-        if (nextMove != null) {
-            val moveToReturn: Move = nextMove!!
-            nextMove = null
-            return moveToReturn
-        }
-        val r = rng.nextDouble()
-        return when {
-            r < 0.05 -> Move.TURN_L
-            r < 0.1 -> Move.TURN_R
-            else -> Move.STEP
-        }
+        return nextDummyMove()
     }
 
     override fun onServerError(infoCode: InfoCode) {
@@ -38,6 +33,25 @@ class Aimless : Strategy(), ErrorInfoListener {
 
     override fun getVisualizationComponent(): VisualizationComponent {
         return visualization
+    }
+
+    /**
+     * Can be used to determine the next dummy move for other bots as fallback. If you use it, don't forget to register
+     * your [Aimless] reference with the client's event handler. If you forget to do so, the wall crash detection will
+     * not work.
+     */
+    fun nextDummyMove(): Move {
+        if (nextMove != null) {
+            val moveToReturn: Move = nextMove!!
+            nextMove = null
+            return moveToReturn
+        }
+        val r = rng.nextDouble()
+        return when {
+            r < 0.05 -> Move.TURN_L
+            r < 0.1 -> Move.TURN_R
+            else -> Move.STEP
+        }
     }
 
 }

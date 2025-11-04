@@ -83,7 +83,10 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
                 } else {
                     otherClientStyle = addStyle(OTHER_CLIENT_STYLE_PREFIX + playerId, clientStyle)
                 }
-                StyleConstants.setForeground(otherClientStyle, UiController.uiPlayerCollection.getById(playerId)?.color ?: Color.black)
+                StyleConstants.setForeground(
+                    otherClientStyle,
+                    UiController.uiPlayerCollection.getById(playerId)?.color ?: Color.black
+                )
                 styledDocument.insertString(styledDocument.length, "$playerNick: ", otherClientStyle)
                 appendChatMessage(message)
             } catch (ex: BadLocationException) {
@@ -99,10 +102,6 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
 
     override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
         playerIds.add(playerSnapshot.id)
-    }
-
-    override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        // ignore
     }
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {

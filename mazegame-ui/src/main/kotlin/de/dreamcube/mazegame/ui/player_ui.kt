@@ -202,10 +202,6 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
         addOrUpdate(playerSnapshot)
     }
 
-    override fun onOwnPlayerLogin(playerSnapshot: PlayerSnapshot) {
-        // ignore
-    }
-
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
         remove(playerSnapshot)
     }
