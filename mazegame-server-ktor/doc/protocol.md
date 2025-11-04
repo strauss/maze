@@ -1,6 +1,11 @@
 # Communication protocol of the Maze Game
 
 All messages are given in CSV format separated by a semicolon (`;`).
+The protocol version is still "1".
+However, at several points it was expanded.
+Former clients should ignore additional parameters in order to work with the new server generation.
+
+Protocol extensions are marked as such.
 
 ## Formal definition basics
 
@@ -208,6 +213,8 @@ The following changes are possible and reflected by the reasons:
 - `mov` (move): The player has moved to the given coordinates (after STEP)
 - `trn` (turn): The player has turned into the given view direction (after TURN)
 
+#### Extensions
+
 The player pos command was extended in a backwards compatible way.
 In case of a teleportation a reason for the teleportation can be given.
 These reasons are:
@@ -243,10 +250,19 @@ Example: `PSCO;13;314`
 ### Ready (RDY.)
 
 ```
-Ready ::= "RDY."
+Ready ::= "RDY." [Speed]
+Speed ::= Integer
 ```
 
 The server uses this to indicate that the client can now send its next STEP or TURN message.
+
+#### Extension
+The protocol has been extended to communicate the current game speed.
+The server can change the speed at any time and clients might want to react on speed changes.
+
+Example: `RDY.;100`
+
+- The client is allowed to send the next command. The game runs at 100 ms/tick.
 
 ### Quit (QUIT)
 
@@ -335,6 +351,13 @@ Examples:
 - `INFO;451`
 - `INFO;200;ninja found an invisible gem!`
 - `INFO;202;Gotcha!;1337`
+
+#### Extensions
+
+The whole text message mechanism is a protocol extension.
+In the original version of the protocol, the INFO command was solely used from server to client for communicating errors.
+With the text messages, Clients are also allowed to send INFO commands.
+However, the server only "understands" commands with the text message info codes.
 
 ## Handshake
 
