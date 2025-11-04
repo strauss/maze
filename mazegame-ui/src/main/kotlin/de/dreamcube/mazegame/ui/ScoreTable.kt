@@ -89,6 +89,8 @@ class ScoreTable() : JTable(), MazeCellSelectionListener {
                 }
             currentColumn.cellRenderer = cellRenderer
         }
+
+        isFocusable = false // prevents unwanted keyboard actions when controlling the player manually
     }
 
     internal fun reset() {
