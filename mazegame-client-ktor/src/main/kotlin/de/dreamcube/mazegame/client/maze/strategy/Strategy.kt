@@ -257,6 +257,14 @@ abstract class Strategy : NoEventListener {
     }
 
     /**
+     * Override this method to perform an action right before the "BYE!" command is sent. Maybe you could literally
+     * say "goodbye" :-)
+     */
+    open fun beforeGoodbye() {
+        // does nothing by default
+    }
+
+    /**
      * This method must decide what to do next and return the appropriate [Move] literal.
      */
     protected abstract fun getNextMove(): Move

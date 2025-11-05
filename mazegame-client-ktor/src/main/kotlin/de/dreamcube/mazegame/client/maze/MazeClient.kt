@@ -4,11 +4,7 @@ import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.commands.ServerCommandParser
 import de.dreamcube.mazegame.client.maze.events.EventHandler
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
-import de.dreamcube.mazegame.common.maze.CommandExecutor
-import de.dreamcube.mazegame.common.maze.ConnectionStatus
-import de.dreamcube.mazegame.common.maze.Message
-import de.dreamcube.mazegame.common.maze.PROTOCOL_VERSION
-import de.dreamcube.mazegame.common.maze.sanitizeAsChatMessage
+import de.dreamcube.mazegame.common.maze.*
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
@@ -151,6 +147,7 @@ class MazeClient @JvmOverloads constructor(
      */
     suspend fun logout() {
         if (isLoggedIn) {
+            strategy.beforeGoodbye()
             LOGGER.info("Logging out...")
             sendMessage(createByeMessage())
         } else {
@@ -302,7 +299,7 @@ class MazeClient @JvmOverloads constructor(
      */
     @JvmName("getPlayers")
     fun getPlayersBlocking(): List<PlayerSnapshot> {
-        return runBlocking { players.elements() }
+        return runBlocking { getPlayers() }
     }
 
     /**

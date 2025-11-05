@@ -60,7 +60,7 @@ class PlayerCollection {
      * Retrieves a read-only [PlayerView] of the [Player] with the id [playerId]. If no such [Player] exists, null is returned. The view will directly
      * reflect all changes made to the player object and access will not be thread-safe.
      */
-    internal fun getPlayerViewById(playerId: Int): PlayerView? {
+    private fun getPlayerViewById(playerId: Int): PlayerView? {
         return playerIdToPlayerMap[playerId]?.view()
     }
 
