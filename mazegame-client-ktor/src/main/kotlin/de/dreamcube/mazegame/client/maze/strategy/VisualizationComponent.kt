@@ -24,6 +24,16 @@ abstract class VisualizationComponent : JComponent(), NoEventListener {
     var colorDistributionMap: Map<Int, Color> = mapOf()
 
     /**
+     * The id of the selected player. Can be used for reacting to player selections in the visualization. Should only be
+     * set by the UI.
+     */
+    var selectedPlayerId: Int? = null
+        set(value) {
+            field = value
+            repaint()
+        }
+
+    /**
      * The current zoom factor of the maze. Should only be set by the UI.
      */
     var zoom = 1

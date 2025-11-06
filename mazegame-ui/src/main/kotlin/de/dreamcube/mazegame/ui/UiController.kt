@@ -271,12 +271,14 @@ object UiController {
     }
 
     fun firePlayerSelected(player: UiPlayerInformation) {
+        visualizationComponent?.selectedPlayerId = player.id
         for (playerSelectionListener in playerSelectionListeners) {
             playerSelectionListener.onPlayerSelected(player)
         }
     }
 
     fun firePlayerSelectionCleared() {
+        visualizationComponent?.selectedPlayerId = null
         for (playerSelectionListener in playerSelectionListeners) {
             playerSelectionListener.onPlayerSelectionCleared()
         }

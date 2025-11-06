@@ -14,7 +14,7 @@ class DebugVisualization : VisualizationComponent() {
         val g2 = g as Graphics2D
         g2.run {
             setRenderingHints(qualityHints)
-            color = Color.magenta
+            color = selectedPlayerId?.let { getPlayerColor(it) } ?: Color.magenta
             font = g2.font.deriveFont(50.0f)
             drawString("Debug visualization", 0, 50)
             drawString("Offset: (${offset.x}/${offset.y})", 0, 100)
