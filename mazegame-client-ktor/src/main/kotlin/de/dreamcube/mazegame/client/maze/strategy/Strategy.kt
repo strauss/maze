@@ -178,7 +178,7 @@ abstract class Strategy : NoEventListener {
 
     }
 
-    protected lateinit var mazeClient: MazeClient
+    lateinit var mazeClient: MazeClient
         private set
 
     /**
