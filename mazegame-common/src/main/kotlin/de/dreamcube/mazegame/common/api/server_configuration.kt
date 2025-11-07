@@ -50,7 +50,14 @@ data class ServerBotsDto(
     )
 ) {
     @JsonIgnore
-    val specialBotNames: Set<String> = nickMappings.dummyNames + nickMappings.trapeaterNames + nickMappings.frenzyNames
+    val specialBotNames: Set<String> = buildSet {
+        add(specialBots.dummy)
+        addAll(nickMappings.dummyNames)
+        add(specialBots.trapeater)
+        addAll(nickMappings.trapeaterNames)
+        add(specialBots.frenzy)
+        addAll(nickMappings.frenzyNames)
+    }
 }
 
 data class BaitGeneratorDto(val objectDivisor: Int = 26, val trapDivisor: Int = 4)
