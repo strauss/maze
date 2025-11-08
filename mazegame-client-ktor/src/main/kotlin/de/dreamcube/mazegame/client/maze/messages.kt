@@ -30,5 +30,5 @@ fun createChatMessage(message: String) = listOf("INFO", InfoCode.CLIENT_MESSAGE.
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createWhisperMessage(message: String, receiverPlayerId: Int) =
-    listOf("INFO", InfoCode.CLIENT_WHISPER, message, receiverPlayerId)
+    listOf("INFO", InfoCode.CLIENT_WHISPER.code, message, receiverPlayerId)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
