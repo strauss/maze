@@ -50,7 +50,7 @@
       - dummy
       - dummy
       - dummy
-      - ninja
+      - ninja_ng
       - mindripper
       - underdog
       - chopstick
@@ -63,12 +63,12 @@
     nickMappings:
       dummyNames:
         - aimless
-        - simon
         - yanni
-        - lost
-        - rüdiger
-        - clueless
         - le_dieter
+        - simon
+        - no_den
+        - eclair
+        - joe
       trapeaterNames:
         - müllschlucker
         - wall-e
