@@ -151,6 +151,23 @@ object ServerController {
     }
 
     /**
+     * Changes the game speed.
+     */
+    suspend fun changeSpeed(call: ApplicationCall, serverId: Int, speedAsString: String) {
+        val newSpeed: GameSpeed? = GameSpeed.fromShortName(speedAsString)
+        if (newSpeed == null) {
+            call.respond(
+                HttpStatusCode.NotFound,
+                "Could not find speed for $speedAsString. Available speeds are ${GameSpeed.entries.map { it.shortName }}."
+            )
+            return
+        }
+        val server: MazeServer = getMazeServer(call, serverId) ?: return
+        server.gameSpeed = newSpeed
+        call.respond(HttpStatusCode.NoContent)
+    }
+
+    /**
      * Transforms all baits into the given type and makes them visible. If the given type is [BaitType.TRAP], the auto trapeater will be spawned. If
      * this function is deactivated, no transformation happens.
      */

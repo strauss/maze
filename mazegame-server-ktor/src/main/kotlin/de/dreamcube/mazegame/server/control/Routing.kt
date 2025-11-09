@@ -21,6 +21,7 @@ private const val jwtTtl: Long = 900L
 private const val pathServerId: String = "serverId"
 private const val queryNow: String = "now"
 private const val queryStop: String = "stop"
+private const val querySpeed: String = "speed"
 private const val pathPlayerId: String = "playerId"
 private const val pathNick: String = "nick"
 
@@ -117,6 +118,12 @@ fun Application.configureRouting() {
                 } else {
                     ServerController.clear(call, serverId, stop)
                 }
+            }
+
+            post("/server/{$pathServerId}/control/speed") {
+                val serverId: Int = call.getIntParameter(pathServerId) ?: return@post
+                val speedAsString: String = call.getStringParameter(querySpeed) ?: return@post
+                ServerController.changeSpeed(call, serverId, speedAsString)
             }
 
             post("/server/{$pathServerId}/control/all-food") {

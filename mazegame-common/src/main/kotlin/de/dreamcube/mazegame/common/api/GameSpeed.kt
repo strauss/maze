@@ -24,4 +24,6 @@ enum class GameSpeed(val delay: Long, @get:JsonValue val shortName: String) {
             else -> null
         }
     }
+
+    override fun toString(): String = "$shortName ($delay ms)"
 }

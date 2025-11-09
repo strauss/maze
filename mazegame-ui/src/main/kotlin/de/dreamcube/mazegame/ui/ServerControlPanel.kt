@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
+import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.api.PlayerInformationDto
 import de.dreamcube.mazegame.common.api.ServerInformationDto
 import de.dreamcube.mazegame.common.maze.BaitType
@@ -54,9 +55,6 @@ class ServerControlPanel() : JPanel() {
         initPlayerControlElements()
         // TODO: contest control
 
-//        val borderColor = UIManager.getColor("Separator.foreground")
-//        val fancyBorder = BorderFactory.createMatteBorder(1, 1, 0, 0, borderColor)
-//        border = fancyBorder
         isOpaque = true
         spawnButton.isEnabled = false
         serverController.launch {
@@ -170,6 +168,41 @@ class ServerControlPanel() : JPanel() {
             }
         }
         add(stopNowButton, SG_UNITY)
+
+        val speedLabel = JLabel("Speed control")
+        speedLabel.font = speedLabel.font.deriveFont(Font.BOLD)
+        add(speedLabel, SPAN_2)
+
+        // speed selection
+        val speedSelection = JComboBox<GameSpeed>()
+        val model: DefaultComboBoxModel<GameSpeed?> = speedSelection.model as DefaultComboBoxModel
+        if (model.size > 0) {
+            model.removeAllElements()
+        }
+        model.addAll(GameSpeed.entries)
+        speedSelection.selectedItem = GameSpeed.NORMAL
+        speedSelection.isEditable = false
+        add(speedSelection, SPAN_2)
+
+        // speed selection button
+        val selectSpeedButton = JButton("Change speed")
+        selectSpeedButton.addActionListener { _ ->
+            val selectedSpeed: GameSpeed = speedSelection.selectedItem as GameSpeed
+            selectSpeedButton.isEnabled = false
+            serverController.launch {
+                try {
+                    serverController.changeSpeed(selectedSpeed)
+                } catch (ex: ResponseException) {
+                    withContext(Dispatchers.Swing) {
+                        showErrorMessage(ex)
+                    }
+                }
+                withContext(Dispatchers.Swing) {
+                    selectSpeedButton.isEnabled = true
+                }
+            }
+        }
+        add(selectSpeedButton, SPAN_2)
     }
 
     private fun initBaitControlElements() {
@@ -459,6 +492,10 @@ class ServerControlPanel() : JPanel() {
 
         add(updateButton, SPAN_2)
         UiController.addPlayerSelectionListener(updateButton)
+
+        val playerSelectionLabel = JLabel("Spawn control")
+        playerSelectionLabel.font = playerSelectionLabel.font.deriveFont(Font.BOLD)
+        add(playerSelectionLabel, SPAN_2)
 
         // Spawn
         add(selectableNicks, SPAN_2)

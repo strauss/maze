@@ -137,7 +137,6 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
 
     override fun onSpeedChanged(oldSpeed: Int, newSpeed: Int) {
         UiController.uiScope.launch {
-            // TODO: as soon as the server is capable of speed changes, we should test this
             gameSpeedLabel.text = "Speed: ${UiController.gameSpeed} ms"
         }
     }

@@ -2,7 +2,6 @@ package de.dreamcube.mazegame.ui
 
 import com.formdev.flatlaf.FlatLightLaf
 import de.dreamcube.mazegame.client.DuplicateNickHandler
-import de.dreamcube.mazegame.client.HeadlessErrorDisplay
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
@@ -305,5 +304,4 @@ fun main() {
     Strategy.scanAndAddStrategiesBlocking()
     FlatLightLaf.setup()
     EventQueue.invokeLater { MainFrame() }
-    UiController.prepareEventListener(HeadlessErrorDisplay)
 }

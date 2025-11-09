@@ -135,6 +135,20 @@ class ServerCommandController(
         }
     }
 
+    suspend fun changeSpeed(speed: GameSpeed) {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/control/speed"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        httpClient.use {
+            it.post(httpAddress) {
+                bearerAuth(token)
+                url {
+                    parameter("speed", speed.shortName)
+                }
+            }
+        }
+    }
+
     suspend fun baitTransform(baitType: BaitType) {
         val suffix: String = when (baitType) {
             BaitType.FOOD -> "all-food"

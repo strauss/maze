@@ -53,6 +53,9 @@ class EventHandler {
         if (listener is ClientConnectionStatusListener) {
             clientConnectionStatusListeners.add(listener)
         }
+        if (listener is SpeedChangedListener) {
+            speedChangedListeners.add(listener)
+        }
     }
 
     /**
@@ -80,6 +83,12 @@ class EventHandler {
         }
         if (listener is ErrorInfoListener) {
             errorInfoListeners.remove(listener)
+        }
+        if (listener is ClientConnectionStatusListener) {
+            clientConnectionStatusListeners.remove(listener)
+        }
+        if (listener is SpeedChangedListener) {
+            speedChangedListeners.remove(listener)
         }
     }
 
@@ -144,7 +153,12 @@ class EventHandler {
         }
     }
 
-    fun firePlayerTeleport(oldPosition: PlayerPosition, newPlayerSnapshot: PlayerSnapshot, teleportType: TeleportType?, causingPlayerId: Int?) {
+    fun firePlayerTeleport(
+        oldPosition: PlayerPosition,
+        newPlayerSnapshot: PlayerSnapshot,
+        teleportType: TeleportType?,
+        causingPlayerId: Int?
+    ) {
         for (listener in playerMovementListeners) {
             listener.onPlayerTeleport(oldPosition, newPlayerSnapshot, teleportType, causingPlayerId)
         }
