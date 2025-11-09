@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import javax.swing.table.AbstractTableModel
+import kotlin.math.max
 
 class UiPlayerInformation(
     initialPlayerSnapshot: PlayerSnapshot,
@@ -66,7 +67,9 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
     private val idToIndexMap: MutableMap<Int, Int> = HashMap()
     private val uiPlayerInformationList: MutableList<UiPlayerInformation> = ArrayList()
 
-    private lateinit var colorDistribution: List<Color>
+    internal val colorDistribution: List<ColorSegment> = getColorDistribution(false)
+    var startingColorDegree = 180
+        internal set
 
     private var scoreRepresentationMode = ScoreRepresentationMode.SERVER
 
@@ -211,21 +214,73 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
     }
 
     internal fun redistributePlayerColorsByDistribution() {
-        if (!this::colorDistribution.isInitialized) {
-            colorDistribution = getColorDistribution(false, 360, 180)
+        if (uiPlayerInformationList.isEmpty()) {
+            return
         }
-        if (colorDistribution.size < uiPlayerInformationList.size) {
-            colorDistribution = getColorDistribution(false, colorDistribution.size * 2, colorDistribution.size)
-        }
-        val delta: Int = colorDistribution.size / uiPlayerInformationList.size
-        var colorIndex = 0
+        val usableColors: Int = colorDistribution.asSequence().filter { it.active }.count()
+        val delta: Int = max(1, usableColors / uiPlayerInformationList.size)
+        var colorIndex = startingColorDegree
         val colorDistributionMap: Map<Int, Color> = buildMap {
             for (playerInformation: UiPlayerInformation in uiPlayerInformationList) {
-                playerInformation.color = colorDistribution[colorIndex]
-                colorIndex += delta
+                while (!colorDistribution[colorIndex].active) {
+                    colorIndex += 1
+                    colorIndex %= 360
+                }
+                playerInformation.color = colorDistribution[colorIndex].c
                 put(playerInformation.id, playerInformation.color)
+                colorIndex += delta
+                colorIndex %= 360
             }
         }
         UiController.colorDistributionChanged(colorDistributionMap)
+        UiController.scoreTable.repaint()
+    }
+
+    private fun configureFullSpectrum() {
+        colorDistribution.forEach { it.activeByConfiguration = true }
+    }
+
+    internal fun configureForNormal() {
+        configureFullSpectrum()
+        redistributePlayerColorsByDistribution()
+    }
+
+    internal fun configureForProtan() {
+        configureFullSpectrum()
+        for (degree in 350..<360) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        for (degree in 0..40) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        for (degree in 95..150) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        redistributePlayerColorsByDistribution()
+    }
+
+    internal fun configureForDeutan() {
+        configureFullSpectrum()
+        for (degree in 350..<360) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        for (degree in 0..40) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        for (degree in 100..145) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        redistributePlayerColorsByDistribution()
+    }
+
+    internal fun configureForTritan() {
+        configureFullSpectrum()
+        for (degree in 50..75) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        for (degree in 185..255) {
+            colorDistribution[degree].activeByConfiguration = false
+        }
+        redistributePlayerColorsByDistribution()
     }
 }

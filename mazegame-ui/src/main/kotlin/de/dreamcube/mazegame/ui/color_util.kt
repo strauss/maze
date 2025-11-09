@@ -39,26 +39,36 @@ fun determineBgColorByLuminance(color: Color): Color {
  * into [granularity] many fragments. For each fragment a color with full saturation is created. Its brightness is adjusted to fit into the theme.
  * If this is impossible (blue on dark is a problem), it is skipped.
  */
-fun getColorDistribution(dark: Boolean = false, granularity: Int = 360, start: Int = 180): List<Color> {
+fun getColorDistribution(dark: Boolean = false): List<ColorSegment> {
+    val granularity = 360
     // If we want dark mode, the color has to be brighter
     // If we want light mode, the color has to be darker
     val deltaBrightness: Float = if (dark) 0.01f else -0.01f
     val startAdjustingAt: Float = if (dark) 0.0f else 1.0f
     val desiredBgColor: Color = if (dark) BLACKISH else WHITISH
     return buildList {
-        for (c: Int in 0..<granularity) {
-            val actualC: Int = (c + start)
-            val hue: Float = (1.0f / granularity) * actualC
+        for (degree: Int in 0..<granularity) {
+            val hue: Float = (1.0f / granularity) * degree
             var brightness: Float = startAdjustingAt
-            adjust@ while (brightness in 0.0..1.0) {
+            adjust@ while (true) {
                 val colorCandidate: Color = Color.getHSBColor(hue, SATURATION, brightness)
                 val resultingBgColor: Color = determineBgColorByLuminance(colorCandidate)
                 if (resultingBgColor == desiredBgColor) {
-                    add(colorCandidate)
+                    add(ColorSegment(colorCandidate, degree, activeByLuminance = true, activeByConfiguration = true))
                     break@adjust
                 }
                 brightness += deltaBrightness
+                if (brightness !in 0.0..1.0) {
+                    add(ColorSegment(colorCandidate, degree, activeByLuminance = false, activeByConfiguration = true))
+                    break@adjust
+                }
             }
         }
     }
 }
+
+class ColorSegment(val c: Color, degree: Int, val activeByLuminance: Boolean, var activeByConfiguration: Boolean) {
+    val active
+        get() = activeByLuminance && activeByConfiguration
+}
+

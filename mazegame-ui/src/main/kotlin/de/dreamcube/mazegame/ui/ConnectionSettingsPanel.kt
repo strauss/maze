@@ -161,9 +161,10 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(connectionLabel, "span")
 
         // Connection type
-        val connectionTypeGroup = ButtonGroup()
-        connectionTypeGroup.add(managedConnection)
-        connectionTypeGroup.add(directConnection)
+        ButtonGroup().apply {
+            add(managedConnection)
+            add(directConnection)
+        }
 
         managedConnection.addChangeListener { _ ->
             if (managedConnection.isSelected) {
