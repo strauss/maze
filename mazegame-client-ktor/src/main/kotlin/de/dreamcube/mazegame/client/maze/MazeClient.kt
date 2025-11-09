@@ -4,6 +4,7 @@ import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.commands.ServerCommandParser
 import de.dreamcube.mazegame.client.maze.events.EventHandler
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
+import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.flavorText
 import de.dreamcube.mazegame.common.maze.*
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
@@ -236,7 +237,9 @@ class MazeClient @JvmOverloads constructor(
 
     internal suspend fun internalConnect(iteration: Int = 0) {
         val nameSuffix = if (iteration == 0) "" else iteration.toString()
-        sendMessage(createHelloMessage("${clientConfiguration.displayName}$nameSuffix"))
+        val flavor: String? =
+            if (clientConfiguration.withFlavor) clientConfiguration.strategyName.flavorText() else null
+        sendMessage(createHelloMessage("${clientConfiguration.displayName}$nameSuffix", flavor))
     }
 
     internal suspend fun loggedIn(id: Int) {

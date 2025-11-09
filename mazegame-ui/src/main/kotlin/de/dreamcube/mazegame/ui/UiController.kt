@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.ui
 
 import com.formdev.flatlaf.FlatLightLaf
 import de.dreamcube.mazegame.client.DuplicateNickHandler
+import de.dreamcube.mazegame.client.HeadlessErrorDisplay
 import de.dreamcube.mazegame.client.config.MazeClientConfigurationDto
 import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
@@ -85,13 +86,18 @@ object UiController {
         }
     }
 
+    private fun removeEventListener(eventListener: EventListener) {
+        uiEventListeners.remove(eventListener)
+    }
+
     internal fun connect(
         address: String,
         port: Int,
         strategyName: String,
+        withFlavor: Boolean,
         displayName: String
     ) {
-        val config = MazeClientConfigurationDto(address, port, strategyName, displayName)
+        val config = MazeClientConfigurationDto(address, port, strategyName, withFlavor, displayName)
         client = MazeClient(config)
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
 
@@ -100,6 +106,11 @@ object UiController {
                 when (infoCode) {
                     InfoCode.WRONG_PARAMETER_VALUE -> {
                         showErrorMessage("Nickname not allowed!")
+                        disconnect()
+                    }
+
+                    InfoCode.PARAMETER_COUNT_INCORRECT -> {
+                        showErrorMessage("Protocol error: wrong parameter count.")
                         disconnect()
                     }
 
@@ -132,14 +143,18 @@ object UiController {
                 oldStatus: ConnectionStatus,
                 newStatus: ConnectionStatus
             ) {
-                if (newStatus == ConnectionStatus.LOGGED_IN || newStatus == ConnectionStatus.DEAD) {
-                    client.eventHandler.removeEventListener(this)
+                val eventListener = this
+                bgScope.launch {
+                    delay(1_000L)
+                    if (newStatus == ConnectionStatus.LOGGED_IN || newStatus == ConnectionStatus.DEAD) {
+                        removeEventListener(eventListener)
+                    }
                 }
             }
 
         }
 
-        client.eventHandler.addEventListener(loginProblemListener)
+        prepareEventListener(loginProblemListener)
         uiEventListeners.forEach { client.eventHandler.addEventListener(it) }
         clientTerminationHandle = client.start()
         messagePane.clear()
@@ -290,4 +305,5 @@ fun main() {
     Strategy.scanAndAddStrategiesBlocking()
     FlatLightLaf.setup()
     EventQueue.invokeLater { MainFrame() }
+    UiController.prepareEventListener(HeadlessErrorDisplay)
 }

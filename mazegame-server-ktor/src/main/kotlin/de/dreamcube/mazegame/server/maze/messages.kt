@@ -17,7 +17,9 @@ fun createWelcomeMessage(id: Int) = listOf("WELC", id.toString())
 fun createMazeHeaderMessage(width: Int, height: Int) = listOf("MAZE", width.toString(), height.toString())
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createJoinMessage(player: Player) = listOf("JOIN", player.id.toString(), player.nick)
+fun createJoinMessage(player: Player) = listOf("JOIN", player.id.toString(), player.nick, player.flavor)
+    .asSequence()
+    .filter { it?.isNotBlank() ?: false }
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createLeaveMessage(id: Int) = listOf("LEAV", id.toString())
@@ -41,23 +43,41 @@ fun createErrorInfoMessage(errorCode: InfoCode) = listOf("INFO", errorCode.code)
 fun createServerInfoMessage(message: String) = listOf("INFO", InfoCode.SERVER_MESSAGE.code, message)
     .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createClientInfoMessage(message: String, sourceId: Int) = listOf("INFO", InfoCode.CLIENT_MESSAGE.code, message, sourceId)
-    .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
+fun createClientInfoMessage(message: String, sourceId: Int) =
+    listOf("INFO", InfoCode.CLIENT_MESSAGE.code, message, sourceId)
+        .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
-fun createClientWhisperInfoMessage(message: String, sourceId: Int) = listOf("INFO", InfoCode.CLIENT_WHISPER.code, message, sourceId)
-    .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
+fun createClientWhisperInfoMessage(message: String, sourceId: Int) =
+    listOf("INFO", InfoCode.CLIENT_WHISPER.code, message, sourceId)
+        .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 
 // Player position and score messages
 private fun createPlayerPositionChangeMessage(player: Player, reason: PlayerPositionChangeReason): String =
-    listOf("PPOS", player.id.toString(), player.x.toString(), player.y.toString(), player.viewDirection.shortName, reason.shortName)
+    listOf(
+        "PPOS",
+        player.id.toString(),
+        player.x.toString(),
+        player.y.toString(),
+        player.viewDirection.shortName,
+        reason.shortName
+    )
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR)
 
-fun createPlayerPositionAppearMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.APPEAR).asMessage()
-fun createPlayerPositionVanishMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.VANISH).asMessage()
-fun createPlayerPositionTurnMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TURN).asMessage()
-fun createPlayerPositionStepMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.MOVE).asMessage()
-fun createPlayerTeleportMessage(player: Player) = createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT).asMessage()
+fun createPlayerPositionAppearMessage(player: Player) =
+    createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.APPEAR).asMessage()
+
+fun createPlayerPositionVanishMessage(player: Player) =
+    createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.VANISH).asMessage()
+
+fun createPlayerPositionTurnMessage(player: Player) =
+    createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TURN).asMessage()
+
+fun createPlayerPositionStepMessage(player: Player) =
+    createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.MOVE).asMessage()
+
+fun createPlayerTeleportMessage(player: Player) =
+    createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT).asMessage()
 
 fun createPlayerTeleportByTrapMessage(player: Player) =
     listOf(createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TELEPORT), TeleportType.TRAP.shortName)
@@ -85,4 +105,5 @@ fun createBaitCollectedMessage(bait: ServerBait) = createBaitPositionChangeMessa
 
 
 // Ready message
-fun createReadyMessage(gameSpeed: GameSpeed) = listOf("RDY.", gameSpeed.delay.toString()).joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
+fun createReadyMessage(gameSpeed: GameSpeed) =
+    listOf("RDY.", gameSpeed.delay.toString()).joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()

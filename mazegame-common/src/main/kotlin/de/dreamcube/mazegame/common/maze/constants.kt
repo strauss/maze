@@ -9,4 +9,6 @@ const val DEFAULT_RANDOM_HEIGHT = 30
 const val MIN_RANDOM_HEIGHT = 15
 const val MAX_RANDOM_HEIGHT = 90
 const val DEFAULT_MAX_CLIENTS = 20
-
+const val MAX_NICK_LENGTH = 32
+const val MAX_FLAVOR_LENGTH = 128
+const val MAX_CHAT_LENGTH = 256

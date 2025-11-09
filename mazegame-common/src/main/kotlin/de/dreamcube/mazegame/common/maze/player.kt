@@ -11,6 +11,7 @@ import kotlin.random.Random
 class Player(
     val id: Int,
     val nick: String,
+    val flavor: String?,
     var x: Int = -1,
     var y: Int = -1,
     var viewDirection: ViewDirection = ViewDirection.random(),

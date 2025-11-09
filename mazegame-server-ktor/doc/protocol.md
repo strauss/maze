@@ -50,7 +50,20 @@ NickName ::= Letter { Letter | Digit }
 A nickname consists of letters and digits.
 It has to start with a letter.
 
+If a nickname is not allowed, the server should respond with a "INFO;450".
+
+The server can decide if it wants to limit the length of nicknames.
+If the nickname is considered too long, it has to respond with a "INFO;450".
+
 Example: `ninja`
+
+#### Extensions
+
+Servers are allowed to soften the rules for nicknames.
+They can allow for any UTF-8 character or limit their usage.
+They should, however, stick to letters as first character.
+
+A good compromise would be allowing for latin characters and some special ones, such as "-" and "_".
 
 ### View direction
 
@@ -79,13 +92,28 @@ BaitType ::= "gem" | "food" | "coffee" | "trap"
 ### Hello (HELO)
 
 ```
-Hello ::= "HELO" NickName
+Hello ::= "HELO" NickName [Flavor]
+Flavor ::= StringWithoutSemicolon
 ```
 
 A client wants to join the game and communicates its nickname.
 The server can either accept it and respond with a `WELC` message or deny it and respond with an `INFO` message.
 
 Example: `HELO;ninja`
+
+#### Extensions
+
+In addition to the nickname, clients are allowed to give a flavor text to the server.
+The server will emit this text to other players.
+Clients can present the flavor text of other players.
+Why? Because it is fun!
+
+The flavor text should be limited.
+If it is too long, the server should truncate it.
+As for nicknames, the allowed charset can be any UTF-8 character.
+It is advisable to employ the same character limits, as for nicknames.
+
+Example: `HELO;chopstick;The chopsticks in your hand think you should start eating now!`
 
 ### MazeQuery (MAZ?)
 
@@ -143,7 +171,7 @@ Examples:
 ### Join (JOIN)
 
 ```
-Join ::= "JOIN" PlayerID NickName
+Join ::= "JOIN" PlayerID NickName [Flavor]
 ```
 
 The server uses this message to inform all clients, that a new player has joined the game.
@@ -151,6 +179,12 @@ The server uses this message to inform all clients, that a new player has joined
 Example: `JOIN;13;ninja`
 
 - `ninja` joined the game with ID `13`.
+
+#### Extensions
+
+The server uses the JOIN command to emit the flavor text of each client to the other clients.
+
+Example: `JOIN;42;chopstick;The chopsticks in your hand think you should start eating now!`
 
 ### Leave (LEAV)
 
@@ -232,7 +266,8 @@ Examples:
 - `PPOS;13;30;32;tel;t`
     - Player with id `13` ran into a trap and was teleported to position x=30, y=32
 - `PPOS;13;1;1;tel;c;1337`
-    - Player with id `1337` ran into player with id `13`. Player with id `13` was teleported to position x=1, y=1 as a consequence.
+    - Player with id `1337` ran into player with id `13`. Player with id `13` was teleported to position x=1, y=1 as a
+      consequence.
 
 ### PlayerScore (PSCO)
 
@@ -256,7 +291,8 @@ Speed ::= Integer
 
 The server uses this to indicate that the client can now send its next STEP or TURN message.
 
-#### Extension
+#### Extensions
+
 The protocol has been extended to communicate the current game speed.
 The server can change the speed at any time and clients might want to react on speed changes.
 
@@ -334,7 +370,7 @@ The info code is one of the following:
 
 - 450: Wrong parameter value
 - 451: Server full (too many clients)
-- 452: Duplicate/Invalid nickname
+- 452: Duplicate nickname
 - 453: Tried to step into a wall
 - 454: Did not wait for RDY. when sending STEP or TURN
 - 455: Already logged in (second HELO)
@@ -355,8 +391,10 @@ Examples:
 #### Extensions
 
 The whole text message mechanism is a protocol extension.
-In the original version of the protocol, the INFO command was solely used from server to client for communicating errors.
+In the original version of the protocol, the INFO command was solely used from server to client for communicating
+errors.
 With the text messages, Clients are also allowed to send INFO commands.
+The server is allowed to limit the size and frequency.
 However, the server only "understands" commands with the text message info codes.
 
 ## Handshake
@@ -373,6 +411,7 @@ Here an example how a typical session looks like:
     - Followed by several PPOS and BPOS commands, including the initial position of the new client
     - Followed by the first `RDY.`
 - The client now responds each ready command with either a step or a turn command.
-- In addition, the server sends a lot of PPOS and BPOS commands to reflect the movements of the new client and all other clients
+- In addition, the server sends a lot of PPOS and BPOS commands to reflect the movements of the new client and all other
+  clients
 - Client: `BYE!`
 - Server: `QUIT`

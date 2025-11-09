@@ -10,6 +10,8 @@ class PlayerView internal constructor(private val player: Player) {
         get() = player.id
     val nick: String
         get() = player.nick
+    val flavor: String?
+        get() = player.flavor
     val x: Int
         get() = player.x
     val y: Int

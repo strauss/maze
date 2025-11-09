@@ -1,6 +1,8 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.maze.MAX_CHAT_LENGTH
 import de.dreamcube.mazegame.common.maze.Message
+import de.dreamcube.mazegame.server.maze.ClientChatControl.Companion.NEW_TOKEN_PERIOD
 import java.util.concurrent.atomic.AtomicInteger
 
 
@@ -45,6 +47,14 @@ class ClientChatControl {
     }
 
     /**
+     * If the server decides for a chat penalty, all tokens are cleared.
+     */
+    fun onPenalty() {
+        currentTokens.set(0)
+        lastTokenUpdateTime = System.currentTimeMillis()
+    }
+
+    /**
      * Checks if sending a message is allowed. If yes, a token is consumed and true is returned. If not, false is returned. In both cases the timestamp
      * is reset. This penalizes clients that try to spam, by blocking all messages.
      */
@@ -67,5 +77,7 @@ class ClientChatControl {
             createServerInfoMessage("Your chat tokens have all been consumed. You have to wait for $NEW_TOKEN_PERIOD milliseconds to get a new one.")
         val FIRST_CHAT_HINT: Message =
             createServerInfoMessage("Be aware: every chat and whisper message costs you a move. Use that power wisely!")
+        val MESSAGE_TOO_LONG: Message =
+            createServerInfoMessage("Your last chat message was too long. Chat messages may only have at most $MAX_CHAT_LENGTH characters. Your chat tokens are set to 0.")
     }
 }

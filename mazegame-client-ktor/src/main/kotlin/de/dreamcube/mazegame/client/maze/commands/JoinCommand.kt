@@ -8,6 +8,7 @@ class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
 
     private val playerId: Int
     private val nick: String
+    private val flavor: String?
     override val okay: Boolean
 
     init {
@@ -20,10 +21,11 @@ class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
             nick = commandWithParameters[2]
             okay = true
         }
+        flavor = if (commandWithParameters.size > 3) commandWithParameters[3] else null
     }
 
     override suspend fun internalExecute() {
-        val newPlayer = Player(playerId, nick)
+        val newPlayer = Player(playerId, nick, flavor)
         val success: Boolean = mazeClient.players.addPlayer(newPlayer)
         if (success) {
             val newPlayerView = newPlayer.view()

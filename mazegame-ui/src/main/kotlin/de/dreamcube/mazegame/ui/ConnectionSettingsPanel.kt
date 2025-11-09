@@ -123,6 +123,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
 
     private val managedConnection = JRadioButton("Managed")
     private val directConnection = JRadioButton("Direct")
+    private var withFlavor: Boolean = true
 
     private val addressLabel = JLabel("Address")
     private val addressField = JTextField(TEXT_FIELD_COLUMNS)
@@ -353,6 +354,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                         addressField.text,
                         gamePortField.text.toInt(),
                         strategySelection.selectedItem as String,
+                        withFlavor,
                         nickField.text
                     )
                 }
@@ -392,6 +394,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlPasswordLabel.isVisible = true
         serverControlPasswordField.isVisible = true
         serverControlActivateButton.isVisible = true
+        withFlavor = true
     }
 
     private fun directConnectionSelected() {
@@ -406,6 +409,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlPasswordLabel.isVisible = false
         serverControlPasswordField.isVisible = false
         serverControlActivateButton.isVisible = false
+        withFlavor = false
         fillGameSelection(emptyList())
 
         // TODO: make these combo-boxes with predefined values, this should do for now

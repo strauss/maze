@@ -11,7 +11,7 @@ import java.awt.FlowLayout
 import java.awt.event.KeyEvent
 import javax.swing.*
 
-class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListener {
+class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListener, PlayerSelectionListener {
 
     private val connectionStatusLabel = JLabel()
     private val serverAddressLabel = JLabel()
@@ -77,6 +77,7 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         border = topLine
         isOpaque = true
         UiController.prepareEventListener(this)
+        UiController.addPlayerSelectionListener(this)
     }
 
     internal fun updateZoom(zoom: Int) {
@@ -108,6 +109,16 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
         hintLabel.text = hintText
     }
 
+    private fun changeFlavorText(flavorText: String?) {
+        UiController.uiScope.launch {
+            botFlavorTextLabel.text = flavorText ?: "This bot is too old!"
+        }
+    }
+
+    private suspend fun resetFlavorText() {
+        botFlavorTextLabel.text = UiController.strategyName?.flavorText() ?: ""
+    }
+
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
@@ -117,7 +128,7 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
             serverAddressLabel.text = UiController.completeServerAddressString
             strategyLabel.text =
                 UiController.strategyName?.let { "as $it (${UiController.getStrategyTypeForStatusBar()})" } ?: ""
-            botFlavorTextLabel.text = UiController.strategyName?.flavorText() ?: ""
+            resetFlavorText()
             zoomLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Zoom: ${UiController.mazePanel.zoom}"
             gameSpeedLabel.text = if (newStatus == ConnectionStatus.DEAD) "" else "Speed: ${UiController.gameSpeed} ms"
             serverControlButton.isEnabled = UiController.isLoggedIn
@@ -125,7 +136,19 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
     }
 
     override fun onSpeedChanged(oldSpeed: Int, newSpeed: Int) {
-        // TODO: as soon as the server is capable of speed changes, we should test this
-        gameSpeedLabel.text = "Speed: ${UiController.gameSpeed} ms"
+        UiController.uiScope.launch {
+            // TODO: as soon as the server is capable of speed changes, we should test this
+            gameSpeedLabel.text = "Speed: ${UiController.gameSpeed} ms"
+        }
+    }
+
+    override fun onPlayerSelected(player: UiPlayerInformation) {
+        changeFlavorText(player.snapshot.flavor)
+    }
+
+    override fun onPlayerSelectionCleared() {
+        UiController.uiScope.launch {
+            resetFlavorText()
+        }
     }
 }

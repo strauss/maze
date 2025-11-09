@@ -10,10 +10,11 @@ private val stepMessage = "STEP".asMessage()
 private val turnLeftMessage = "TURN;l".asMessage()
 private val turnRightMessage = "TURN;r".asMessage()
 
-fun createEmptyLastMessage() = "".asMessage()
-
 // Login stuff
-fun createHelloMessage(nick: String) = listOf("HELO", nick).joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
+fun createHelloMessage(nick: String, flavor: String?) = listOf("HELO", nick, flavor)
+    .asSequence()
+    .filter { it?.isNotBlank() ?: false }
+    .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 fun createRequestMazeMessage() = "MAZ?".asMessage()
 

@@ -302,10 +302,10 @@ class MazeServer(
     /**
      * Is used for clients to register themselves with the server. One could also call it "login".
      */
-    suspend fun registerClient(connection: ClientConnection, nick: String) {
+    suspend fun registerClient(connection: ClientConnection, nick: String, flavor: String?) {
         // assign id and log player in
         val newId = lastId.incrementAndGet()
-        connection.login(newId, nick)
+        connection.login(newId, nick, flavor)
         clientConnectionMutex.withLock {
             clientConnectionsById[newId] = connection
             connection.sendMessage(createWelcomeMessage(newId))

@@ -95,7 +95,7 @@ class ClientConnection(
     /**
      * The player object associated with this client connection.
      */
-    var player: Player = Player(-1, "")
+    var player: Player = Player(-1, "", null)
 
     /**
      * The server-sided client that is associated with this client connection.
@@ -244,11 +244,11 @@ class ClientConnection(
     /**
      * Sets the client connection to the login status if it is not already logged in.
      */
-    suspend fun login(id: Int, nick: String) {
+    suspend fun login(id: Int, nick: String, flavor: String?) {
         if (status == ConnectionStatus.CONNECTED) {
             wasEverLoggedIn = true
             status = ConnectionStatus.LOGGED_IN
-            this.player = Player(id, nick)
+            this.player = Player(id, nick, flavor)
         } else {
             sendMessage(createErrorInfoMessage(InfoCode.ALREADY_LOGGED_IN))
         }

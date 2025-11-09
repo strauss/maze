@@ -1,6 +1,7 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.InfoCode
+import de.dreamcube.mazegame.common.maze.MAX_CHAT_LENGTH
 import de.dreamcube.mazegame.server.maze.*
 
 class ChatCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :
@@ -53,11 +54,17 @@ class ChatCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
     }
 
     override suspend fun internalExecute() {
+        if (message.length > MAX_CHAT_LENGTH) {
+            clientConnection.chatControl.onPenalty()
+            clientConnection.sendMessage(ClientChatControl.MESSAGE_TOO_LONG)
+            return
+        }
         if (clientConnection.chatControl.onSendMessage()) {
             if (infoCode == InfoCode.CLIENT_MESSAGE.code) {
                 mazeServer.sendToAllPlayers(createClientInfoMessage(message, clientConnection.id))
             } else if (infoCode == InfoCode.CLIENT_WHISPER.code) {
-                mazeServer.getClientConnection(targetId)?.sendMessage(createClientWhisperInfoMessage(message, clientConnection.id))
+                mazeServer.getClientConnection(targetId)
+                    ?.sendMessage(createClientWhisperInfoMessage(message, clientConnection.id))
             }
         } else {
             clientConnection.sendMessage(ClientChatControl.FAILURE_MESSAGE)

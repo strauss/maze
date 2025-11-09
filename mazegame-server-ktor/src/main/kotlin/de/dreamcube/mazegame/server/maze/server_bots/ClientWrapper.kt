@@ -64,7 +64,7 @@ class ClientWrapper(val client: MazeClient) : ServerSideClient, ErrorInfoListene
             port: Int,
             displayName: String = aliasName
         ): ClientWrapper {
-            val config = MazeClientConfigurationDto("localhost", port, aliasName, displayName)
+            val config = MazeClientConfigurationDto("localhost", port, aliasName, true, displayName)
             val mazeClient = MazeClient(config)
             return ClientWrapper(mazeClient)
         }
