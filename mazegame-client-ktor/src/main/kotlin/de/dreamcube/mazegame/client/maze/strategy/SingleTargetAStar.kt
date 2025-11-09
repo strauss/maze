@@ -4,7 +4,7 @@ import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.MazeEventListener
 import de.dreamcube.mazegame.client.maze.events.PlayerMovementListener
-import de.dreamcube.mazegame.client.maze.strategy.maze_representations.Maze
+import de.dreamcube.mazegame.common.maze.CompactMaze
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
 import de.dreamcube.mazegame.common.maze.ViewDirection
@@ -18,7 +18,7 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
     /**
      * Internal representation of the maze.
      */
-    protected lateinit var maze: Maze
+    protected lateinit var maze: CompactMaze
 
     /**
      * The selected target trap.
@@ -128,14 +128,14 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
     }
 
     private fun walkable(position: PlayerPosition): Boolean =
-        position.x >= 0 && position.y >= 0 && maze[position.x, position.y] == Maze.FieldValue.PATH
+        position.x >= 0 && position.y >= 0 && maze[position.x, position.y] == CompactMaze.FieldValue.PATH
 
     private data class SearchState(val position: PlayerPosition, val costSoFar: Int, val estimatedCost: Int)
 
     protected fun getManhattanDistance(x1: Int, x2: Int, y1: Int, y2: Int): Int = abs(x1 - x2) + abs(y1 - y2)
 
     override fun onMazeReceived(width: Int, height: Int, mazeLines: List<String>) {
-        maze = Maze(width, height, mazeLines)
+        maze = CompactMaze.createFromLines(width, height, mazeLines)
     }
 
     override fun onPlayerTeleport(

@@ -1,5 +1,6 @@
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.maze.CompactMaze
 import de.dreamcube.mazegame.common.maze.ViewDirection
 import de.dreamcube.mazegame.server.maze.Maze.Companion.PATH
 import kotlinx.coroutines.sync.Mutex
@@ -167,6 +168,24 @@ class Maze(val width: Int, val height: Int) {
             }
         }
         return sb.toString()
+    }
+
+    /**
+     * Creates a compact representation of this [Maze]'s data.
+     */
+    internal fun toCompactMaze(): CompactMaze {
+        val result = CompactMaze(width, height)
+        for (y in 0..<height) {
+            for (x in 0..<width) {
+                result[x, y] = when (this[x, y]) {
+                    OUTSIDE -> CompactMaze.FieldValue.OUTSIDE
+                    WALL -> CompactMaze.FieldValue.WALL
+                    PATH -> CompactMaze.FieldValue.PATH
+                    else -> CompactMaze.FieldValue.UNKNOWN
+                }
+            }
+        }
+        return result
     }
 
     companion object {

@@ -15,6 +15,7 @@ import io.ktor.server.response.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import kotlin.io.encoding.Base64
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -40,7 +41,10 @@ object ServerController {
             MazeServer.serverMap.values.forEach {
                 val result = it.stop()
                 if (result.isFailure) {
-                    LOGGER.error("Failed to stop server at port '${it.serverConfiguration.connection.port}': ", result.exceptionOrNull())
+                    LOGGER.error(
+                        "Failed to stop server at port '${it.serverConfiguration.connection.port}': ",
+                        result.exceptionOrNull()
+                    )
                 }
             }
         }
@@ -61,7 +65,11 @@ object ServerController {
      * Retrieves a [ClientConnection] with matching [playerId] from the given [server]. If none is found, null is returned and a
      * [HttpStatusCode.NotFound] is responded.
      */
-    private suspend fun getClientConnection(call: ApplicationCall, server: MazeServer, playerId: Int): ClientConnection? {
+    private suspend fun getClientConnection(
+        call: ApplicationCall,
+        server: MazeServer,
+        playerId: Int
+    ): ClientConnection? {
         val clientConnection: ClientConnection? = server.getClientConnection(playerId)
         if (clientConnection == null) {
             call.respond(HttpStatusCode.NotFound, "Player $playerId not found.")
@@ -179,7 +187,14 @@ object ServerController {
     suspend fun putBait(call: ApplicationCall, serverId: Int, putBaitCommand: PutBaitCommandDto) {
         val server: MazeServer = getMazeServer(call, serverId) ?: return
         val baitType: BaitType = putBaitCommand.baitType
-        val command = PutBaitCommand(server, baitType, putBaitCommand.x, putBaitCommand.y, putBaitCommand.visible, putBaitCommand.reappearOffset)
+        val command = PutBaitCommand(
+            server,
+            baitType,
+            putBaitCommand.x,
+            putBaitCommand.y,
+            putBaitCommand.visible,
+            putBaitCommand.reappearOffset
+        )
         server.commandExecutor.addCommand(command)
         val result: OccupationResult = command.reply.await()
         communicateOccupationResult(call, result)
@@ -188,7 +203,11 @@ object ServerController {
     private suspend fun communicateOccupationResult(call: ApplicationCall, result: OccupationResult) {
         when (result) {
             OccupationResult.SUCCESS -> call.respond(HttpStatusCode.NoContent)
-            OccupationResult.FAIL_OUT_OF_BOUNDS -> call.respond(HttpStatusCode.BadRequest, "Coordinates are out of bounds.")
+            OccupationResult.FAIL_OUT_OF_BOUNDS -> call.respond(
+                HttpStatusCode.BadRequest,
+                "Coordinates are out of bounds."
+            )
+
             OccupationResult.FAIL_NO_PATH -> call.respond(HttpStatusCode.BadRequest, "Position is not a walkable path.")
             OccupationResult.FAIL_OCCUPIED -> call.respond(HttpStatusCode.BadRequest, "Position is already occupied.")
         }
@@ -202,7 +221,9 @@ object ServerController {
         val info: List<ReducedServerInformationDto> = ids.map { id ->
             val server: MazeServer = MazeServer.serverMap[id]!!
             val configuration = server.serverConfiguration
-            val spectator: String? = if (configuration.game.allowSpectator) configuration.serverBots.specialBots.spectator else null
+            val compactMaze: String = Base64.encode(server.maze.toCompactMaze().export())
+            val spectator: String? =
+                if (configuration.game.allowSpectator) configuration.serverBots.specialBots.spectator else null
             ReducedServerInformationDto(
                 id,
                 configuration.connection.maxClients,
@@ -210,6 +231,7 @@ object ServerController {
                 server.gameSpeed.delay.toInt(),
                 server.maze.width,
                 server.maze.height,
+                compactMaze,
                 spectator
             )
         }
@@ -225,7 +247,11 @@ object ServerController {
         val connection: ConnectionDto = serverConfiguration.connection
         val maze: MazeGeneratorConfigurationDto = serverConfiguration.maze
         val mazeInformation =
-            MazeInformationDto(maze.generatorMode.shortName, maze.generatorParameters, server.positionProvider.walkablePositionsSize)
+            MazeInformationDto(
+                maze.generatorMode.shortName,
+                maze.generatorParameters,
+                server.positionProvider.walkablePositionsSize
+            )
         val game: GameDto = serverConfiguration.game
         val baitInformation = BaitInformationDto(
             game.baitGenerator,
@@ -329,9 +355,15 @@ object ServerController {
         val clientConnection: ClientConnection? = command.reply.await()
         if (clientConnection == null) {
             if (nick == server.serverConfiguration.serverBots.specialBots.trapeater) {
-                call.respond(HttpStatusCode.Accepted, "Auto trapeater will be activated or remain activated but not spawned directly.")
+                call.respond(
+                    HttpStatusCode.Accepted,
+                    "Auto trapeater will be activated or remain activated but not spawned directly."
+                )
             } else {
-                call.respond(HttpStatusCode.InternalServerError, "Unknown error while spawning server side bot '$nick'.")
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    "Unknown error while spawning server side bot '$nick'."
+                )
             }
             return
         }

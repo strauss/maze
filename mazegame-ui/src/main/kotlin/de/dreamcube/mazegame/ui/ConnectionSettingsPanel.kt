@@ -4,6 +4,7 @@ import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
 import de.dreamcube.mazegame.common.api.ReducedServerInformationDto
+import de.dreamcube.mazegame.common.maze.CompactMaze
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.Dispatchers
@@ -17,80 +18,107 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.event.ItemEvent
 import java.awt.event.KeyEvent
+import java.awt.image.BufferedImage
 import javax.swing.*
+import kotlin.io.encoding.Base64
 
 class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     companion object {
         private const val TEXT_FIELD_COLUMNS: Int = 20
         private val LOGGER: Logger = LoggerFactory.getLogger(ConnectionSettingsPanel::class.java)
+    }
 
-        private class ServerInfoPanel() : JPanel() {
-            // Dummy panel for future minimap
-            val dummyPanel = JPanel()
-            private val idLabel = JLabel("Port")
-            private val idText = JLabel()
-            private val dimensionsLabel = JLabel("Dimensions")
-            private val dimensionsText = JLabel()
-            private val clientsLabel = JLabel("Clients")
-            private val clientsText = JLabel()
-            private val speedLabel = JLabel("Game speed")
-            private val speedText = JLabel()
-            private val spectatorLabel = JLabel("Spectator prefix")
-            private val spectatorText = JLabel()
+    private class ServerInfoPanel(preferredPreviewWidth: Int) : JPanel() {
+        // Dummy panel for future minimap
+        private val previewLabel = JLabel("No preview")
+        private val idLabel = JLabel("Port")
+        private val idText = JLabel()
+        private val dimensionsLabel = JLabel("Dimensions")
+        private val dimensionsText = JLabel()
+        private val clientsLabel = JLabel("Clients")
+        private val clientsText = JLabel()
+        private val speedLabel = JLabel("Game speed")
+        private val speedText = JLabel()
+        private val spectatorLabel = JLabel("Spectator prefix")
+        private val spectatorText = JLabel()
 
-            init {
-                layout = MigLayout("wrap 2")
+        init {
+            layout = MigLayout("wrap 3", "[][][]")
 
-                dummyPanel.preferredSize = Dimension(50, 50)
-                add(dummyPanel, "west")
+            previewLabel.preferredSize = Dimension(preferredPreviewWidth, 50)
+            add(previewLabel, "span 1 5")
 
-                // Now we add the information
-                idLabel.font = idLabel.font.deriveFont(Font.BOLD)
-                add(idLabel)
-                add(idText)
+            // Now we add the information
+            idLabel.font = idLabel.font.deriveFont(Font.BOLD)
+            add(idLabel)
+            add(idText)
 
-                dimensionsLabel.font = dimensionsLabel.font.deriveFont(Font.BOLD)
-                add(dimensionsLabel)
-                add(dimensionsText)
+            dimensionsLabel.font = dimensionsLabel.font.deriveFont(Font.BOLD)
+            add(dimensionsLabel)
+            add(dimensionsText)
 
-                clientsLabel.font = clientsLabel.font.deriveFont(Font.BOLD)
-                add(clientsLabel)
-                add(clientsText)
+            clientsLabel.font = clientsLabel.font.deriveFont(Font.BOLD)
+            add(clientsLabel)
+            add(clientsText)
 
-                speedLabel.font = speedLabel.font.deriveFont(Font.BOLD)
-                add(speedLabel)
-                add(speedText)
+            speedLabel.font = speedLabel.font.deriveFont(Font.BOLD)
+            add(speedLabel)
+            add(speedText)
 
-                spectatorLabel.font = spectatorLabel.font.deriveFont(Font.BOLD)
-                add(spectatorLabel)
-                add(spectatorText)
+            spectatorLabel.font = spectatorLabel.font.deriveFont(Font.BOLD)
+            add(spectatorLabel)
+            add(spectatorText)
 
-                clear()
-            }
-
-            fun clear() {
-                idText.text = null
-                dimensionsText.text = null
-                clientsText.text = null
-                speedText.text = null
-                spectatorText.text = null
-                isVisible = false
-            }
-
-            fun activate(serverInfo: ReducedServerInformationDto) {
-                idText.text = serverInfo.id.toString()
-                dimensionsText.text = "${serverInfo.width} x ${serverInfo.height}"
-                clientsText.text = "${serverInfo.activeClients} / ${serverInfo.maxClients}"
-                speedText.text = "${serverInfo.speed} ms per tick"
-                spectatorText.text = serverInfo.spectatorName ?: "<no spectators allowed>"
-                isVisible = true
-            }
-
-            fun adjustLeftSide(preferredWidth: Int) {
-                dummyPanel.preferredSize = Dimension(preferredWidth, dummyPanel.preferredSize.height)
-            }
-
+            clear()
         }
+
+        fun clear() {
+            idText.text = null
+            dimensionsText.text = null
+            clientsText.text = null
+            speedText.text = null
+            spectatorText.text = null
+            isVisible = false
+        }
+
+        fun activate(serverInfo: ReducedServerInformationDto) {
+            val compactMaze = CompactMaze.import(Base64.decode(serverInfo.compactMaze))
+            val previewImage = BufferedImage(compactMaze.width * 2, compactMaze.height * 2, BufferedImage.TYPE_INT_RGB)
+            for (y in 0..<compactMaze.height) {
+                for (x in 0..<compactMaze.width) {
+                    val colorAsRBG: Int = when (compactMaze[x, y]) {
+                        CompactMaze.FieldValue.PATH -> 0xffffff // white
+                        CompactMaze.FieldValue.WALL -> 0x777777 // darkish gray
+                        CompactMaze.FieldValue.OUTSIDE -> 0x000000 // black
+                        CompactMaze.FieldValue.UNKNOWN -> 0xff0000 // red
+                    }
+                    val xx = x * 2
+                    val yy = y * 2
+                    previewImage.setRGB(xx, yy, colorAsRBG)
+                    previewImage.setRGB(xx + 1, yy, colorAsRBG)
+                    previewImage.setRGB(xx + 1, yy + 1, colorAsRBG)
+                    previewImage.setRGB(xx, yy + 1, colorAsRBG)
+                }
+            }
+            previewLabel.text = null
+            previewLabel.icon = ImageIcon(previewImage)
+            previewLabel.horizontalAlignment = SwingConstants.CENTER
+            previewLabel.verticalAlignment = SwingConstants.CENTER
+            previewLabel.preferredSize = Dimension(previewImage.width + 20, previewImage.height)
+            previewLabel.revalidate()
+            previewLabel.repaint()
+            idText.text = serverInfo.id.toString()
+            dimensionsText.text = "${serverInfo.width} x ${serverInfo.height}"
+            clientsText.text = "${serverInfo.activeClients} / ${serverInfo.maxClients}"
+            speedText.text = "${serverInfo.speed} ms per tick"
+            spectatorText.text = serverInfo.spectatorName ?: "<no spectators allowed>"
+            isVisible = true
+        }
+
+        fun adjustLeftSide(preferredWidth: Int) {
+            previewLabel.preferredSize = Dimension(preferredWidth, previewLabel.preferredSize.height)
+        }
+
     }
 
     private val managedConnection = JRadioButton("Managed")
@@ -110,7 +138,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     private val gameLabel = JLabel("Game")
     private val gameSelection = JComboBox<ReducedServerInformationDto?>()
 
-    private val serverInfoPanel = ServerInfoPanel()
+    private val serverInfoPanel = ServerInfoPanel(addressLabel.preferredSize.width)
 
     private val serverControlHeader = JLabel("Server Control (optional)")
     private val serverControlPasswordLabel = JLabel("Password")
@@ -235,7 +263,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
             }
         }
 
-        add(serverInfoPanel, "span 2")
+        add(serverInfoPanel, "span 2, growx")
         serverInfoPanel.adjustLeftSide(addressLabel.preferredSize.width)
         add(JSeparator(), "span 2")
 

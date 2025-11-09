@@ -1,7 +1,17 @@
 package de.dreamcube.mazegame.common.api
 
-data class ServerInformationDto(val connection: ConnectionDto, val mazeInformation: MazeInformationDto, val gameInformation: GameInformationDto)
-data class MazeInformationDto(val generatorMode: String, val generatorParameters: GeneratorParametersDto, val walkableFields: Int)
+data class ServerInformationDto(
+    val connection: ConnectionDto,
+    val mazeInformation: MazeInformationDto,
+    val gameInformation: GameInformationDto
+)
+
+data class MazeInformationDto(
+    val generatorMode: String,
+    val generatorParameters: GeneratorParametersDto,
+    val walkableFields: Int
+)
+
 data class GameInformationDto(
     val speed: String,
     val autoTrapeater: Boolean,
@@ -44,6 +54,7 @@ data class ReducedServerInformationDto(
     val speed: Int,
     val width: Int,
     val height: Int,
+    val compactMaze: String,
     val spectatorName: String? = null
 ) {
     override fun toString(): String = "$id ($width x $height)"
