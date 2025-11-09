@@ -51,9 +51,11 @@
       - dummy
       - dummy
       - ninja_ng
-      - mindripper
-      - underdog
+      - stubborn
       - chopstick
+      - planestrider
+      - underdog
+      - mindripper
       - bloodhound
       - FrenzyFrede
     specialBots:
