@@ -22,6 +22,9 @@ import java.awt.image.BufferedImage
 import javax.swing.*
 import kotlin.io.encoding.Base64
 
+private const val LOCALHOST = "localhost"
+private const val DREAMCUBE = "dreamcube.de"
+
 class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     companion object {
         private const val TEXT_FIELD_COLUMNS: Int = 20
@@ -126,7 +129,9 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     private var withFlavor: Boolean = true
 
     private val addressLabel = JLabel("Address")
-    private val addressField = JTextField(TEXT_FIELD_COLUMNS)
+
+    //    private val addressField = JTextField(TEXT_FIELD_COLUMNS)
+    private val addressFieldComboBox = JComboBox<String>()
 
     private val portLabel = JLabel("Port")
     private val portField = JTextField(TEXT_FIELD_COLUMNS)
@@ -184,8 +189,18 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
 
         // Address and port
         add(addressLabel)
-        addressField.text = "localhost" // TODO: make it better
-        add(addressField)
+        val model: DefaultComboBoxModel<String> = addressFieldComboBox.model as DefaultComboBoxModel
+        if (model.size > 0) {
+            model.removeAllElements()
+        }
+        model.addElement(LOCALHOST)
+        model.addElement(DREAMCUBE)
+        addressFieldComboBox.isEditable = true
+        addressFieldComboBox.selectedItem = LOCALHOST
+
+        addressFieldComboBox.preferredSize =
+            Dimension(portField.preferredSize.width, addressFieldComboBox.preferredSize.height)
+        add(addressFieldComboBox)
 
         add(portLabel)
         portField.text = "8080" // TODO: make it better
@@ -193,11 +208,11 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
 
         // Query button for managed connection
         add(JPanel()) // Dummy panel without content
-        queryButton.preferredSize = Dimension(addressField.preferredSize.width, queryButton.preferredSize.height)
+        queryButton.preferredSize = Dimension(portField.preferredSize.width, queryButton.preferredSize.height)
         queryButton.mnemonic = KeyEvent.VK_R
         add(queryButton)
         queryButton.addActionListener { _ ->
-            val address = addressField.text
+            val address: String = addressFieldComboBox.selectedItem as String
             val port = portField.text
             if (address.isNotBlank() && port.isNotBlank()) {
                 queryButton.isEnabled = false
@@ -232,14 +247,14 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(gameLabel)
         add(gameSelection)
         gameSelection.isEnabled = false
-        gameSelection.preferredSize = Dimension(addressField.preferredSize.width, gameSelection.preferredSize.height)
+        gameSelection.preferredSize = Dimension(portField.preferredSize.width, gameSelection.preferredSize.height)
         fillGameSelection(listOf())
         gameSelection.addItemListener { event: ItemEvent ->
             if (event.stateChange == ItemEvent.SELECTED) {
                 val item: ReducedServerInformationDto? = event.item as ReducedServerInformationDto
                 if (item != null) {
                     gamePortField.text = item.id.toString()
-                    addressField.isEnabled = false
+                    addressFieldComboBox.isEnabled = false
                     portField.isEnabled = false
                     queryButton.isEnabled = false
                     managedConnection.isEnabled = false
@@ -254,7 +269,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 }
             } else if (event.stateChange == ItemEvent.DESELECTED) {
                 gamePortField.text = ""
-                addressField.isEnabled = true
+                addressFieldComboBox.isEnabled = true
                 portField.isEnabled = true
                 queryButton.isEnabled = true
                 managedConnection.isEnabled = true
@@ -279,7 +294,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(serverControlPasswordField)
 
         serverControlActivateButton.preferredSize =
-            Dimension(addressField.preferredSize.width, serverControlActivateButton.preferredSize.height)
+            Dimension(portField.preferredSize.width, serverControlActivateButton.preferredSize.height)
         serverControlActivateButton.isEnabled = false
         add(JPanel()) // Dummy panel without content
         add(serverControlActivateButton)
@@ -288,7 +303,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
             UiController.bgScope.launch {
                 try {
                     UiController.activateServerController(
-                        addressField.text,
+                        addressFieldComboBox.selectedItem as String,
                         portField.text.toInt(),
                         String(serverControlPasswordField.password),
                         gamePortField.text.toInt()
@@ -324,7 +339,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(strategyLabel)
         fillStrategySelection()
         strategySelection.preferredSize =
-            Dimension(addressField.preferredSize.width, strategySelection.preferredSize.height)
+            Dimension(portField.preferredSize.width, strategySelection.preferredSize.height)
         add(strategySelection)
         strategySelection.addItemListener { event: ItemEvent ->
             if (event.stateChange == ItemEvent.SELECTED) {
@@ -338,21 +353,21 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(nickField)
 
         add(JPanel())
-        connectButton.preferredSize = Dimension(addressField.preferredSize.width, connectButton.preferredSize.height)
+        connectButton.preferredSize = Dimension(portField.preferredSize.width, connectButton.preferredSize.height)
         add(connectButton)
 
         connectButton.addActionListener { _ ->
             val readyToConnect =
                 UiController.connectionStatus == ConnectionStatus.NOT_CONNECTED || UiController.connectionStatus == ConnectionStatus.DEAD
             if (readyToConnect &&
-                addressField.text.isNotBlank() &&
+                (addressFieldComboBox.selectedItem as String).isNotBlank() &&
                 gamePortField.text.isNotBlank() &&
                 (strategySelection.selectedItem as String?)?.isNotBlank() ?: false &&
                 nickField.text.isNotBlank()
             ) {
                 UiController.bgScope.launch {
                     UiController.connect(
-                        addressField.text,
+                        addressFieldComboBox.selectedItem as String,
                         gamePortField.text.toInt(),
                         strategySelection.selectedItem as String,
                         withFlavor,
@@ -414,7 +429,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         fillGameSelection(emptyList())
 
         // TODO: make these combo-boxes with predefined values, this should do for now
-        addressField.text = "dreamcube.de"
+        addressFieldComboBox.selectedItem = DREAMCUBE
         gamePortField.text = "12345"
     }
 
