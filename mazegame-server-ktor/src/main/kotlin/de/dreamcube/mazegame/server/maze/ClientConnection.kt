@@ -301,7 +301,7 @@ class ClientConnection(
         if (performDelayCompensation) {
             delayCompensator.startTimer()
         }
-        sendMessage(createReadyMessage(server.gameSpeed))
+        sendMessage(createReadyMessage())
     }
 
     /**

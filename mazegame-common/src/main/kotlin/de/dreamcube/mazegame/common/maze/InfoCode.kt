@@ -5,6 +5,7 @@ enum class InfoCode(val code: Int) {
     SERVER_MESSAGE(200),
     CLIENT_MESSAGE(201),
     CLIENT_WHISPER(202),
+    SPEED_CHANGE(300),
     WRONG_PARAMETER_VALUE(450),
     TOO_MANY_CLIENTS(451),
     DUPLICATE_NICK(452),
@@ -23,6 +24,7 @@ enum class InfoCode(val code: Int) {
             SERVER_MESSAGE.code -> SERVER_MESSAGE
             CLIENT_MESSAGE.code -> CLIENT_MESSAGE
             CLIENT_WHISPER.code -> CLIENT_WHISPER
+            SPEED_CHANGE.code -> SPEED_CHANGE
             WRONG_PARAMETER_VALUE.code -> WRONG_PARAMETER_VALUE
             TOO_MANY_CLIENTS.code -> TOO_MANY_CLIENTS
             DUPLICATE_NICK.code -> DUPLICATE_NICK

@@ -14,6 +14,7 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
     private val infoCode: InfoCode
     private val message: String?
     private val sourcePlayerId: Int?
+    private val gameSpeed: Int?
     override val okay: Boolean
 
     init {
@@ -23,10 +24,22 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
             message = null
             sourcePlayerId = null
             okay = false
+            gameSpeed = null
         } else {
             infoNumber = commandWithParameters[1].toInt()
             infoCode = InfoCode.fromCode(infoNumber)
-            message = if (commandWithParameters.size > 2) commandWithParameters[2] else null
+            if (commandWithParameters.size > 2) {
+                if (infoCode == InfoCode.SPEED_CHANGE) {
+                    message = null
+                    gameSpeed = commandWithParameters[2].toInt()
+                } else {
+                    message = commandWithParameters[2]
+                    gameSpeed = null
+                }
+            } else {
+                message = null
+                gameSpeed = null
+            }
             sourcePlayerId = if (commandWithParameters.size > 3) commandWithParameters[3].toInt() else null
             okay = true
         }
@@ -45,9 +58,24 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
             InfoCode.CLIENT_MESSAGE, InfoCode.CLIENT_WHISPER -> {
                 val sourcePlayerNick: String = getSourcePlayerNick()
                 if (sourcePlayerId != null && message != null) {
-                    mazeClient.eventHandler.firePlayerChat(sourcePlayerId, sourcePlayerNick, message, infoCode == InfoCode.CLIENT_WHISPER)
+                    mazeClient.eventHandler.firePlayerChat(
+                        sourcePlayerId,
+                        sourcePlayerNick,
+                        message,
+                        infoCode == InfoCode.CLIENT_WHISPER
+                    )
                 } else {
                     LOGGER.warn("Received invalid client message (something is null) with source player id '$sourcePlayerId', nick '$sourcePlayerNick' and message '$message'.")
+                }
+            }
+
+            InfoCode.SPEED_CHANGE -> {
+                if (gameSpeed != null) {
+                    val oldSpeed: Int = mazeClient.gameSpeed
+                    mazeClient.gameSpeed = gameSpeed
+                    if (oldSpeed != gameSpeed) {
+                        mazeClient.eventHandler.fireSpeedChanged(oldSpeed, gameSpeed)
+                    }
                 }
             }
 

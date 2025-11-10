@@ -285,20 +285,10 @@ Example: `PSCO;13;314`
 ### Ready (RDY.)
 
 ```
-Ready ::= "RDY." [Speed]
-Speed ::= Integer
+Ready ::= "RDY."
 ```
 
 The server uses this to indicate that the client can now send its next STEP or TURN message.
-
-#### Extensions
-
-The protocol has been extended to communicate the current game speed.
-The server can change the speed at any time and clients might want to react on speed changes.
-
-Example: `RDY.;100`
-
-- The client is allowed to send the next command. The game runs at 100 ms/tick.
 
 ### Quit (QUIT)
 
@@ -341,9 +331,10 @@ Example: `WELC;13`
 ## Info messages (INFO)
 
 ```
-Info ::= "INFO" InfoCode [ Message [ PlayerID ] ]
+Info ::= "INFO" InfoCode ( [ Message [ PlayerID ] ] | Speed )
 InfoCode ::= Integer
 Message ::= StringWithoutSemicolon
+Speed ::= Integer
 ```
 
 The info command used to be a pure server command.
@@ -358,6 +349,8 @@ In this scenario also only the text message is appended.
 A client can whisper a text message to a specific other client.
 In this scenario the player-ID of the sender/receiver is also appended.
 
+The server can communicate a speed change to the clients.
+
 The info code is one of the following:
 
 ### Text messages
@@ -365,6 +358,10 @@ The info code is one of the following:
 - 200: Server text message to client
 - 201: Client broadcast text message to server (and also to the other clients that will receive the message)
 - 202: Client whisper text message to server (and also to the other client that will receive the message)
+
+### Game speed change
+
+- 300: The game speed has changed
 
 ### Temporary errors
 
@@ -385,8 +382,15 @@ The info code is one of the following:
 Examples:
 
 - `INFO;451`
+    - Error: The server is full
 - `INFO;200;ninja found an invisible gem!`
+    - The server broadcasts something to everyone
+- `INFO:201;I feel lonely.`
+    - A client broadcasts something to everyone
 - `INFO;202;Gotcha!;1337`
+    - A client whispers something to a player with ID 1337.
+- `INFO;300;150`
+    - The server notifies everyone that the game speed has changed to 150 ms per tick.
 
 #### Extensions
 
@@ -396,6 +400,8 @@ errors.
 With the text messages, Clients are also allowed to send INFO commands.
 The server is allowed to limit the size and frequency.
 However, the server only "understands" commands with the text message info codes.
+
+Also, the speed change notification is an extension to the original protocol.
 
 ## Handshake
 

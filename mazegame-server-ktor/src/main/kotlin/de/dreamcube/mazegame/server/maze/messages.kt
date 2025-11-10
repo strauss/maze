@@ -3,9 +3,13 @@ package de.dreamcube.mazegame.server.maze
 import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.maze.*
 
+private val EMPTY_LAST_MESSAGE = "".asMessage()
+
+private val RDY_MESSAGE = "RDY.".asMessage()
+
 internal fun String.asMessage() = Message(this)
 
-fun createEmptyLastMessage() = "".asMessage()
+fun createEmptyLastMessage() = EMPTY_LAST_MESSAGE
 
 // Login stuff
 fun createServerVersionMessage() = listOf("MSRV", PROTOCOL_VERSION.toString())
@@ -50,6 +54,9 @@ fun createClientInfoMessage(message: String, sourceId: Int) =
 fun createClientWhisperInfoMessage(message: String, sourceId: Int) =
     listOf("INFO", InfoCode.CLIENT_WHISPER.code, message, sourceId)
         .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
+
+fun createSpeedChangeInfoMessage(newSpeed: GameSpeed) = listOf("INFO", InfoCode.SPEED_CHANGE.code, newSpeed.delay)
+    .joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
 
 
 // Player position and score messages
@@ -103,7 +110,5 @@ private fun createBaitPositionChangeMessage(bait: ServerBait, reason: BaitPositi
 fun createBaitGeneratedMessage(bait: ServerBait) = createBaitPositionChangeMessage(bait, BaitPositionChange.GENERATED)
 fun createBaitCollectedMessage(bait: ServerBait) = createBaitPositionChangeMessage(bait, BaitPositionChange.COLLECTED)
 
-
 // Ready message
-fun createReadyMessage(gameSpeed: GameSpeed) =
-    listOf("RDY.", gameSpeed.delay.toString()).joinToString(COMMAND_AND_MESSAGE_SEPARATOR).asMessage()
+fun createReadyMessage() = RDY_MESSAGE

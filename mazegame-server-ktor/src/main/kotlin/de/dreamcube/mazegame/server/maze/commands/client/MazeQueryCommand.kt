@@ -1,12 +1,13 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.InfoCode
-import de.dreamcube.mazegame.server.maze.ClientChatControl
-import de.dreamcube.mazegame.server.maze.ClientConnection
-import de.dreamcube.mazegame.server.maze.MazeServer
-import de.dreamcube.mazegame.server.maze.createServerInfoMessage
+import de.dreamcube.mazegame.server.maze.*
 
-class MazeQueryCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :
+class MazeQueryCommand(
+    clientConnection: ClientConnection,
+    mazeServer: MazeServer,
+    commandWithParameters: List<String>
+) :
     ClientCommand(mazeServer, clientConnection) {
 
     init {
@@ -20,6 +21,7 @@ class MazeQueryCommand(clientConnection: ClientConnection, mazeServer: MazeServe
         mazeServer.sendMapData(clientConnection)
         mazeServer.sendAllPlayerInfos(clientConnection)
         mazeServer.sendAllBaitInfos(clientConnection)
+        clientConnection.sendMessage(createSpeedChangeInfoMessage(mazeServer.gameSpeed).thereIsMore())
         if (clientConnection.startAsSpectator) {
             startSpectating()
         } else {

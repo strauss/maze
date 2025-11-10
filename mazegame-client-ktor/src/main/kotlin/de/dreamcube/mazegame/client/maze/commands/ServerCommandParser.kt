@@ -9,7 +9,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
-class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClient, val commandExecutor: CommandExecutor) :
+class ServerCommandParser(
+    parentScope: CoroutineScope,
+    val mazeClient: MazeClient,
+    val commandExecutor: CommandExecutor
+) :
     CoroutineScope by CoroutineScope(parentScope.coroutineContext + SupervisorJob()) {
 
     companion object {
@@ -47,7 +51,7 @@ class ServerCommandParser(parentScope: CoroutineScope, val mazeClient: MazeClien
 
                     "RDY." -> {
                         finalizeMazeCommand()
-                        commandExecutor.addCommand(ReadyCommand(mazeClient, commandWithParameters))
+                        commandExecutor.addCommand(ReadyCommand(mazeClient))
                     }
 
                     "BPOS" -> {
