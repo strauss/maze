@@ -7,6 +7,9 @@ import java.awt.Color
 import java.awt.Font
 import java.awt.Graphics
 import java.awt.Graphics2D
+import java.awt.geom.Area
+import java.awt.geom.Rectangle2D
+import kotlin.math.floor
 
 interface DrawableMazeObject {
     /**
@@ -107,121 +110,28 @@ class DrawablePlayer(private val color: Color, private val viewDirection: ViewDi
     }
 
     override fun drawAt(g: Graphics, x: Int, y: Int, zoom: Int) {
-        val w: Int
-        g.color = color
+        val g2 = g as Graphics2D
+        g2.run {
+            val zd = zoom.toDouble()
+            val xx: Double = x.toDouble() * zd + 1.0
+            val yy: Double = y.toDouble() * zd + 1.0
+            val wh: Double = zd - 2.0
+            val r: Double = floor(wh / 3.0)
+            val w: Double = (wh - r) / 2.0
 
-        val xx: Int = x * zoom + 1
-        val yy: Int = y * zoom + 1
-        g.fillRect(xx, yy, zoom - 2, zoom - 2)
-        val r = zoom / 3
-        w = (zoom - r - 2) / 2
-        g.color = DrawablePath.PATH_COLOR
-
-        when (viewDirection) {
-            ViewDirection.NORTH -> cutNorth(g, xx, yy, w, r, zoom)
-            ViewDirection.EAST -> cutEast(g, xx, yy, w, r, zoom)
-            ViewDirection.SOUTH -> cutSouth(g, xx, yy, w, r, zoom)
-            ViewDirection.WEST -> cutWest(g, xx, yy, w, r, zoom)
-
+            val rect = Rectangle2D.Double(xx, yy, wh, wh)
+            val subRect = when (viewDirection) {
+                ViewDirection.NORTH -> Rectangle2D.Double(xx + w, yy, r, r)
+                ViewDirection.EAST -> Rectangle2D.Double(xx + zd - 2.0 - r, yy + w, r, r)
+                ViewDirection.SOUTH -> Rectangle2D.Double(xx + w, yy + zd - 2.0 - r, r, r)
+                ViewDirection.WEST -> Rectangle2D.Double(xx, yy + w, r, r)
+            }
+            val playerArea = Area(rect).apply { subtract(Area(subRect)) }
+            color = this@DrawablePlayer.color
+            g2.fill(playerArea)
+            color = EDGE_COLOR
+            g2.draw(playerArea)
         }
     }
 
-    private fun cutNorth(g: Graphics, x: Int, y: Int, w: Int, r: Int, zoom: Int) {
-        val dx = w
-        val dy = 0
-        g.fillRect(x + dx, y + dy, r, r)
-
-        g.color = EDGE_COLOR
-
-        // north
-        g.drawLine(x, y, x + w, y) // right
-        g.drawLine(x + w, y, x + w, y + w) // down
-        g.drawLine(x + w, y + w, x + w + r, y + w) // further right
-        g.drawLine(x + w + r, y + w, x + w + r, y) // up again
-        g.drawLine(x + w + r, y, x + zoom - 2, y) // finalize to the right
-
-        // east
-        g.drawLine(x + zoom - 2, y, x + zoom - 2, y + zoom - 2)
-
-        // south
-        g.drawLine(x + zoom - 2, y + zoom - 2, x, y + zoom - 2)
-
-        // west
-        g.drawLine(x, y + zoom - 2, x, y)
-    }
-
-    private fun cutEast(g: Graphics, x: Int, y: Int, w: Int, r: Int, zoom: Int) {
-        val dx = zoom - 1 - r
-        val dy = w
-        g.fillRect(x + dx, y + dy, r, r)
-
-        g.color = EDGE_COLOR
-
-        // north
-        g.drawLine(x, y, x + zoom - 2, y)
-
-        // east
-        g.drawLine(x + zoom - 2, y, x + zoom - 2, y + w) // down
-        g.drawLine(x + zoom - 2, y + w, x + zoom - 2 - w, y + w) // left
-        g.drawLine(x + zoom - 2 - w, y + w, x + zoom - 2 - w, y + w + r) // further down
-        g.drawLine(x + zoom - 2 - w, y + w + r, x + zoom - 2, y + w + r) // right again
-        g.drawLine(x + zoom - 2, y + w + r, x + zoom - 2, y + zoom - 2) // finalize to the bottom
-
-        // south
-        g.drawLine(x + zoom - 2, y + zoom - 2, x, y + zoom - 2)
-
-        // west
-        g.drawLine(x, y + zoom - 2, x, y)
-    }
-
-    private fun cutSouth(g: Graphics, x: Int, y: Int, w: Int, r: Int, zoom: Int) {
-        val dx = w
-        val dy = zoom - 1 - r
-        g.fillRect(x + dx, y + dy, r, r)
-
-        g.color = EDGE_COLOR
-
-        // north
-        g.drawLine(x, y, x + zoom - 2, y)
-
-        // east
-        g.drawLine(x + zoom - 2, y, x + zoom - 2, y + zoom - 2)
-
-        // south
-        g.drawLine(x, y + zoom - 2, x + w, y + zoom - 2) // right
-        g.drawLine(x + w, y + zoom - 2, x + w, y + zoom - 2 - w) // down
-        g.drawLine(x + w, y + zoom - 2 - w, x + w + r, y + zoom - 2 - w) // further right
-        g.drawLine(x + w + r, y + zoom - 2 - w, x + w + r, y + zoom - 2) // up again
-        g.drawLine(x + w + r, y + zoom - 2, x + zoom - 2, y + zoom - 2) // finalize to the right
-
-        // west
-        g.drawLine(x, y + zoom - 2, x, y)
-    }
-
-    private fun cutWest(g: Graphics, x: Int, y: Int, w: Int, r: Int, zoom: Int) {
-        val dx = 0
-        val dy = w
-        g.fillRect(x + dx, y + dy, r, r)
-
-        g.color = EDGE_COLOR
-
-        // north
-        g.drawLine(x, y, x + zoom - 2, y)
-
-        // east
-        g.drawLine(x + zoom - 2, y, x + zoom - 2, y + zoom - 2)
-
-        // south
-        g.drawLine(x + zoom - 2, y + zoom - 2, x, y + zoom - 2)
-
-        // west
-        g.drawLine(x, y, x, y + w) // down
-        g.drawLine(x, y + w, x + w, y + w) // left
-        g.drawLine(x + w, y + w, x + w, y + w + r) // further down
-        g.drawLine(x + w, y + w + r, x, y + w + r) // right again
-        g.drawLine(x, y + w + r, x, y + zoom - 2) // finalize to the bottom
-    }
-
 }
-
-fun UiPlayerInformation.drawable() = DrawablePlayer(this.color, this.snapshot.viewDirection)
