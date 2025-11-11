@@ -2,7 +2,9 @@ package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
+import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isHumanStrategyBlocking
 import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategy
+import de.dreamcube.mazegame.client.maze.strategy.Strategy.Companion.isSpectatorStrategyBlocking
 import de.dreamcube.mazegame.common.api.ReducedServerInformationDto
 import de.dreamcube.mazegame.common.maze.CompactMaze
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
@@ -203,7 +205,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(addressFieldComboBox)
 
         add(portLabel)
-        portField.text = "8080" // TODO: make it better
+        portField.text = "8080"
         add(portField)
 
         // Query button for managed connection
@@ -411,6 +413,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlPasswordField.isVisible = true
         serverControlActivateButton.isVisible = true
         withFlavor = true
+        gamePortField.text = ""
     }
 
     private fun directConnectionSelected() {
@@ -428,7 +431,6 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         withFlavor = false
         fillGameSelection(emptyList())
 
-        // TODO: make these combo-boxes with predefined values, this should do for now
         addressFieldComboBox.selectedItem = DREAMCUBE
         gamePortField.text = "12345"
     }
@@ -442,13 +444,32 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         model.addAll(elements)
     }
 
+    private enum class StrategyType {
+        BOT, SPECTATOR, HUMAN
+    }
+
     private fun fillStrategySelection() {
         val availableStrategies: Set<String> = Strategy.getStrategyNamesBlocking()
+        val classifiedStrategies: List<Pair<String, StrategyType>> = availableStrategies.map {
+            val type = when {
+                it.isSpectatorStrategyBlocking() -> StrategyType.SPECTATOR
+                it.isHumanStrategyBlocking() -> StrategyType.HUMAN
+                else -> StrategyType.BOT
+            }
+            Pair(it, type)
+        }
+        val compare = compareBy<Pair<String, StrategyType>> { it.second }
+            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.first }
+            .thenBy { it.first }
+        val sortedStrategies = classifiedStrategies.sortedWith(compare)
+
         val model: DefaultComboBoxModel<String> = strategySelection.model as DefaultComboBoxModel
         if (model.size > 0) {
             model.removeAllElements()
         }
-        model.addAll(availableStrategies)
+        sortedStrategies.forEach {
+            model.addElement(it.first)
+        }
     }
 
     override fun onConnectionStatusChange(
