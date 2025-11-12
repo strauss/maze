@@ -5,12 +5,31 @@ import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.common.maze.BaitPositionChange
 import de.dreamcube.mazegame.common.maze.BaitType
 
+/**
+ * Command for receiving bait related events.
+ */
 class BaitPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
+    /**
+     * [x] coordinate of the affected bait.
+     */
     private val x: Int
+
+    /**
+     * [y] coordinate of the affected bait.
+     */
     private val y: Int
+
+    /**
+     * [type] of the affected bait (see [BaitType])
+     */
     private val type: BaitType
+
+    /**
+     * The [reason] for the change. It's either [BaitPositionChange.GENERATED] or [BaitPositionChange.COLLECTED].
+     */
     private val reason: BaitPositionChange
+
     override val okay: Boolean
 
     init {
@@ -29,6 +48,9 @@ class BaitPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>
         }
     }
 
+    /**
+     * Adds or removes the bait and fires the corresponding event.
+     */
     override suspend fun internalExecute() {
         when (reason) {
             BaitPositionChange.COLLECTED -> {

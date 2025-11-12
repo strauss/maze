@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 private val LOGGER: Logger = LoggerFactory.getLogger("main")
 
 fun main() {
-    // Bot-Strategien laden
+    // Load strategies
     Strategy.scanAndAddStrategiesBlocking()
     LOGGER.info("Found strategies: ${Strategy.getStrategyNamesBlocking()}")
     val strategyName = "trapeater"

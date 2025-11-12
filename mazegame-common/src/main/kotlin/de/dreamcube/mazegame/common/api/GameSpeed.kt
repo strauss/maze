@@ -3,6 +3,10 @@ package de.dreamcube.mazegame.common.api
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 
+/**
+ * Enum class for the game speed. The values contain a [delay], indicating how much time should pass between the last
+ * received move and the next "RDY." command. The [shortName] is used in DTO classes.
+ */
 enum class GameSpeed(val delay: Long, @get:JsonValue val shortName: String) {
     UNLIMITED(1L, "unlimited"),
     ULTRA(50L, "ultra"),

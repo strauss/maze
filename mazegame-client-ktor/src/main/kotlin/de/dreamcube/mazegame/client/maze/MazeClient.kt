@@ -32,12 +32,21 @@ class MazeClient @JvmOverloads constructor(
             setOf(ConnectionStatus.LOGGED_IN, ConnectionStatus.SPECTATING, ConnectionStatus.PLAYING)
     }
 
+    /**
+     * The reference to the strategy object. It is initialized, as soon as the connection is about to be established.
+     */
     lateinit var strategy: Strategy
         private set
 
+    /**
+     * The server address.
+     */
     val serverAddress
         get() = clientConfiguration.serverAddress
 
+    /**
+     * The server port.
+     */
     val serverPort
         get() = clientConfiguration.serverPort
 
@@ -93,11 +102,32 @@ class MazeClient @JvmOverloads constructor(
     private lateinit var readJob: Job
     private lateinit var writeJob: Job
 
+    /**
+     * The internal collection of baits.
+     */
     internal val baits = BaitCollection()
+
+    /**
+     * The internal collection of players.
+     */
     internal val players = PlayerCollection()
+
+    /**
+     * The reference to the own player object. It is initialized during [status] [ConnectionStatus.LOGGED_IN] right
+     * after the maze data was received. Only in status [ConnectionStatus.SPECTATING] or [ConnectionStatus.PLAYING] you
+     * can be sure this reference exists.
+     */
     lateinit var ownPlayer: PlayerView
+
+    /**
+     * Checks, if [ownPlayer] has already been initialized.
+     */
     private val ownPlayerInitialized: Boolean
         get() = this::ownPlayer.isInitialized
+
+    /**
+     * Takes a snapshot of the own player object.
+     */
     val ownPlayerSnapshot: PlayerSnapshot
         get() = runBlocking { players.getPlayerSnapshot(ownPlayer.id)!! }
 
@@ -110,7 +140,7 @@ class MazeClient @JvmOverloads constructor(
     fun startAndWait(): CompletableFuture<Void> = start().asCompletableFuture().thenApply { null }
 
     /**
-     * Starts the client ... Kotlin edition.
+     * Starts the client ... Kotlin edition. Creates the strategy object and establishes the connection in a coroutine.
      */
     fun start(): Deferred<Unit> {
         // We have to get the strategy somewhere ... this is one way to do it.
@@ -140,6 +170,9 @@ class MazeClient @JvmOverloads constructor(
         return result
     }
 
+    /**
+     * Indicates if the client is logged in.
+     */
     val isLoggedIn
         get() = status in loggedInStates
 
@@ -164,6 +197,11 @@ class MazeClient @JvmOverloads constructor(
         runBlocking { logout() }
     }
 
+    /**
+     * Initializes a clean logout. Is also called whenever the server terminates the connection. The call is idempotent
+     * because it reacts to the [status] [ConnectionStatus.DYING] and [ConnectionStatus.DEAD], meaning if the client
+     * is already dying or dead, it is not tried to kill it again.
+     */
     internal suspend fun stop(clientSide: Boolean) {
         if (status == ConnectionStatus.DEAD || status == ConnectionStatus.DYING) {
             return
@@ -191,6 +229,9 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Internal read loop. Reads directly from the network socket's [ByteReadChannel].
+     */
     private suspend fun readLoop(scope: CoroutineScope) {
         try {
             val input: ByteReadChannel = socket.openReadChannel()
@@ -204,6 +245,9 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Internal write loop. Writes directly to the network socket's [ByteWriteChannel].
+     */
     private suspend fun writeLoop() {
         try {
             val output: ByteWriteChannel = socket.openWriteChannel(autoFlush = false)
@@ -221,6 +265,9 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Sends a [Message] to the server.
+     */
     internal suspend fun sendMessage(message: Message) {
         try {
             outgoingMessages.send(message)
@@ -229,12 +276,20 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    /**
+     * If the protocol version matches, the connection is established.
+     */
     internal suspend fun connect(serverProtocolVersion: Int) {
         if (serverProtocolVersion == PROTOCOL_VERSION) {
             internalConnect()
         }
+        // TODO: abort with an error message
     }
 
+    /**
+     * Connects to the server. The optional iteration parameter is used for attaching a number to the nickname, if the
+     * number is bigger than 0. Can be used for a simple retry mechanism.
+     */
     internal suspend fun internalConnect(iteration: Int = 0) {
         val nameSuffix = if (iteration == 0) "" else iteration.toString()
         val flavor: String? =
@@ -242,6 +297,10 @@ class MazeClient @JvmOverloads constructor(
         sendMessage(createHelloMessage("${clientConfiguration.displayName}$nameSuffix", flavor))
     }
 
+    /**
+     * Changes the [status] from [ConnectionStatus.CONNECTED] to [ConnectionStatus.LOGGED_IN]. Sends the "MAZ?" message
+     * to the server for requesting the maze data.
+     */
     internal suspend fun loggedIn(id: Int) {
         if (status == ConnectionStatus.CONNECTED && id > 0) {
             this.id = id
@@ -250,6 +309,10 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Processes the receiving of the maze by changing the [status] to [ConnectionStatus.SPECTATING] and firing the maze
+     * received event. Only works, if the client is in [status] [ConnectionStatus.LOGGED_IN].
+     */
     internal fun initializeMaze(width: Int, height: Int, mazeLines: List<String>) {
         if (status == ConnectionStatus.LOGGED_IN) {
             eventHandler.fireMazeReceived(width, height, mazeLines)
@@ -257,6 +320,10 @@ class MazeClient @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Is executed whenever the client receives a "RDY." command. When being called for the first time, the [status]
+     * changes from [ConnectionStatus.SPECTATING] to [ConnectionStatus.PLAYING].
+     */
     internal suspend fun onReady() {
         if (status == ConnectionStatus.SPECTATING) {
             if (!ownPlayerInitialized) {
@@ -264,7 +331,7 @@ class MazeClient @JvmOverloads constructor(
                 return logout()
             }
             status = ConnectionStatus.PLAYING
-        }
+        } // no "else" here, because the bot would then never start moving. It would mean "ignore the first RDY!".
         if (status == ConnectionStatus.PLAYING) {
             strategy.makeNextMove()
         }

@@ -3,10 +3,21 @@ package de.dreamcube.mazegame.client.maze.commands
 import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 
+/**
+ * This command indicates a score change.
+ */
 class PlayerScoreCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
+    /**
+     * The id of the affected player.
+     */
     private val playerId: Int
+
+    /**
+     * The new [score] of the affected player.
+     */
     private val score: Int
+
     override val okay: Boolean
 
     init {
@@ -21,10 +32,14 @@ class PlayerScoreCommand(mazeClient: MazeClient, commandWithParameters: List<Str
         }
     }
 
+    /**
+     * Triggers a score change event.
+     */
     override suspend fun internalExecute() {
-        mazeClient.players.changePlayerScore(playerId, score)?.let { (oldScore, playerSnapshot): Pair<Int, PlayerSnapshot> ->
-            mazeClient.eventHandler.fireScoreChange(oldScore, playerSnapshot)
-        }
+        mazeClient.players.changePlayerScore(playerId, score)
+            ?.let { (oldScore, playerSnapshot): Pair<Int, PlayerSnapshot> ->
+                mazeClient.eventHandler.fireScoreChange(oldScore, playerSnapshot)
+            }
     }
 
 }

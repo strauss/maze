@@ -5,16 +5,39 @@ import de.dreamcube.mazegame.common.maze.InfoCode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+/**
+ * The info command. It is used for receiving chat messages, error codes and speed changes.
+ */
 class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeClient::class.java)
     }
 
+    /**
+     * The parsed info number.
+     */
     private val infoNumber: Int
+
+    /**
+     * The corresponding [InfoCode].
+     */
     private val infoCode: InfoCode
+
+    /**
+     * The optional chat message.
+     */
     private val message: String?
+
+    /**
+     * The optional id of the sending player.
+     */
     private val sourcePlayerId: Int?
+
+    /**
+     * The optional game speed, in case of a speed change.
+     */
     private val gameSpeed: Int?
+
     override val okay: Boolean
 
     init {
@@ -45,6 +68,13 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
         }
     }
 
+    /**
+     * Depending on the code, the following things can happen:
+     * - A server info event is fired.
+     * - A player chat event is fired.
+     * - A speed change event is fired.
+     * - A server error event is fired.
+     */
     override suspend fun internalExecute() {
         when (infoCode) {
             InfoCode.SERVER_MESSAGE -> {
@@ -89,6 +119,10 @@ class InfoCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
         }
     }
 
+    /**
+     * Retrieves the nickname of the source player, if it exists. If not, just the id is returned. The latter can
+     * happen, if the player logs out, before/while the chat message can be displayed.
+     */
     private suspend fun getSourcePlayerNick(): String {
         val sourcePlayerNick: String = sourcePlayerId?.let {
             mazeClient.players.getPlayerSnapshot(it)?.nick

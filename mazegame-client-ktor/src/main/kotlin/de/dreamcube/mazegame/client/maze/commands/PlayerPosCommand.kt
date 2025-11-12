@@ -6,14 +6,46 @@ import de.dreamcube.mazegame.common.maze.PlayerPositionChangeReason
 import de.dreamcube.mazegame.common.maze.TeleportType
 import de.dreamcube.mazegame.common.maze.ViewDirection
 
+/**
+ * This command is received whenever a player changed.
+ */
 class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
+    /**
+     * The id of the affected player.
+     */
     private val id: Int
+
+    /**
+     * The new [x] coordinate of the player.
+     */
     private val x: Int
+
+    /**
+     * The new [y] coordinate of the player.
+     */
     private val y: Int
+
+    /**
+     * The new [ViewDirection] of the player.
+     */
     private val viewDirection: ViewDirection
+
+    /**
+     * The [reason] for the change. See [PlayerPositionChangeReason] for details.
+     */
     private val reason: PlayerPositionChangeReason
+
+    /**
+     * The type of teleportation, if the [reason] is [PlayerPositionChangeReason.TELEPORT]. See [TeleportType] for
+     * details.
+     */
     private val teleportType: TeleportType?
+
+    /**
+     * If the [reason] was [PlayerPositionChangeReason.TELEPORT] and the [teleportType] was [TeleportType.COLLISION],
+     * this field contains the id of the causing player. This can either be another player or the own player.
+     */
     private val causingPlayerId: Int?
 
     override val okay: Boolean
@@ -42,12 +74,28 @@ class PlayerPosCommand(mazeClient: MazeClient, commandWithParameters: List<Strin
         }
     }
 
+    /**
+     * Depending on the type of player position change, one of the following events is triggered:
+     * - Player step
+     * - Player turn
+     * - Player teleport
+     * - Player appear
+     * - Player vanish
+     */
     override suspend fun internalExecute() {
         mazeClient.players.changePlayerPosition(id, x, y, viewDirection, reason)?.let {
             val (oldSnapshot: PlayerSnapshot, newSnapshot: PlayerSnapshot) = it
             when (reason) {
-                PlayerPositionChangeReason.MOVE -> mazeClient.eventHandler.firePlayerStep(oldSnapshot.position, newSnapshot)
-                PlayerPositionChangeReason.TURN -> mazeClient.eventHandler.firePlayerTurn(oldSnapshot.position, newSnapshot)
+                PlayerPositionChangeReason.MOVE -> mazeClient.eventHandler.firePlayerStep(
+                    oldSnapshot.position,
+                    newSnapshot
+                )
+
+                PlayerPositionChangeReason.TURN -> mazeClient.eventHandler.firePlayerTurn(
+                    oldSnapshot.position,
+                    newSnapshot
+                )
+
                 PlayerPositionChangeReason.TELEPORT -> mazeClient.eventHandler.firePlayerTeleport(
                     oldSnapshot.position,
                     newSnapshot,

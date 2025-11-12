@@ -8,6 +8,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
 
+/**
+ * Generic command executor, based on coroutines. It is used by the client and the server.
+ */
 class CommandExecutor(private val parentScope: CoroutineScope) :
     CoroutineScope by CoroutineScope(parentScope.coroutineContext + SupervisorJob()) {
 
@@ -36,6 +39,9 @@ class CommandExecutor(private val parentScope: CoroutineScope) :
         LOGGER.info("Command executor stopped!")
     }
 
+    /**
+     * Adds a new command to the queue.
+     */
     suspend fun addCommand(command: Command) = commandChannel.send(command)
 
 }

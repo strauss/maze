@@ -4,7 +4,9 @@ import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.ViewDirection
 
 /**
- * Contains a snapshot of the internal player state at the moment the object is created. Useful for strategies, but not for live surveillance.
+ * Contains a snapshot of the internal player state at the moment the object is created. Useful for strategies, but not
+ * for live surveillance. If you really want to do it, you can use the [view] reference for a read-only realtime view
+ * on the player.
  */
 class PlayerSnapshot(val view: PlayerView) {
     val id: Int
@@ -22,8 +24,16 @@ class PlayerSnapshot(val view: PlayerView) {
     val pointsPerMinute: Double = view.pointsPerMinute
     val moveTime: Double = view.moveTime
     val scoreOffset: Int = view.scoreOffset
+
+    /**
+     * For convenience: Creates a [PlayerPosition] object, each time it is accessed.
+     */
     val position: PlayerPosition
         get() = PlayerPosition(x, y, viewDirection)
+
+    /**
+     * Returns the score without the [scoreOffset].
+     */
     val localScore: Int
         get() = score - scoreOffset
 }

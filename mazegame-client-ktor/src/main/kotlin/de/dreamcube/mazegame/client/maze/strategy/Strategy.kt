@@ -49,12 +49,24 @@ abstract class Strategy : NoEventListener {
 
         private val strategyMutex = Mutex()
 
+        /**
+         * Map containing all strategies.
+         */
         private val STRATEGIES: MutableMap<String, Class<out Strategy>> = HashMap()
 
+        /**
+         * Set containing all spectator strategies.
+         */
         private val SPECTATOR_NAMES: MutableSet<String> = HashSet()
 
+        /**
+         * Set containing all human strategies.
+         */
         private val HUMAN_NAMES: MutableSet<String> = HashSet()
 
+        /**
+         * Map containing all flavor texts.
+         */
         private val FLAVOR_TEXTS: MutableMap<String, String> = HashMap()
 
         @JvmStatic

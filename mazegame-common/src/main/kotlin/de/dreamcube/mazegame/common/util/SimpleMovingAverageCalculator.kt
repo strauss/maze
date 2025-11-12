@@ -3,6 +3,9 @@ package de.dreamcube.mazegame.common.util
 import java.util.*
 import kotlin.math.roundToLong
 
+/**
+ * Utility class for calculating a moving average. Is used by the server for the delay compensation.
+ */
 class SimpleMovingAverageCalculator(windowSize: Int) : AverageCalculator<Long> {
     val values: LongArray = LongArray(windowSize)
     var internalSum: Long = 0L

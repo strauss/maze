@@ -4,11 +4,26 @@ import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.client.maze.view
 import de.dreamcube.mazegame.common.maze.Player
 
+/**
+ * This command indicates, that a new player has joined the game (aka logged into the server).
+ */
 class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) : ClientSideCommand(mazeClient) {
 
+    /**
+     * The ID of the new player.
+     */
     private val playerId: Int
+
+    /**
+     * The nickname of the new player.
+     */
     private val nick: String
+
+    /**
+     * The optional flavor text of the new player.
+     */
     private val flavor: String?
+
     override val okay: Boolean
 
     init {
@@ -24,6 +39,10 @@ class JoinCommand(mazeClient: MazeClient, commandWithParameters: List<String>) :
         flavor = if (commandWithParameters.size > 3) commandWithParameters[3] else null
     }
 
+    /**
+     * Fires a player login event. If it is the own player id, in addition, an own player login event is fired. This
+     * also initializes the [MazeClient.ownPlayer] reference.
+     */
     override suspend fun internalExecute() {
         val newPlayer = Player(playerId, nick, flavor)
         val success: Boolean = mazeClient.players.addPlayer(newPlayer)

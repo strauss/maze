@@ -11,6 +11,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Logs player connection events.
+ */
 object HeadlessPlayerConnectionLogger : PlayerConnectionListener {
 
     val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerConnectionLogger::class.java)
@@ -38,6 +41,9 @@ object HeadlessPlayerConnectionLogger : PlayerConnectionListener {
     }
 }
 
+/**
+ * Logs player movements (very noisy, can be useful for debugging on a local solo server).
+ */
 object HeadlessPlayerMovementLogger : PlayerMovementListener {
 
     val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerMovementLogger::class.java)
@@ -84,6 +90,9 @@ object HeadlessPlayerMovementLogger : PlayerMovementListener {
     }
 }
 
+/**
+ * Logs score changes (also very noisy).
+ */
 object HeadlessPlayerScoreLogger : ScoreChangeListener {
     val LOGGER: Logger = LoggerFactory.getLogger(HeadlessPlayerScoreLogger::class.java)
 

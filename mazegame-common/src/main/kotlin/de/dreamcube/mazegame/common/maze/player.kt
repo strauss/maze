@@ -19,6 +19,10 @@ class Player(
     val loginTime: Long = System.currentTimeMillis(),
     var playStartTime: Long = System.currentTimeMillis(),
     moveCounter: Int = 0,
+    /**
+     * This field is only used in the client. It is set to the current score on the first "PSCO" command for each
+     * player. It can be used to display a comparable score since player login.
+     */
     var scoreOffset: Int = score
 ) {
 
@@ -123,11 +127,33 @@ enum class ViewDirection(val shortName: String) {
         }
 }
 
+/**
+ * All possible reasons for player (position) changes.
+ */
 enum class PlayerPositionChangeReason(val shortName: String) {
+    /**
+     * The player was teleported. The teleportation reason is determined by the [TeleportType].
+     */
     TELEPORT("tel"),
+
+    /**
+     * The player appears for the first time. It happens right after a login.
+     */
     APPEAR("app"),
+
+    /**
+     * The player vanishes from the maze. It happens right before a logout.
+     */
     VANISH("van"),
+
+    /**
+     * The player moved one step forward.
+     */
     MOVE("mov"),
+
+    /**
+     * The player changed the view direction (turn).
+     */
     TURN("trn");
 
     companion object {
@@ -142,8 +168,18 @@ enum class PlayerPositionChangeReason(val shortName: String) {
     }
 }
 
+/**
+ * Reason for teleportation.
+ */
 enum class TeleportType(val shortName: String) {
+    /**
+     * The teleportation was caused by a trap.
+     */
     TRAP("t"),
+
+    /**
+     * The teleportation was caused by a collision with another player.
+     */
     COLLISION("c");
 
     companion object {

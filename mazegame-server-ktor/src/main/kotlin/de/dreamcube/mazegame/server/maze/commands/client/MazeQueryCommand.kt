@@ -12,7 +12,7 @@ class MazeQueryCommand(
 
     init {
         if (commandWithParameters.size != 1) {
-            errorCode = InfoCode.WRONG_PARAMETER_VALUE
+            errorCode = InfoCode.PARAMETER_COUNT_INCORRECT
         }
         checkLoggedIn()
     }

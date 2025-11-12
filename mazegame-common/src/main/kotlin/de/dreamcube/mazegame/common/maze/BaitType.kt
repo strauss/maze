@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import kotlin.math.abs
 
+/**
+ * Contains information which bait types exist, how they are called and their score.
+ */
 enum class BaitType(
     @get:JsonValue
     val baitName: String,

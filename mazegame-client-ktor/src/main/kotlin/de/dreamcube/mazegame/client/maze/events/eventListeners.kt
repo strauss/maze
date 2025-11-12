@@ -7,21 +7,26 @@ import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
 
+/**
+ * Super-interface for all client event listeners.
+ */
 sealed interface EventListener
 
 /**
- * Dummy-Interface for allowing the abstract superclass [de.dreamcube.mazegame.client.maze.strategy.Strategy] to have no specific [EventListener]
- * implemented. Does not contain any functions.
+ * Dummy-Interface for allowing the abstract superclass [de.dreamcube.mazegame.client.maze.strategy.Strategy] to have no
+ * specific [EventListener] implemented. Does not contain any functions.
  */
 interface NoEventListener : EventListener
 
 /**
- * This listener interface handles maze related events.
+ * This listener interface handles maze related events. If your strategy requires the maze's map, its class should
+ * implement this interface.
  */
 interface MazeEventListener : EventListener {
     /**
-     * After the server sent the whole maze data, this method is called and should be used to create the desired internal maze structure for the
-     * strategy.
+     * After the server sent the whole maze data, this method is called and should be used to create the desired
+     * internal maze structure for the strategy. This function the perfect place for initializing strategy-related
+     * data that requires the maze to be present.
      */
     fun onMazeReceived(width: Int, height: Int, mazeLines: List<String>)
 }
@@ -101,7 +106,10 @@ interface PlayerMovementListener : EventListener {
     }
 
     /**
-     * This function is called, when a player was teleported.
+     * This function is called, when a player was teleported. The optional [teleportType] indicates, whether the
+     * teleport was caused by a [TeleportType.TRAP] or a [TeleportType.COLLISION]. In the latter case, the
+     * [causingPlayerId] contains the id of the responsible player (the one who crashed into the other one). The server
+     * can always tell who is to blame :-)
      */
     fun onPlayerTeleport(
         oldPosition: PlayerPosition,
@@ -144,7 +152,7 @@ interface ChatInfoListener : EventListener {
 }
 
 /**
- * This listener interface handles errors sent by the server.
+ * This listener interface handles errors sent by the server. The [InfoCode] for further information.
  */
 interface ErrorInfoListener : EventListener {
     /**
@@ -155,6 +163,27 @@ interface ErrorInfoListener : EventListener {
 
 /**
  * This listener interface is intended for the UI for directly reacting to connection status changes.
+ *
+ * In order to use it properly, you need to know what happens at in each status and what is "available" at each status.
+ *
+ * - [ConnectionStatus.NOT_CONNECTED]: When the client is created it starts in this status. Here, the strategy object is
+ * not available yet. The strategy object is created before a connection attempt is made.
+ * - [ConnectionStatus.CONNECTED]: The connection has been established on the network level. The client expects the
+ * first command from the server, namely the "MSRV" command. This command initializes the "handshake" process. After
+ * receiving the "MSRV" command, the client responds with the "HELO" command. The server then either responds with an
+ * error code or with a "WELC" command. The latter contains the client ID.
+ * - [ConnectionStatus.LOGGED_IN]: In this status, the client ID is available. The next step for the client is
+ * requesting the maze with the "MAZ?" command. After receiving the maze data, the [MazeEventListener.onMazeReceived]
+ * event is fired.
+ * - [ConnectionStatus.SPECTATING]: In this status, the maze data is available and the server starts sending game
+ * updates to the client, including the login events for all players, including the own player's. If the client is
+ * logged in as spectator (determined by a special nickname), the server won't send a "RDY." command.
+ * - [ConnectionStatus.PLAYING]: This status is reached, when the server sends the first "RDY." command. Here, the
+ * client is able to send movement related commands to the server.
+ * - [ConnectionStatus.DYING]: This is literally a short-lived status. It indicates that the client is logging out of
+ * the game (or the server terminated the connection).
+ * - [ConnectionStatus.DEAD]: In this state the client has been disconnected and the game is over. In order to play
+ * again, a new client has to be created.
  */
 interface ClientConnectionStatusListener : EventListener {
     /**

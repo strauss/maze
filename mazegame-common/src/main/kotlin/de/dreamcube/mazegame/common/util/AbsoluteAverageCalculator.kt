@@ -5,6 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.roundToLong
 
+/**
+ * Utility class to calculate an absolute average.
+ */
 class AbsoluteAverageCalculator : AverageCalculator<Long> {
 
     private val internalSum = AtomicLong(0L)

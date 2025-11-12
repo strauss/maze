@@ -6,6 +6,10 @@ import java.awt.Color
 import java.awt.Graphics
 import java.awt.Graphics2D
 
+/**
+ * Example visualization. It showcases how to get the color of the selected player and how to access some of the other
+ * fields from [VisualizationComponent].
+ */
 class DebugVisualization : VisualizationComponent() {
 
     private val qualityHints = createDefaultRenderingHints()

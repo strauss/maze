@@ -8,8 +8,12 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 
 /**
- * Space-efficient representation of the maze. The maze is represented as two 1D BitSets. The constructor requires the [width] and the
- * [height] of the maze.
+ * Space-efficient representation of the maze. The maze is represented as two 1D BitSets. The constructor requires the
+ * [width] and the [height] of the maze. It is not intended for "good" bots. The inferior a-star strategies, that are
+ * contained in the default client/server implementation, use this maze representation.
+ *
+ * This structure is also used for the compact maze representation that is sent to the client when requesting meta
+ * information. The UI can use it to render a minimap as preview.
  */
 class CompactMaze(val width: Int, val height: Int) {
 

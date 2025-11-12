@@ -25,7 +25,12 @@ class EventHandler {
     private val speedChangedListeners: MutableList<SpeedChangedListener> = LinkedList()
 
     /**
-     * Adds the given [EventListener] to all matching lists according to the implemented interfaces. This operation costs O(1).
+     * Adds the given [EventListener] to all matching lists according to the implemented interfaces. This operation
+     * costs O(1).
+     *
+     * The [de.dreamcube.mazegame.client.maze.strategy.Strategy] and the
+     * [de.dreamcube.mazegame.client.maze.strategy.VisualizationComponent] are added automagically at the appropriate
+     * time. All other listeners have to be added manually.
      */
     fun addEventListener(listener: EventListener) {
         // Feel the power of smart casts :-)
@@ -59,7 +64,8 @@ class EventHandler {
     }
 
     /**
-     * Removes the given [EventListener] from all matching lists according to the implemented interfaces. This operation costs O(n).
+     * Removes the given [EventListener] from all matching lists according to the implemented interfaces. This operation
+     * costs O(n).
      */
     fun removeEventListener(listener: EventListener) {
         // Feel the power of smart casts :-)

@@ -6,6 +6,9 @@ import de.dreamcube.mazegame.common.maze.InfoCode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+/**
+ * Logs chat messages (actually useful).
+ */
 object HeadlessChatDisplay : ChatInfoListener {
     private val LOGGER: Logger = LoggerFactory.getLogger(HeadlessChatDisplay::class.java)
 
@@ -23,6 +26,9 @@ object HeadlessChatDisplay : ChatInfoListener {
     }
 }
 
+/**
+ * Logs error messages (also very useful, especially when debugging).
+ */
 object HeadlessErrorDisplay : ErrorInfoListener {
     private val LOGGER: Logger = LoggerFactory.getLogger(HeadlessErrorDisplay::class.java)
     override fun onServerError(infoCode: InfoCode) {
