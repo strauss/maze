@@ -61,12 +61,12 @@ data class PlayerInformationDto(
 )
 
 /**
- * Contains the playtime in milliseconds and in human readable form.
+ * Contains the playtime in milliseconds and in human-readable form.
  */
 data class PlayTimeDto(val milliseconds: Long, val time: String)
 
 /**
- * Contains a reduced sub set of player information. It is used for the openly available meta information that can be
+ * Contains a reduced sub set of server information. It is used for the openly available meta information that can be
  * queried without auth before the connection is established.
  */
 data class ReducedServerInformationDto(
@@ -79,5 +79,5 @@ data class ReducedServerInformationDto(
     val compactMaze: String,
     val spectatorName: String? = null
 ) {
-    override fun toString(): String = "$id ($width x $height)"
+    override fun toString(): String = if (id < 0) "Clear..." else "$id ($width x $height)"
 }

@@ -27,6 +27,8 @@ import kotlin.io.encoding.Base64
 private const val LOCALHOST = "localhost"
 private const val DREAMCUBE = "dreamcube.de"
 
+private const val MAX_PORT_NUMBER = 65535
+
 class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     companion object {
         private const val TEXT_FIELD_COLUMNS: Int = 20
@@ -220,25 +222,30 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 queryButton.isEnabled = false
                 UiController.bgScope.launch {
                     try {
-                        val gameInformationList: List<ReducedServerInformationDto> =
-                            ServerCommandController.queryForGameInformation(address, port.toInt())
-                        fillGameSelection(gameInformationList)
-                        withContext(Dispatchers.Swing) {
-                            gameSelection.isEnabled = true
+                        val serverHttpPort = readPortNumber(port)
+                        if (serverHttpPort > 0) {
+                            val gameInformationList: List<ReducedServerInformationDto> =
+                                ServerCommandController.queryForGameInformation(address, serverHttpPort)
+                            withContext(Dispatchers.Swing) {
+                                fillGameSelection(gameInformationList)
+                                gameSelection.isEnabled = true
+                                portField.isEnabled = false
+                                addressFieldComboBox.isEnabled = false
+                            }
                         }
                     } catch (ex: Exception) {
                         LOGGER.error("Error while retrieving game information from server: '${ex.message}'", ex)
                         withContext(Dispatchers.Swing) {
-                            fillGameSelection(listOf())
+                            clearGameSelection()
                             JOptionPane.showMessageDialog(
                                 this@ConnectionSettingsPanel,
                                 "Error while retrieving game information from server.\nCheck address and port or use a direct connection.",
                                 "Connection Error",
                                 JOptionPane.ERROR_MESSAGE
                             )
+                            queryButton.isEnabled = true
                         }
                     }
-                    queryButton.isEnabled = true
                 }
             }
         }
@@ -250,11 +257,10 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(gameSelection)
         gameSelection.isEnabled = false
         gameSelection.preferredSize = Dimension(portField.preferredSize.width, gameSelection.preferredSize.height)
-        fillGameSelection(listOf())
         gameSelection.addItemListener { event: ItemEvent ->
             if (event.stateChange == ItemEvent.SELECTED) {
                 val item: ReducedServerInformationDto? = event.item as ReducedServerInformationDto
-                if (item != null) {
+                if (item != null && item.id > 0) {
                     gamePortField.text = item.id.toString()
                     addressFieldComboBox.isEnabled = false
                     portField.isEnabled = false
@@ -268,17 +274,18 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                     if (selectedStrategyName != null) {
                         handleNick(selectedStrategyName, item.spectatorName)
                     }
+                } else {
+                    gamePortField.text = ""
+                    addressFieldComboBox.isEnabled = true
+                    portField.isEnabled = true
+                    queryButton.isEnabled = true
+                    managedConnection.isEnabled = true
+                    directConnection.isEnabled = true
+                    serverControlPasswordField.isEnabled = false
+                    serverControlActivateButton.isEnabled = false
+                    clearGameSelection()
+                    serverInfoPanel.clear()
                 }
-            } else if (event.stateChange == ItemEvent.DESELECTED) {
-                gamePortField.text = ""
-                addressFieldComboBox.isEnabled = true
-                portField.isEnabled = true
-                queryButton.isEnabled = true
-                managedConnection.isEnabled = true
-                directConnection.isEnabled = true
-                serverControlPasswordField.isEnabled = false
-                serverControlActivateButton.isEnabled = false
-                serverInfoPanel.clear()
             }
         }
 
@@ -368,15 +375,20 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 nickField.text.isNotBlank()
             ) {
                 UiController.bgScope.launch {
-                    UiController.connect(
-                        addressFieldComboBox.selectedItem as String,
-                        gamePortField.text.toInt(),
-                        strategySelection.selectedItem as String,
-                        withFlavor,
-                        nickField.text
-                    )
+                    val gamePortNumber = readPortNumber(gamePortField.text)
+                    if (gamePortNumber in 1..MAX_PORT_NUMBER) {
+                        UiController.connect(
+                            addressFieldComboBox.selectedItem as String,
+                            gamePortNumber,
+                            strategySelection.selectedItem as String,
+                            withFlavor,
+                            nickField.text
+                        )
+                        withContext(Dispatchers.Swing) {
+                            connectButton.isEnabled = false
+                        }
+                    }
                 }
-                connectButton.isEnabled = false
             }
         }
         connectButton.mnemonic = KeyEvent.VK_C
@@ -386,6 +398,32 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(JPanel(), "growy")
 
         UiController.prepareEventListener(this)
+    }
+
+    private suspend fun readPortNumber(portNumberAsString: String): Int {
+        try {
+            val parsedNumber = portNumberAsString.toInt()
+            if (parsedNumber !in 1..MAX_PORT_NUMBER) {
+                JOptionPane.showMessageDialog(
+                    this@ConnectionSettingsPanel,
+                    "The port number has to be between 1 and $MAX_PORT_NUMBER.",
+                    "Error while connecting to the server",
+                    JOptionPane.ERROR_MESSAGE
+                )
+                return -1
+            }
+            return parsedNumber
+        } catch (_: NumberFormatException) {
+            withContext(Dispatchers.Swing) {
+                JOptionPane.showMessageDialog(
+                    this@ConnectionSettingsPanel,
+                    "The port NUMBER has to be an actual number.",
+                    "Error while connecting to the server",
+                    JOptionPane.ERROR_MESSAGE
+                )
+            }
+            return -1
+        }
     }
 
     private fun handleNick(selectedStrategy: String, spectatorName: String?) {
@@ -428,7 +466,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlPasswordField.isVisible = false
         serverControlActivateButton.isVisible = false
         withFlavor = false
-        fillGameSelection(emptyList())
+        clearGameSelection()
 
         addressFieldComboBox.selectedItem = DREAMCUBE
         gamePortField.text = "12345"
@@ -439,8 +477,19 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         if (model.size > 0) {
             model.removeAllElements()
         }
-        model.addElement(null)
-        model.addAll(elements)
+        val actualList = buildList {
+            // The first one resemles the "Clear..." text for resetting the received game information.
+            add(ReducedServerInformationDto(-1, -1, -1, -1, -1, -1, ""))
+            addAll(elements)
+        }
+        model.addAll(actualList)
+    }
+
+    private fun clearGameSelection() {
+        val model: DefaultComboBoxModel<ReducedServerInformationDto?> = gameSelection.model as DefaultComboBoxModel
+        if (model.size > 0) {
+            model.removeAllElements()
+        }
     }
 
     private enum class StrategyType {
