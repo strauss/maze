@@ -17,10 +17,28 @@ data class ConnectionDto(
 )
 
 /**
+ * Does the map file refer to a ressource or file. Determines how the file is tried to be read.
+ */
+enum class MapFileMode {
+    /**
+     * The maze file is read as a ressource. In order for this to work, the map file has to be in the classpath of the
+     * application.
+     */
+    RESSOURCE,
+
+    /**
+     * The maze file is read as a file. Here, the file can be anywhere, but if you specify an indirect path, the working
+     * directory of the application has to be taken into account.
+     */
+    FILE
+}
+
+/**
  * Controls the maze generator.
  * - [width]: Default 40; not relevant if in [GeneratorMode.MAP] or [GeneratorMode.TEMPLATE].
  * - [height]: Default 30; not relevant if in [GeneratorMode.MAP] or [GeneratorMode.TEMPLATE].
  * - [mapFile]: Points to a resource location of a map file. Can refer to a map or template.
+ * - [mapFileMode]: Read map file as ressource or file?
  * - [templateFillStartPoints]: Only relevant if in [GeneratorMode.TEMPLATE]. If the template contains start positions
  * for walls ('?'), the flag indicates if further random start positions for walls should be generated or not. The
  * default is false. If the template file does not contain any starting positions for walls, this flag is not relevant.
@@ -29,6 +47,7 @@ data class GeneratorParametersDto(
     val width: Int = 40,
     val height: Int = 30,
     val mapFile: String? = null,
+    val mapFileMode: MapFileMode = MapFileMode.RESSOURCE,
     val templateFillStartPoints: Boolean = false
 )
 

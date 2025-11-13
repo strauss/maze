@@ -413,7 +413,6 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlPasswordField.isVisible = true
         serverControlActivateButton.isVisible = true
         withFlavor = true
-        gamePortField.text = ""
     }
 
     private fun directConnectionSelected() {

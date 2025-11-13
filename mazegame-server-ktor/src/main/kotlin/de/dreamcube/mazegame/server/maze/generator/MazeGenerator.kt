@@ -2,6 +2,7 @@ package de.dreamcube.mazegame.server.maze.generator
 
 import de.dreamcube.mazegame.common.api.GeneratorMode
 import de.dreamcube.mazegame.common.api.GeneratorParametersDto
+import de.dreamcube.mazegame.common.api.MapFileMode
 import de.dreamcube.mazegame.common.api.MazeGeneratorConfigurationDto
 import de.dreamcube.mazegame.common.maze.MAX_RANDOM_HEIGHT
 import de.dreamcube.mazegame.common.maze.MAX_RANDOM_WITH
@@ -10,6 +11,10 @@ import de.dreamcube.mazegame.common.maze.MIN_RANDOM_WIDTH
 import de.dreamcube.mazegame.server.maze.Maze
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.exists
+import kotlin.io.path.readText
 import kotlin.math.max
 import kotlin.math.min
 
@@ -64,7 +69,10 @@ private fun MazeGenerator.readMapOrRandom(generatorParameters: GeneratorParamete
         LOGGER.warn("No resource path configured. Falling back to random generation.")
         createRandom(generatorParameters)
     } else {
-        val map: Maze = parseMazeLinesFromResource(resourcePath)
+        val map: Maze = when (generatorParameters.mapFileMode) {
+            MapFileMode.RESSOURCE -> parseMazeLinesFromResource(resourcePath)
+            MapFileMode.FILE -> parseMazeLinesFromFile(resourcePath)
+        }
         if (map.height == 0 || map.width == 0) {
             LOGGER.warn("Empty map file or map file not found. Falling back to random generation.")
             createRandom(generatorParameters)
@@ -81,6 +89,16 @@ private fun MazeGenerator.createRandom(generatorParameters: GeneratorParametersD
 }
 
 private fun parseMazeLinesFromResource(resource: String): Maze {
-    val mazeLines: List<String> = object {}.javaClass.getResourceAsStream(resource)?.bufferedReader(Charsets.UTF_8)?.readLines() ?: emptyList()
+    val mazeLines: List<String> =
+        object {}.javaClass.getResourceAsStream(resource)?.bufferedReader(Charsets.UTF_8)?.readLines() ?: emptyList()
     return Maze.fromLines(mazeLines)
+}
+
+private fun parseMazeLinesFromFile(filename: String): Maze {
+    val path = Path(filename)
+    LOGGER.info("Trying to read map from '${path.absolutePathString()}'")
+    return if (path.exists()) {
+        val mazeLines: List<String> = path.readText().trim().lines()
+        Maze.fromLines(mazeLines)
+    } else Maze(0, 0)
 }
