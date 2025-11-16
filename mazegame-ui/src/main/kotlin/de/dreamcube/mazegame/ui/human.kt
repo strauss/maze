@@ -147,7 +147,7 @@ class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
 
 @Suppress("unused")
 @Bot("clickAndCollect", isHuman = true, flavor = "Click on bait, I will collect it!")
-class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellSelectionListener,
+class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellListener,
     BaitEventListener {
 
     override fun onConnectionStatusChange(
@@ -155,19 +155,29 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
         newStatus: ConnectionStatus
     ) {
         when (newStatus) {
-            ConnectionStatus.PLAYING -> UiController.mazePanel.addMazeCellSelectionListener(this)
-            ConnectionStatus.DEAD -> UiController.mazePanel.removeMazeCellSelectionListener(this)
+            ConnectionStatus.PLAYING -> {
+                UiController.addMazeCellListener(this)
+                UiController.activateHoverMarks()
+            }
+
+            ConnectionStatus.DEAD -> {
+                UiController.removeMazeCellListener(this)
+                UiController.deactivateHoverMarks()
+            }
+
             else -> {
                 // do nothing
             }
         }
     }
 
-    override fun onMazeCellSelected(x: Int, y: Int) {
-        val bait: Bait? = runBlocking { mazeClient.getBaitAt(x, y) }
-        bait?.let {
-            currentTarget = it
-            path.clear()
+    override fun onMazeCellSelected(x: Int, y: Int, mazeField: MazeModel.MazeField) {
+        if (mazeField is MazeModel.PathMazeField && mazeField.occupationStatus == MazeModel.PathOccupationStatus.BAIT) {
+            val bait: Bait? = runBlocking { mazeClient.getBaitAt(x, y) }
+            bait?.let {
+                currentTarget = it
+                path.clear()
+            }
         }
     }
 

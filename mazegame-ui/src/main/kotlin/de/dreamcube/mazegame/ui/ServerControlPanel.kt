@@ -256,14 +256,16 @@ class ServerControlPanel() : JPanel() {
         putBaitButton.addActionListener { _ ->
             putBaitButton.isEnabled = false
             UiController.hintOnStatusBar("Select position")
+            UiController.activateHoverMarks()
 
             val disposer = Disposer()
             disposer.addDisposeAction {
                 putBaitButton.isEnabled = true
                 UiController.clearHintOnStatusBar()
+                UiController.deactivateHoverMarks()
             }
 
-            val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
+            val mazeCellListener = MazeCellListener { x, y, _ ->
                 val baitType: BaitType = baitTypeSelection.selectedItem as BaitType
                 serverController.launch {
                     try {
@@ -278,8 +280,10 @@ class ServerControlPanel() : JPanel() {
                     }
                 }
             }
-            UiController.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
-            disposer.addDisposeAction { UiController.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
+            UiController.addMazeCellListener(mazeCellListener)
+            disposer.addDisposeAction {
+                UiController.removeMazeCellListener(mazeCellListener)
+            }
 
             val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
             val escDispatcher = DisposeOnEscape(disposer)
@@ -402,15 +406,17 @@ class ServerControlPanel() : JPanel() {
             teleportButton.isEnabled = false
             killButton.isEnabled = false
             UiController.hintOnStatusBar("Select position")
+            UiController.activateHoverMarks()
 
             val disposer = Disposer()
             disposer.addDisposeAction {
                 teleportButton.isEnabled = true
                 killButton.isEnabled = true
                 UiController.clearHintOnStatusBar()
+                UiController.deactivateHoverMarks()
             }
 
-            val mazeCellSelectionListener = MazeCellSelectionListener { x, y ->
+            val mazeCellListener = MazeCellListener { x, y, _ ->
                 val selectedPlayerIndex = UiController.scoreTable.selectedRow
                 val selectedPlayerId: Int? = UiController.uiPlayerCollection[selectedPlayerIndex]?.id
                 if (selectedPlayerId != null) {
@@ -428,8 +434,10 @@ class ServerControlPanel() : JPanel() {
                     }
                 }
             }
-            UiController.mazePanel.addMazeCellSelectionListener(mazeCellSelectionListener)
-            disposer.addDisposeAction { UiController.mazePanel.removeMazeCellSelectionListener(mazeCellSelectionListener) }
+            UiController.addMazeCellListener(mazeCellListener)
+            disposer.addDisposeAction {
+                UiController.removeMazeCellListener(mazeCellListener)
+            }
 
             val kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager()
             val escDispatcher = DisposeOnEscape(disposer)

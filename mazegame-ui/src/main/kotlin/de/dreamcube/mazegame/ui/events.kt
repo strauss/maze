@@ -1,10 +1,13 @@
 package de.dreamcube.mazegame.ui
 
 /**
- * Event listener for reacting to maze cell selection.
+ * Event listener for reacting to maze cell mouse interactions.
  */
-fun interface MazeCellSelectionListener {
-    fun onMazeCellSelected(x: Int, y: Int)
+fun interface MazeCellListener {
+    fun onMazeCellSelected(x: Int, y: Int, mazeField: MazeModel.MazeField)
+    fun onMazeCellHovered(x: Int, y: Int, mazeField: MazeModel.MazeField) {
+        // do nothing by default, but allow for functional interface
+    }
 }
 
 /**

@@ -60,6 +60,8 @@ object UiController {
 
     private val playerSelectionListeners: MutableList<PlayerSelectionListener> = LinkedList()
 
+    private val mazeCellListeners: MutableList<MazeCellListener> = LinkedList()
+
     internal var visualizationComponent: VisualizationComponent? = null
 
     internal val serverControllerActive: Boolean
@@ -248,6 +250,16 @@ object UiController {
         activateControlButton()
     }
 
+    internal fun activateHoverMarks() {
+        if (markerPane !in mazeCellListeners) {
+            addMazeCellListener(markerPane)
+        }
+    }
+
+    internal fun deactivateHoverMarks() {
+        removeMazeCellListener(markerPane)
+    }
+
     internal fun startPlaying() {
         ownId = client.ownPlayer.id
     }
@@ -280,8 +292,16 @@ object UiController {
         playerSelectionListeners.add(playerSelectionListener)
     }
 
+    internal fun addMazeCellListener(mazeCellListener: MazeCellListener) {
+        mazeCellListeners.add(mazeCellListener)
+    }
+
     fun removePlayerSelectionListener(playerSelectionListener: PlayerSelectionListener) {
         playerSelectionListeners.remove(playerSelectionListener)
+    }
+
+    internal fun removeMazeCellListener(mazeCellListener: MazeCellListener) {
+        mazeCellListeners.remove(mazeCellListener)
     }
 
     fun firePlayerSelected(player: UiPlayerInformation) {
@@ -295,6 +315,18 @@ object UiController {
         visualizationComponent?.selectedPlayerId = null
         for (playerSelectionListener in playerSelectionListeners) {
             playerSelectionListener.onPlayerSelectionCleared()
+        }
+    }
+
+    internal fun fireMazeCellSelected(x: Int, y: Int, mazeField: MazeModel.MazeField) {
+        for (mazeCellSelectionListener in mazeCellListeners) {
+            mazeCellSelectionListener.onMazeCellSelected(x, y, mazeField)
+        }
+    }
+
+    internal fun fireMazeCellHovered(x: Int, y: Int, mazeField: MazeModel.MazeField) {
+        for (mazeCellSelectionListener in mazeCellListeners) {
+            mazeCellSelectionListener.onMazeCellHovered(x, y, mazeField)
         }
     }
 

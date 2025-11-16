@@ -5,7 +5,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.*
 import java.awt.event.*
-import java.util.*
 import javax.swing.JPanel
 import kotlin.math.min
 
@@ -35,8 +34,6 @@ class MazePanel() : JPanel() {
         private set
 
     private var pressPoint: Point? = null
-
-    private val mazeCellSelectionListeners: MutableList<MazeCellSelectionListener> = LinkedList()
 
     internal fun reset() {
         // Erase the image with a transparent rectangle
@@ -69,7 +66,7 @@ class MazePanel() : JPanel() {
                     val x = (e.x - offset.x) / zoom
                     val y = (e.y - offset.y) / zoom
                     if (x >= 0 && y >= 0 && x < UiController.mazeModel.width && y < UiController.mazeModel.height) {
-                        fireMazeCellSelection(x, y)
+                        UiController.fireMazeCellSelected(x, y, UiController.mazeModel[x, y])
                     }
                 }
             }
@@ -110,10 +107,13 @@ class MazePanel() : JPanel() {
             }
 
             override fun mouseMoved(e: MouseEvent?) {
+                val mx = ((e?.x ?: 0) - offset.x) / zoom
+                val my = ((e?.y ?: 0) - offset.y) / zoom
                 if (UiController.markerPane.playerToMark == null) {
-                    val x = (e?.x ?: 0) - offset.x
-                    val y = (e?.y ?: 0) - offset.y
-                    UiController.updatePositionStatus(x / zoom, y / zoom)
+                    UiController.updatePositionStatus(mx, my)
+                }
+                if (UiController.mazeModel.mazeReceived && mx in 0..<UiController.mazeModel.width && my in 0..<UiController.mazeModel.height) {
+                    UiController.fireMazeCellHovered(mx, my, UiController.mazeModel[mx, my])
                 }
             }
         }
@@ -216,20 +216,6 @@ class MazePanel() : JPanel() {
             .coerceAtLeast(-(UiController.mazeModel.height - 10) * zoom)
         repaint()
         UiController.updateOffset(offset.x, offset.y)
-    }
-
-    internal fun addMazeCellSelectionListener(mazeCellSelectionListener: MazeCellSelectionListener) {
-        mazeCellSelectionListeners.add(mazeCellSelectionListener)
-    }
-
-    internal fun removeMazeCellSelectionListener(mazeCellSelectionListener: MazeCellSelectionListener) {
-        mazeCellSelectionListeners.remove(mazeCellSelectionListener)
-    }
-
-    internal fun fireMazeCellSelection(x: Int, y: Int) {
-        for (mazeCellSelectionListener in mazeCellSelectionListeners) {
-            mazeCellSelectionListener.onMazeCellSelected(x, y)
-        }
     }
 
 }

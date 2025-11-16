@@ -110,7 +110,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         mainSplitPane.add(leftSplitPane, JSplitPane.LEFT)
 
         mazePanel = MazePanel()
-        mazePanel.addMazeCellSelectionListener(scoreTable)
+        UiController.addMazeCellListener(scoreTable)
         mainSplitPane.add(mazePanel, JSplitPane.RIGHT)
         mainSplitPane.resizeWeight = 0.1
 

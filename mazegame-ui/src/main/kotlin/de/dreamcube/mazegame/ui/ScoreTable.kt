@@ -10,7 +10,7 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 
-class ScoreTable() : JTable(), MazeCellSelectionListener {
+class ScoreTable() : JTable(), MazeCellListener {
 
     val scoreFont: Font = Font(font.name, Font.PLAIN, 16)
 
@@ -111,7 +111,7 @@ class ScoreTable() : JTable(), MazeCellSelectionListener {
         }
     }
 
-    override fun onMazeCellSelected(x: Int, y: Int) {
+    override fun onMazeCellSelected(x: Int, y: Int, mazeField: MazeModel.MazeField) {
         // Clear selection if selected at position
         if (selectedRow >= 0) {
             val selectedPlayer: UiPlayerInformation? = uiPlayerInformationModel[selectedRow]
@@ -122,7 +122,6 @@ class ScoreTable() : JTable(), MazeCellSelectionListener {
         }
 
         // Select, if position contains a player
-        val mazeField: MazeModel.MazeField = UiController.mazeModel[x, y]
         if (mazeField is MazeModel.PathMazeField && mazeField.occupationStatus == MazeModel.PathOccupationStatus.PLAYER) {
             val playerToSelect: PlayerSnapshot? = mazeField.player
             playerToSelect?.let { UiController.uiPlayerCollection.getIndex(it.id) }
