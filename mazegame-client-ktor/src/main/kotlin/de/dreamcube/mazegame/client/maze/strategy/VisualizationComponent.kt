@@ -14,9 +14,15 @@ import javax.swing.JComponent
 abstract class VisualizationComponent : JComponent(), NoEventListener {
 
     /**
+     * Should the visualization be activated right away?
+     */
+    open val activateImmediately: Boolean
+        get() = false
+
+    /**
      * Is the visualization active or not. Should only be set by the UI.
      */
-    var visualizationEnabled = false
+    var visualizationEnabled = activateImmediately
 
     /**
      * This map contains the color distribution for all player ids. Should only be set by the UI.

@@ -12,6 +12,9 @@ import java.awt.Graphics2D
  */
 class DebugVisualization : VisualizationComponent() {
 
+    override val activateImmediately: Boolean
+        get() = true
+
     private val qualityHints = createDefaultRenderingHints()
 
     override fun paintComponent(g: Graphics?) {

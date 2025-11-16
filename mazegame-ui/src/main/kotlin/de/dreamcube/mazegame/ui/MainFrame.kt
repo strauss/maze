@@ -39,7 +39,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
     private var controlPanelInPlace: Boolean = false
     private val layeredGlassPane: JLayeredPane
 
-    private val visualizationButton = object : JButton(VIS_BUTTON_TEXT_OFF) {
+    private inner class VisualizationButton : JButton(VIS_BUTTON_TEXT_OFF) {
         val visualizationComponent: VisualizationComponent?
             get() = UiController.client.strategy.getVisualizationComponent()
 
@@ -79,6 +79,8 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
             text = VIS_BUTTON_TEXT_OFF
         }
     }
+
+    private val visualizationButton = VisualizationButton()
 
     init {
         UiController.mainFrame = this
@@ -248,6 +250,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                     strategy.getVisualizationComponent()?.let { visualizationComponent ->
                         botControlPanel.add(visualizationButton, BorderLayout.SOUTH)
                         UiController.visualizationComponent = visualizationComponent
+                        if (visualizationComponent.activateImmediately) {
+                            visualizationButton.activate()
+                        }
                         botControlActive = true
                     }
                     if (botControlActive) {
