@@ -125,7 +125,12 @@ class ScoreTable() : JTable(), MazeCellListener {
         if (mazeField is MazeModel.PathMazeField && mazeField.occupationStatus == MazeModel.PathOccupationStatus.PLAYER) {
             val playerToSelect: PlayerSnapshot? = mazeField.player
             playerToSelect?.let { UiController.uiPlayerCollection.getIndex(it.id) }
-                ?.let { selectionModel.setSelectionInterval(it, it) }
+                ?.let { selectIndex(it) }
         }
     }
+
+    fun selectIndex(index: Int) {
+        selectionModel.setSelectionInterval(index, index)
+    }
+
 }

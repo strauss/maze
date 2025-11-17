@@ -1,17 +1,17 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.Bait
+import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.BaitEventListener
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
-import de.dreamcube.mazegame.client.maze.strategy.Bot
-import de.dreamcube.mazegame.client.maze.strategy.Move
-import de.dreamcube.mazegame.client.maze.strategy.SingleTargetAStar
-import de.dreamcube.mazegame.client.maze.strategy.Strategy
+import de.dreamcube.mazegame.client.maze.strategy.*
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import de.dreamcube.mazegame.common.maze.PlayerPosition
+import de.dreamcube.mazegame.common.maze.TeleportType
 import de.dreamcube.mazegame.common.maze.ViewDirection
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.awt.KeyEventDispatcher
-import java.awt.KeyboardFocusManager
+import java.awt.*
 import java.awt.event.KeyEvent
 
 @Suppress("unused")
@@ -150,6 +150,47 @@ class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
 class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellListener,
     BaitEventListener {
 
+    private val visualization = object : VisualizationComponent() {
+
+        private val thickStroke = BasicStroke(4.0f)
+        private val normalStroke = BasicStroke(3f)
+
+        override val activateImmediately: Boolean
+            get() = true
+
+        override fun paintComponent(g: Graphics?) {
+            val target = currentTarget ?: return
+            val g2 = g as Graphics2D
+            g2.run {
+                // mark target
+                color = getPlayerColor(UiController.ownId)
+                stroke = thickStroke
+                val xx = offset.x + target.x * zoom
+                val yy = offset.y + target.y * zoom
+                drawRect(xx, yy, zoom, zoom)
+
+                // draw path
+                stroke = normalStroke
+                var px = -1
+                var py = -1
+                val path = path.toList() // copy for avoiding exception ... probably won't work
+                for (pos in path) {
+                    val cx = offset.x + pos.x * zoom + zoom / 2
+                    val cy = offset.y + pos.y * zoom + zoom / 2
+                    if (px >= 0 && py >= 0) {
+                        drawLine(px, py, cx, cy)
+                    }
+                    px = cx
+                    py = cy
+                }
+            }
+        }
+    }
+
+    override fun getVisualizationComponent(): VisualizationComponent? {
+        return visualization
+    }
+
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
@@ -158,6 +199,11 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
             ConnectionStatus.PLAYING -> {
                 UiController.addMazeCellListener(this)
                 UiController.activateHoverMarks()
+                UiController.uiScope.launch {
+                    UiController.uiPlayerCollection.getIndex(UiController.ownId)?.let {
+                        UiController.scoreTable.selectIndex(it)
+                    }
+                }
             }
 
             ConnectionStatus.DEAD -> {
@@ -182,7 +228,7 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
     }
 
     override fun onBaitAppeared(bait: Bait) {
-        // ignore
+        UiController.activateHoverMarks()
     }
 
     override fun onBaitVanished(bait: Bait) {
@@ -190,6 +236,16 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
             currentTarget = null
             path.clear()
         }
+    }
+
+    override fun onPlayerTeleport(
+        oldPosition: PlayerPosition,
+        newPlayerSnapshot: PlayerSnapshot,
+        teleportType: TeleportType?,
+        causingPlayerId: Int?
+    ) {
+        super.onPlayerTeleport(oldPosition, newPlayerSnapshot, teleportType, causingPlayerId)
+        UiController.activateHoverMarks()
     }
 
 }
