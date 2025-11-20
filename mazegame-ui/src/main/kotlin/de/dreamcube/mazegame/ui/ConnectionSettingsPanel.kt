@@ -133,8 +133,6 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     private var withFlavor: Boolean = true
 
     private val addressLabel = JLabel("Address")
-
-    //    private val addressField = JTextField(TEXT_FIELD_COLUMNS)
     private val addressFieldComboBox = JComboBox<String>()
 
     private val portLabel = JLabel("Port")
@@ -357,6 +355,9 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 handleNick(selectedStrategy, spectatorName)
             }
         }
+
+        strategySelection.selectedIndex = 0
+        nickField.text = strategySelection.selectedItem as String?
 
         add(nickLabel)
         add(nickField)
