@@ -13,7 +13,7 @@ class MazePanel() : JPanel() {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazePanel::class.java)
         internal const val INITIAL_ZOOM = 17
         private const val MIN_ZOOM = 5
-        private const val MAX_ZOOM = 31
+        private const val MAX_ZOOM = 33
     }
 
     var zoom: Int = INITIAL_ZOOM

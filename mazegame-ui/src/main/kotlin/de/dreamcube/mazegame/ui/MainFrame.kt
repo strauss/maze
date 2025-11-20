@@ -12,6 +12,7 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Rectangle
 import java.awt.event.*
+import javax.imageio.ImageIO
 import javax.swing.*
 import kotlin.system.exitProcess
 
@@ -83,6 +84,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
     private val visualizationButton = VisualizationButton()
 
     init {
+        addIcons()
         UiController.mainFrame = this
         defaultCloseOperation = DO_NOTHING_ON_CLOSE
 
@@ -304,5 +306,13 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
 
     override fun onPlayerLogout(playerSnapshot: PlayerSnapshot) {
         leftSplitPane.resetToPreferredSizes()
+    }
+
+    private fun addIcons() {
+        iconImages = buildList {
+            add(ImageIO.read(this@MainFrame.javaClass.getResource("16x16.png")))
+            add(ImageIO.read(this@MainFrame.javaClass.getResource("32x32.png")))
+            add(ImageIO.read(this@MainFrame.javaClass.getResource("48x48.png")))
+        }
     }
 }
