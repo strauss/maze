@@ -1,6 +1,9 @@
 package de.dreamcube.mazegame.common.api
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.dreamcube.mazegame.common.maze.DEFAULT_MAX_CLIENTS
+import de.dreamcube.mazegame.common.maze.DEFAULT_RANDOM_HEIGHT
+import de.dreamcube.mazegame.common.maze.DEFAULT_RANDOM_WIDTH
 
 /**
  * Connection data.
@@ -11,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
  */
 data class ConnectionDto(
     val port: Int = 0,
-    val maxClients: Int = 20,
+    val maxClients: Int = DEFAULT_MAX_CLIENTS,
     val loginTimeout: Long = 30_000L,
     val instantFlush: Boolean = false
 )
@@ -44,8 +47,8 @@ enum class MapFileMode {
  * default is false. If the template file does not contain any starting positions for walls, this flag is not relevant.
  */
 data class GeneratorParametersDto(
-    val width: Int = 40,
-    val height: Int = 30,
+    val width: Int = DEFAULT_RANDOM_WIDTH,
+    val height: Int = DEFAULT_RANDOM_HEIGHT,
     val mapFile: String? = null,
     val mapFileMode: MapFileMode = MapFileMode.RESSOURCE,
     val templateFillStartPoints: Boolean = false
@@ -135,12 +138,14 @@ data class BaitGeneratorDto(val objectDivisor: Int = 26, val trapDivisor: Int = 
  * amount of time will not contain further random events. The other values are probabilities:
  * - [allTrapProbability]: Whenever a gem is collected, it could be a "blood diamond", causing all baits to become
  * traps. The default probability is 1%.
- * - [allFoodProbability]: Whenever a coffee is collectet, it could be a "coffee from the office machine", causing all
+ * - [allFoodProbability]: Whenever a coffee is collected, it could be a "coffee from the office machine", causing all
  * baits to become food. The default probability is 1%.
  * - [allCoffeeProbability]: Whenever a player collision happens, there is a chance, that all baits transform into
  * coffee, because the causing player was "too tired" to pay attention. The default probability is 1%.
  * - [allGemProbability]: Whenever a food is collected, it could be an "enchanted golden apple" causing all baits to
  * be transformed into gems. The default probability is 0.5%.
+ * - [baitRushProbability]: Whenever an invisible trap is stepped on, there is a chance that a bait rush happens. The
+ * default probability is 5%.
  * - [loseBaitProbability]: Whenever a player collision happens, there is also a chance that the causing player loses a
  * random bait at the collision location (and the corresponding points).
  */

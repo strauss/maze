@@ -26,7 +26,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.max
 import kotlin.math.round
 
 /**
@@ -192,9 +191,11 @@ class MazeServer(
         LOGGER.info("Maze total fields: $totalFields")
         val walkableFields = positionProvider.walkablePositionsSize
         LOGGER.info("Maze walkable fields: $walkableFields (${round((10000.0 * walkableFields) / totalFields) / 100.0} %)")
-        baseBaitCount = walkableFields / serverConfiguration.game.baitGenerator.objectDivisor
+        val actualObjectDivisor = serverConfiguration.game.baitGenerator.objectDivisor.coerceIn(1..walkableFields)
+        baseBaitCount = walkableFields / actualObjectDivisor
         LOGGER.info("Base bait count: $baseBaitCount")
-        maxTrapCount = max(1, baseBaitCount / serverConfiguration.game.baitGenerator.trapDivisor)
+        val actualTrapDivisor = serverConfiguration.game.baitGenerator.trapDivisor.coerceIn(1..baseBaitCount)
+        maxTrapCount = baseBaitCount / actualTrapDivisor
         LOGGER.info("Max trap count: $maxTrapCount")
         desiredBaitCount = AtomicInteger(if (serverConfiguration.game.generateBaitsAtStart) baseBaitCount else 0)
         availableBotNames = ClientWrapper.determineAvailableBotNames()

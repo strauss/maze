@@ -23,7 +23,7 @@ class GameEventControl(private val server: MazeServer, private val parentScope: 
 
     private val gameEventChannel = Channel<GameEvent>(Channel.UNLIMITED)
     private val rng = Random.Default
-    private var earliestNextEvent: AtomicLong = AtomicLong(0L)
+    private val earliestNextEvent: AtomicLong = AtomicLong(0L)
 
     fun start() = launch {
         activateCooldown()
