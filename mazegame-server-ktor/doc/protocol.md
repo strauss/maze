@@ -384,11 +384,14 @@ Examples:
 - `INFO;451`
     - Error: The server is full
 - `INFO;200;ninja found an invisible gem!`
-    - The server broadcasts something to everyone
-- `INFO:201;I feel lonely.`
-    - A client broadcasts something to everyone
+    - The server sends something to a client.
+- `INFO;201;I feel lonely.`
+    - A client broadcasts something to the server.
+- `INFO;201;I feel lonely;1337`
+    - A server sends a broadcast message from player with ID 1337 to another client (every client should receive that)
 - `INFO;202;Gotcha!;1337`
-    - A client whispers something to a player with ID 1337.
+    - When sent from client to server: A client whispers something to a player with ID 1337.
+    - When sent from server to client: The server sends a whisper message from player with ID 1337.
 - `INFO;300;150`
     - The server notifies everyone that the game speed has changed to 150 ms per tick.
 
