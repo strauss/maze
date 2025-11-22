@@ -22,24 +22,52 @@ fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
 
+private const val MAZEGAME_CONFIG_PROPERTY = "mazegame.config-path"
+private const val MANUAL_SERVER_START_NOTIFICATION = "Servers have to be started manually using the REST interface."
+
 private val LOGGER = LoggerFactory.getLogger(Application::class.java)
 
+
 fun Application.module() {
-    val configPath: String = environment.config.property("mazegame.config-path").getString()
+    val configPath: String? =
+        System.getProperty(MAZEGAME_CONFIG_PROPERTY) ?: environment.config.propertyOrNull(MAZEGAME_CONFIG_PROPERTY)
+            ?.getString()
 
     val objectMapper = ObjectMapper(YAMLFactory())
     objectMapper.registerKotlinModule()
-    val serverList: List<MazeServerConfigurationDto> = objectMapper.readValue(File(configPath))
-
-    serverList.forEach {
-        val result = ServerController.launchServer(it)
-        runBlocking {
+    val serverList: List<MazeServerConfigurationDto> = if (configPath == null) {
+        LOGGER.warn("No configuration file specified. $MANUAL_SERVER_START_NOTIFICATION")
+        listOf()
+    } else {
+        val configurationFile = File(configPath)
+        if (configurationFile.exists()) {
             try {
-                result.await()
-            } catch (ex: Throwable) {
-                LOGGER.error("Failed to start server on port '${it.connection.port}': ", ex)
+                objectMapper.readValue(configurationFile)
+            } catch (ex: Exception) {
+                LOGGER.error(
+                    "Error while parsing the configuration file '$configurationFile' $MANUAL_SERVER_START_NOTIFICATION The error: '${ex.message}'."
+                )
+                listOf()
+            }
+        } else {
+            LOGGER.warn("Configuration file '$configurationFile' does not exist. $MANUAL_SERVER_START_NOTIFICATION")
+            listOf()
+        }
+    }
+
+    if (serverList.isNotEmpty()) {
+        serverList.forEach {
+            val result = ServerController.launchServer(it)
+            runBlocking {
+                try {
+                    result.await()
+                } catch (ex: Throwable) {
+                    LOGGER.error("Failed to start server on port '${it.connection.port}': ", ex)
+                }
             }
         }
+    } else {
+        LOGGER.info("No servers configured.")
     }
 
     monitor.subscribe(ApplicationStopping) {

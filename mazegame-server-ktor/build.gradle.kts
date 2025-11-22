@@ -51,7 +51,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("mazegame.server_ktor.ApplicationKt")
+    mainClass.set("de.dreamcube.mazegame.server.ApplicationKt")
 }
 
 tasks.withType<ShadowJar> {

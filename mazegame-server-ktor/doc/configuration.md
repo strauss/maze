@@ -1,9 +1,9 @@
 # Server configuration
 
-The server expects a configuration file at `./config/maze_config.yaml` relative to the working directory.
-This documents describes the configuration of a maze server.
-At top level, the configuration file is a list of server configurations, meaning you can define multiple servers in one
-file.
+The application expects a configuration file at `./config/maze_config.yaml` relative to the working directory.
+This documents describes the configuration of maze servers.
+At top level, the configuration file is a list of server configurations, meaning you can define multiple servers
+in one file.
 
 The yaml format is very strict and unforgiving.
 So be careful when editing the configuration file :-)
@@ -12,13 +12,28 @@ So be careful when editing the configuration file :-)
 
 Almost all configuration elements have default values and are not required to be configured.
 The only exception is the game port.
-The following minimal configuration defines a server at port `12345` with all values set to their respective default
-values.
+The following minimal configuration defines a list with one server at port `12345` with all values set to their
+respective default values.
 
 ```yaml
 - connection:
     port: 12345
 ```
+
+## Empty configuration
+
+It is possible to start the application without any running servers.
+For this, the configuration file has to solely contain an empty list.
+
+```yaml
+[ ]
+```
+
+If you start the application like this, you have to create servers using the [server control](server_control.md).
+All the detailed explanations on how to configure a server are also valid there.
+The only exception is the data format.
+The REST endpoints for this only accept JSON and only one server configuration at a time.
+For more information on that aspect, please consult the server control documentation.
 
 ## The configuration classes in detail
 
