@@ -52,8 +52,7 @@ It contains the following attributes that are explored one at a time.
 
 - `port: Int`: The only property that is absolutely required to be configured. The default is 0, but that value would
   not work as a port. Each server requires a different port here. If the port is blocked by the OS, the server cannot
-  start. If multiple servers are configured, only those with free ports will actually start. If no server starts, the
-  whole application will stop immediately.
+  start. If multiple servers are configured, only those with free ports will actually start.
 - `maxClients: Int`: The maximum number of clients. The default value is `20`. A client is either a player or a
   spectator. They both count.
 - `loginTimeout: Long`: After how many milliseconds should the server stop waiting for a client response and cancel the

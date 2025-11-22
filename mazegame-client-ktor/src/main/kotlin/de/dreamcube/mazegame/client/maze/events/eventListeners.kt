@@ -164,7 +164,7 @@ interface ErrorInfoListener : EventListener {
 /**
  * This listener interface is intended for the UI for directly reacting to connection status changes.
  *
- * In order to use it properly, you need to know what happens at in each status and what is "available" at each status.
+ * In order to use it properly, you need to know what happens in each status and what is "available" in each status.
  *
  * - [ConnectionStatus.NOT_CONNECTED]: When the client is created it starts in this status. Here, the strategy object is
  * not available yet. The strategy object is created before a connection attempt is made.

@@ -8,6 +8,7 @@ import kotlin.math.roundToLong
 /**
  * Utility class to calculate an absolute average.
  */
+@Suppress("unused")
 class AbsoluteAverageCalculator : AverageCalculator<Long> {
 
     private val internalSum = AtomicLong(0L)

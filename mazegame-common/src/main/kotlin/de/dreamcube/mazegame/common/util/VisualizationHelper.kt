@@ -30,8 +30,11 @@ object VisualizationHelper {
     )
 
     /**
-     * Draws the given [text] centric inside the rectangle defined by the coordinates and the dimensions.
+     * Draws the given [text] centric inside the rectangle defined by the coordinates and the dimensions. It is used to
+     * render the baits in the center of the maze cells. It can also be used to display text (or numbers) inside the
+     * maze cells for visualizing the calculations of the strategy. Feel free to use it.
      */
+    @JvmStatic
     fun drawTextCentric(
         g2: Graphics2D,
         text: String,
