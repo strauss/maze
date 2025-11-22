@@ -1,9 +1,9 @@
 [versions]
-kotlin = "2.2.10"
+kotlin = "2.2.20"
 ktor = "3.3.0"
 jackson = "2.18.2"
 slf4j = "2.0.9"
-logback = "1.5.13"
+logback = "1.5.16"
 jwt = "4.4.0"
 kotlinxSerialization = "1.6.3"
 kotlinxHtml = "0.12.0"

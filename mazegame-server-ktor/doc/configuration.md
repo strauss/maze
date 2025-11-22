@@ -8,7 +8,7 @@ file.
 The yaml format is very strict and unforgiving.
 So be careful when editing the configuration file :-)
 
-## Minimal configurtaion
+## Minimal configuration
 
 Almost all configuration elements have default values and are not required to be configured.
 The only exception is the game port.
