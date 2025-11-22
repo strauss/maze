@@ -13,7 +13,7 @@ data class ServerInformationDto(
  * Contains the maze information and how it was generated.
  */
 data class MazeInformationDto(
-    val generatorMode: String,
+    val generatorMode: GeneratorMode,
     val generatorParameters: GeneratorParametersDto,
     val walkableFields: Int
 )
@@ -22,7 +22,7 @@ data class MazeInformationDto(
  * Contains the whole game information, basically reflecting parts of the configuration.
  */
 data class GameInformationDto(
-    val speed: String,
+    val speed: GameSpeed,
     val autoTrapeater: Boolean,
     val allowSpectator: Boolean,
     val delayCompensation: Boolean,

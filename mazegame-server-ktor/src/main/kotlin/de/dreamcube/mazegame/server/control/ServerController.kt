@@ -267,7 +267,7 @@ object ServerController {
         val maze: MazeGeneratorConfigurationDto = serverConfiguration.maze
         val mazeInformation =
             MazeInformationDto(
-                maze.generatorMode.shortName,
+                maze.generatorMode,
                 maze.generatorParameters,
                 server.positionProvider.walkablePositionsSize
             )
@@ -282,7 +282,7 @@ object ServerController {
             server.visibleTrapCount.get()
         )
         val gameInformation = GameInformationDto(
-            server.gameSpeed.shortName,
+            server.gameSpeed,
             server.autoTrapeaterEnabled,
             game.allowSpectator,
             game.delayCompensation,

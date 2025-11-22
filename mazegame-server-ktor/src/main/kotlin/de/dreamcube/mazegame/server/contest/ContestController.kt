@@ -57,10 +57,13 @@ class ContestController(
         events.send(ContestEvent(ContestEventType.START, 0))
         events.send(ContestEvent(ContestEventType.STOP, configuration.durationInMinutes))
         // Report events
-        var currentMinute = configuration.statusReportIntervalInMinutes
-        while (currentMinute < configuration.durationInMinutes) {
-            events.send(ContestEvent(ContestEventType.REPORT, currentMinute))
-            currentMinute += configuration.statusReportIntervalInMinutes
+        val reportInterval = configuration.statusReportIntervalInMinutes
+        if (reportInterval in 1..configuration.durationInMinutes) {
+            var currentMinute = reportInterval
+            while (currentMinute < configuration.durationInMinutes) {
+                events.send(ContestEvent(ContestEventType.REPORT, currentMinute))
+                currentMinute += reportInterval
+            }
         }
         // Additional events
         configuration.additionalEvents.forEach { events.send(it) }
@@ -95,7 +98,8 @@ class ContestController(
             server.commandExecutor.addCommand(ClearCommand(server))
             everStarted = true
             contestStartedAt = System.currentTimeMillis()
-            val contestStartMessage = "Starting contest. Contest will run for ${configuration.durationInMinutes} minutes."
+            val contestStartMessage =
+                "Starting contest. Contest will run for ${configuration.durationInMinutes} minutes."
             LOGGER.info(contestStartMessage)
             server.sendToAllPlayers(createServerInfoMessage(contestStartMessage).thereIsMore())
             server.commandExecutor.addCommand(GoCommand(server))
@@ -144,7 +148,9 @@ class ContestController(
             .toList()
         var position = 1
         for (player in topList) {
-            server.sendToAllPlayers(createServerInfoMessage("Position ${String.format("%02d", position)}: ${player.nick}").thereIsMore())
+            server.sendToAllPlayers(
+                createServerInfoMessage("Position ${String.format("%02d", position)}: ${player.nick}").thereIsMore()
+            )
             position += 1
         }
         server.sendToAllPlayers(createServerInfoMessage("The winner is: ${topList.first().nick}"))

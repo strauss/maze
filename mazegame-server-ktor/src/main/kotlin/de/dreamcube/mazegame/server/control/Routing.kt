@@ -27,6 +27,9 @@ private const val pathNick: String = "nick"
 
 fun Application.configureAuthentication() {
     authentication {
+        /**
+         * Authentication used only for obtaining the bearer token.
+         */
         basic(name = basicAuth) {
             realm = authRealm
             validate { credentials ->
@@ -38,6 +41,9 @@ fun Application.configureAuthentication() {
             }
         }
 
+        /**
+         * Authentication used for everything else.
+         */
         bearer(name = bearerAuth) {
             realm = authRealm
             authenticate { tokenCredential ->
@@ -66,9 +72,11 @@ fun Application.configureRouting() {
         */
 
         /**
-         * This endpoint is used for allowing a client to get essential connection information about all available running maze servers.
+         * This endpoint is used for allowing a client to get essential connection information about all available
+         * running maze servers. There is no authentication required for this endpoint. This allows for managed
+         * connections in clients that support it.
          */
-        get("server") {
+        get("/server") {
             ServerController.getReducedServerInformation(call)
         }
 
@@ -122,6 +130,7 @@ fun Application.configureRouting() {
 
             post("/server/{$pathServerId}/control/speed") {
                 val serverId: Int = call.getIntParameter(pathServerId) ?: return@post
+                // TODO: check if this is the correct function for retrieving a string query parameter
                 val speedAsString: String = call.getStringParameter(querySpeed) ?: return@post
                 ServerController.changeSpeed(call, serverId, speedAsString)
             }
