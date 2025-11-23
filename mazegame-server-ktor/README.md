@@ -84,6 +84,8 @@ Those extensions are backwards-compatible, if clients ignore "too many parameter
 - JOIN command: The server uses it to communicate the flavor text to the other clients ... for fun
 - PPOS command: It now also contains a teleportation reason and, in case of collisions, who was responsible
 
+If you are interested in the full protocol, please read [protocol.md](doc/protocol.md).
+
 ## More advanced start options
 
 All of these options can be changed simultaneously.
