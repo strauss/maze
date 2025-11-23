@@ -132,16 +132,17 @@ I also hosted a contest at the end of the course.
 
 The apprentices loved it and I got hooked on the maze game again.
 I implemented my own new bots at that time.
-The project hooked me again, and it didn't stop there.
+It didn't stop there.
 
-I extended the server with new features (such as teleporting players) and made the client more accessible.
+I extended the server with new features (such as teleporting players and delay compensation) and made the client more
+accessible.
 At some point I realized something.
 I wanted to make this amazing project available for more people to enjoy.
 My plan was making the code "open source", which is what I eventually did.
 
 I didn't want to release the code as it was.
 For one, it was not my code, it was Volker's.
-He might have given it to us, but I just felt completely wrong.
+He might have given it to us students, but it just felt completely wrong.
 
 I also wanted to try something "new".
 My favorite programming language changed from "Java" to "Kotlin" around 2019.
@@ -162,7 +163,7 @@ For the client, I also chose Kotlin as language and some parts of it also use Kt
 
 The UI was a tougher choice.
 I didn't choose Java-FX, because outside of universities, it seems insignificant.
-Also: I learned, that Volker also reused the maze game for a different lecture.
+Also: I learned, that Volker revived the maze game for a different lecture.
 He demands Java-FX and I don't want to release something that might simplify the work for his students.
 They have to learn it the hard way :-)
 I didn't want to move to "Compose Multiplatform" (yet), because it would have been completely new for me, and I am
@@ -181,11 +182,11 @@ I migrated (almost) all of my own bots to the new client (some remained in Java,
 I also migrated Volker's "ninja" not only to the new client, but also to Kotlin.
 Its new version is now called "ninja_ng".
 
-Some facts about the advanced bots that might inspire your own designs:
+Here are some facts about the advanced bots that might inspire your own approaches.
 
 ### "ninja" (now "ninja_ng")
 
-Volker once described his approach "spill water".
+Volker once described his algorithm as "spill water".
 The bot treats other players as walls, its evaluation function is outstanding.
 However, the bot's performance gets worse, the more other players compete.
 
@@ -201,7 +202,8 @@ The paths are not optimal, but it still performs pretty well, if the maze is not
 The name is some kind of "inside joke" from the first iteration of the Java course.
 For the last session I implemented a non-thread-safe version of the philosopher's problem.
 The apprentice's exercise was "make it thread-safe".
-In my approach the chopsticks "knew" more about the philosophers than the other way around.
+In my approach the chopsticks "knew" more about the philosophers than the other way around (it seemed practical from a
+technical point of view).
 One of the apprentices was too confused by that fact, that they couldn't finish the exercise.
 
 I named the bot "chopstick" because it does things unconventionally backwards.
@@ -224,12 +226,11 @@ I am also not sure if I will port it to Kotlin or not.
 
 ### "underdog"
 
-Now we are talking ...
 This bot was my very first bot from 2023, that I would consider "very good".
-It uses a "very complicated" map structure for avoiding too expensive search algorithms.
+It uses a "complicated" map structure for avoiding too expensive search algorithms.
 It searches forwards (as all bots should do :-) ).
-It uses a technique, that one of my former apprentices called "mind reading" (he actually named his bot "...mindreader"
-and won the first contest with it).
+It uses a technique, that one of my former apprentices called "mind reading" (they actually named their own bot
+"...mindreader" and won the first contest with it).
 
 I hacked down the first version in 2 hours (mostly, because I already implemented the map structure for "chopstick"
 without using it there).
@@ -237,7 +238,7 @@ Therefore, the name "underdog", because "No one expected me, but here I am!" (fl
 The first version was not thread-safe but still performed pretty well.
 In 2024, I redesigned it to be very thread-safe and added more tweaks to it.
 
-The final tweak ultimately created my best bot (yet).
+The final tweak ultimately created "mindripper", my best bot (yet).
 
 "underdog" is already migrated to the new client and has been ported to Kotlin and now uses coroutines.
 I hope he is still thread-safe :-)
@@ -276,3 +277,90 @@ If you analyzed the code of
 easily come up with your own stubborn implementation.
 
 If you are one of my apprentices, I highly recommend not to do that :-)
+
+## What about Chat-GPT
+
+If you plan on using Chat-GPT for bot development ... well depending on how you will approach it, I would say "go for
+it!".
+Nowadays, using an AI as a tool is not a "sin" (anymore).
+
+However, I highly recommend to discuss topics on "a higher level".
+Don't let the AI do the coding for you.
+The goal should be "learning to code".
+If you struggle with certain aspects of your code, let the AI explain it to you.
+
+Out of curiosity, I once let Chat-GPT develop a bot on its own.
+It wasn't able to just solve the problem.
+I had to guide it towards a feasible solution.
+That was a fun experience, because we swapped roles.
+Usually the AI tells the human how to approach a problem.
+This time it was the other way around.
+
+The AI produced several bots of different quality.
+I would consider the best of its bots to be of "mediocre" quality.
+However, I know how Chat-GPT approaches this task.
+Therefore, I think I am able to spot a bot that was created or inspired by Chat-GPT.
+
+On the other hand that was almost a year ago and the quality might have improved by now.
+I might try it again with the new client.
+
+If you are one of my apprentices, keep that in mind.
+Also note, that Chat-GPT-bots will not win you the contest!
+
+### My use of Chat-GPT in this project
+
+When migrating and expanding on this project, Chat-GPT was a good sparring partner for discussions.
+I admit, that there are a few parts in the code base, that are "highly inspired" by Chat-GPT.
+One example is the class [Disposer](mazegame-common/src/main/kotlin/de/dreamcube/mazegame/common/util/Disposer.kt).
+
+The `Disposer` was Chat-GPTs idea for a problem that I solved with a simple list.
+I showed my code and asked for a better solution.
+Chat-GPT came up with the `Disposer` class.
+I liked the pattern and took it.
+
+Another example is the luminance-related code in
+[color_util.kt](mazegame-ui/src/main/kotlin/de/dreamcube/mazegame/ui/color_util.kt).
+
+As mentioned above, I'm a backend developer and basically clueless, when it comes to finding the right contrast.
+I am also a cis male and therefore only capable of distinguishing between 16 colors :-)
+
+This whole construct is a preparation for a dark mode that I want to add in the future.
+Without the help of Chat-GPT, the whole part with colors, contrast and luminance would be a mess and the UI would be of
+worse quality.
+
+#### My way of prompting
+
+Usually I ask questions like "How can I select a row in a JTable using code in a way that the same events are triggered
+as if I clicked on the row?".
+Then Chat-GPT will give me a generic example which I can then read, understand, and adapt into my own code.
+It is basically a better version of stack overflow, with the exception, that the answer will be tailored to your
+problem, and you don't have to justify whatever you are doing.
+
+Sometimes I discuss code snippets and incorporate improvement suggestions (or ignore them right away because they annoy
+me).
+
+#### Chat-GPTs biggest contribution
+
+The most important task that Chat-GPT did for me was its help, when I migrated the former Maven project into this Gradle
+project.
+Without Chat-GPT, I would have failed or even given up on it entirely.
+
+Build frameworks are a mess, no matter if we are talking about Maven or Gradle.
+Everyone seems to do things differently.
+Build scripts also tend to become a patchwork of copy and paste.
+This is especially true for Maven projects.
+
+When migrating the multi-module Maven project to Gradle, Chat-GPT introduced me to the
+[toml file](gradle/libs.versions.toml) because I requested central version management.
+I really adore this concept, because it is exactly what I desired.
+This concept is even superior to the dependency management and version properties that are regularly used in Maven.
+
+However, whenever I request a new dependency, the suggestions always use the hardcoded variants, instead of telling me
+to extend the toml file and refer to it.
+I learned enough to do that myself, but it really annoys me.
+
+#### Conclusion
+
+In a nutshell: I try to use Chat-GPT in a way that I learn from it.
+I rarely copy and past its code.
+Sometimes I even force it to not generate any code and just tell me the concept.
