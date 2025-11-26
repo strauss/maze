@@ -14,6 +14,9 @@ import kotlinx.coroutines.runBlocking
 import java.awt.*
 import java.awt.event.KeyEvent
 
+/**
+ * Simplest imaginable spectator strategy. Just does nothing.
+ */
 @Suppress("unused")
 @Bot("spectator", isSpectator = true, flavor = "Who will win? Nobody knows!")
 class Spectator : Strategy() {
@@ -25,6 +28,9 @@ class Spectator : Strategy() {
 
 }
 
+/**
+ * Human strategy with keyboard control. Every command is represented by one of the arrow keys.
+ */
 @Suppress("unused")
 @Bot("humanFirstPerson", isHuman = true, flavor = "User arrow keys: left/right for turn and up for step")
 class HumanPlayerFirstPerson : Strategy(), ClientConnectionStatusListener {
@@ -69,6 +75,10 @@ class HumanPlayerFirstPerson : Strategy(), ClientConnectionStatusListener {
     }
 }
 
+/**
+ * Human strategy with keyboard control. Here you press in the direction you want to go and the bot does the turning
+ * automatically.
+ */
 @Suppress("unused")
 @Bot("humanThirdPerson", isHuman = true, flavor = "Use all four arrow keys")
 class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
@@ -145,6 +155,11 @@ class HumanPlayerThirdPerson : Strategy(), ClientConnectionStatusListener {
     }
 }
 
+/**
+ * Human strategy with mouse control. The player clicks on the bait and the "almost bot" will move automatically towards
+ * the bait. Automatically marks the player and starts the visualization. Whenever a bait is selected, the path is also
+ * shown in the maze.
+ */
 @Suppress("unused")
 @Bot("clickAndCollect", isHuman = true, flavor = "Click on bait, I will collect it!")
 class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, MazeCellListener,

@@ -29,12 +29,18 @@ private const val DREAMCUBE = "dreamcube.de"
 
 private const val MAX_PORT_NUMBER = 65535
 
+/**
+ * This class resembles the connection settings, that are shown on the left side, when the application is started.
+ */
 class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     companion object {
         private const val TEXT_FIELD_COLUMNS: Int = 20
         private val LOGGER: Logger = LoggerFactory.getLogger(ConnectionSettingsPanel::class.java)
     }
 
+    /**
+     * This inner class shows the game information of the selected server.
+     */
     private class ServerInfoPanel(preferredPreviewWidth: Int) : JPanel() {
         // Dummy panel for future minimap
         private val previewLabel = JLabel("No preview")
@@ -88,6 +94,10 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
             isVisible = false
         }
 
+        /**
+         * Fills the panel with the information of the selected server/game. Renders a preview image of the map and
+         * copies all values into the matching fields.
+         */
         fun activate(serverInfo: ReducedServerInformationDto) {
             val compactMaze = CompactMaze.import(Base64.decode(serverInfo.compactMaze))
             val previewImage = BufferedImage(compactMaze.width * 2, compactMaze.height * 2, BufferedImage.TYPE_INT_RGB)
@@ -167,7 +177,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         connectionLabel.font = connectionLabel.font.deriveFont(Font.BOLD)
         add(connectionLabel, "span")
 
-        // Connection type
+        // Connection type (managed or direct)
         ButtonGroup().apply {
             add(managedConnection)
             add(directConnection)
@@ -184,6 +194,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 directConnectionSelected()
             }
         }
+        // The default is a managed connection ... never stick yourself to the past :-)
         managedConnection.isSelected = true
 
         add(managedConnection)
@@ -213,6 +224,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         queryButton.preferredSize = Dimension(portField.preferredSize.width, queryButton.preferredSize.height)
         queryButton.mnemonic = KeyEvent.VK_R
         add(queryButton)
+        // When clicking the button, the server is queried
         queryButton.addActionListener { _ ->
             val address: String = addressFieldComboBox.selectedItem as String
             val port = portField.text
@@ -255,6 +267,8 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(gameSelection)
         gameSelection.isEnabled = false
         gameSelection.preferredSize = Dimension(portField.preferredSize.width, gameSelection.preferredSize.height)
+        // Selecting the game is a further step in the configuration process
+        // Several UI elements are activated or deactivated depending on the selection
         gameSelection.addItemListener { event: ItemEvent ->
             if (event.stateChange == ItemEvent.SELECTED) {
                 val item: ReducedServerInformationDto? = event.item as ReducedServerInformationDto
@@ -295,6 +309,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlHeader.font = serverControlHeader.font.deriveFont(Font.BOLD)
         add(serverControlHeader, "span 2")
 
+        // "fancy star"
         serverControlPasswordField.echoChar = '★'
         serverControlPasswordField.isEnabled = false
         add(serverControlPasswordLabel)
@@ -317,7 +332,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                     )
                     withContext(Dispatchers.Swing) {
                         gameSelection.isEnabled = false
-                        serverControlPasswordField.text = "success"
+                        serverControlPasswordField.text = "..."
                         serverControlPasswordField.isEnabled = false
                     }
                 } catch (ex: ClientRequestException) {
@@ -366,6 +381,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         connectButton.preferredSize = Dimension(portField.preferredSize.width, connectButton.preferredSize.height)
         add(connectButton)
 
+        // Finally the connection button
         connectButton.addActionListener { _ ->
             val readyToConnect =
                 UiController.connectionStatus == ConnectionStatus.NOT_CONNECTED || UiController.connectionStatus == ConnectionStatus.DEAD
@@ -401,6 +417,9 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         UiController.prepareEventListener(this)
     }
 
+    /**
+     * Parses the port number. Yields an error, if it is not valid (not a number or not in the port range).
+     */
     private suspend fun readPortNumber(portNumberAsString: String): Int {
         try {
             val parsedNumber = portNumberAsString.toInt()
@@ -427,6 +446,10 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         }
     }
 
+    /**
+     * For managed connections this function automatically sets the nickname to the spectator's nickname, if a
+     * spectator strategy is selected.
+     */
     private fun handleNick(selectedStrategy: String, spectatorName: String?) {
         UiController.uiScope.launch {
             if (selectedStrategy.isSpectatorStrategy() && spectatorName != null) {
@@ -439,6 +462,9 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         }
     }
 
+    /**
+     * Activates and deactivates UI elements for configuring a managed connection.
+     */
     private fun managedConnectionSelected() {
         portLabel.isVisible = true
         portField.isVisible = true
@@ -454,6 +480,9 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         withFlavor = true
     }
 
+    /**
+     * Activates and deactivates UI elements for configuring a direct connection (aka "old style").
+     */
     private fun directConnectionSelected() {
         portLabel.isVisible = false
         portField.isVisible = false
@@ -473,13 +502,16 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         gamePortField.text = "12345"
     }
 
+    /**
+     * Fills the game selection combobox with the meta information received from the server.
+     */
     private fun fillGameSelection(elements: List<ReducedServerInformationDto>) {
         val model: DefaultComboBoxModel<ReducedServerInformationDto?> = gameSelection.model as DefaultComboBoxModel
         if (model.size > 0) {
             model.removeAllElements()
         }
         val actualList = buildList {
-            // The first one resemles the "Clear..." text for resetting the received game information.
+            // The first one resembles the "Clear..." text for resetting the received game information.
             add(ReducedServerInformationDto(-1, -1, -1, -1, -1, -1, ""))
             addAll(elements)
         }
@@ -497,6 +529,11 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         BOT, SPECTATOR, HUMAN
     }
 
+    /**
+     * Retrieves the available strategies from [Strategy]'s companion object (or static area, if you prefer). They are
+     * sorted by their strategy type (bots first, then spectators, then human strategies) and by their name
+     * (case-insensitive).
+     */
     private fun fillStrategySelection() {
         val availableStrategies: Set<String> = Strategy.getStrategyNamesBlocking()
         val classifiedStrategies: List<Pair<String, StrategyType>> = availableStrategies.map {
@@ -521,6 +558,10 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         }
     }
 
+    /**
+     * React to connection events. As soon as we are connected, this part of the UI is disabled. When the client dies,
+     * the UI is put into a state where it can set up a new connection.
+     */
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus

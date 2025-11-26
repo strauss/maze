@@ -10,7 +10,7 @@ val WHITISH: Color = Color(Color.HSBtoRGB(0.0f, 0.0f, 0.95f))
 const val SATURATION: Float = 1.0f
 
 /**
- * Converts a normalized RBG component to "linear"
+ * Converts a normalized RBG component to "linear".
  */
 private fun lin(c: Double): Double = if (c <= 0.04045) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)
 

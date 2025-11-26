@@ -11,13 +11,20 @@ import java.awt.geom.Area
 import java.awt.geom.Rectangle2D
 import kotlin.math.floor
 
-interface DrawableMazeObject {
+/**
+ * Unites all drawable maze objects in one interface. The coordinates are variable. The implementations are "static" in
+ * most cases ("object").
+ */
+sealed interface DrawableMazeObject {
     /**
      * Draws this maze object into the given [Graphics] [g]. [x] and [y] refer to maze coordinates. [zoom] is the zoom factor.
      */
     fun drawAt(g: Graphics, x: Int, y: Int, zoom: Int)
 }
 
+/**
+ * A path ... usually just a plain white box.
+ */
 object DrawablePath : DrawableMazeObject {
     internal val PATH_COLOR = Color.white
 
@@ -27,6 +34,9 @@ object DrawablePath : DrawableMazeObject {
     }
 }
 
+/**
+ * The visual representation of a wall.
+ */
 object DrawableWall : DrawableMazeObject {
     private val WALL_COLOR = Color.lightGray
 
@@ -48,6 +58,9 @@ object DrawableWall : DrawableMazeObject {
     }
 }
 
+/**
+ * The outside world ... which is sometimes inside.
+ */
 object DrawableOutside : DrawableMazeObject {
     private val OUTSIDE_COLOR = Color.darkGray
 
@@ -57,6 +70,10 @@ object DrawableOutside : DrawableMazeObject {
     }
 }
 
+/**
+ * Currently mostly unused ... was planned for "fog of war" (not a feature yet). Currently it is a red box, but this
+ * might change in the future.
+ */
 object DrawableUnknown : DrawableMazeObject {
     private val UNKNOWN_COLOR = Color.red
 
@@ -66,6 +83,10 @@ object DrawableUnknown : DrawableMazeObject {
     }
 }
 
+/**
+ * Abstract representation of a bait. A Bait is represented by a rendered letter. This class actually renders it. The
+ * letter is defined by the specializations.
+ */
 abstract class DrawableBait(private val type: BaitType) : DrawableMazeObject {
     companion object {
         protected val BAIT_BASE_FONT = Font("SansSerif", Font.BOLD, 0)
@@ -97,6 +118,9 @@ object DrawableTrap : DrawableBait(BaitType.TRAP) {
     override val baitColor: Color = Color.darkGray
 }
 
+/**
+ * Gives the drawable representation of a [BaitType].
+ */
 fun BaitType.drawable(): DrawableBait = when (this) {
     BaitType.FOOD -> DrawableFood
     BaitType.COFFEE -> DrawableCoffee
@@ -104,6 +128,13 @@ fun BaitType.drawable(): DrawableBait = when (this) {
     BaitType.TRAP -> DrawableTrap
 }
 
+/**
+ * The only [DrawableMazeObject] that is somewhat variable. Each player has its own instance. This is mainly because of
+ * the player's color and viewDirection. It is constantly recreated for all players, because color and view direction
+ * regularly change.
+ *
+ * The player is drawn with an outline, using "areas" as technique.
+ */
 class DrawablePlayer(private val color: Color, private val viewDirection: ViewDirection) : DrawableMazeObject {
     companion object {
         private val EDGE_COLOR: Color = Color.black
