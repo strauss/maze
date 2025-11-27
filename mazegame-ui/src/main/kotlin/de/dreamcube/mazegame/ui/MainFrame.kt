@@ -16,6 +16,9 @@ import javax.imageio.ImageIO
 import javax.swing.*
 import kotlin.system.exitProcess
 
+/**
+ * This class resembles the main frame of the whole application.
+ */
 class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnectionListener {
     companion object {
         private const val TITLE = "Maze-Game Client KT"
@@ -25,21 +28,82 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         private const val MARK_POS = 2
     }
 
+    /**
+     * The [JSplitPane] separating the maze visualization (right) from the score table and chat (left).
+     */
     private val mainSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT)
+
+    /**
+     * The panel for configuring the connection.
+     */
     private val connectionSettingsPanel = ConnectionSettingsPanel()
+
+    /**
+     * The split [JSplitPane] separating the score table and the chat.
+     */
     private val leftSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
+
+    /**
+     * The [ScorePanel] including the [ScoreTable].
+     */
     private val scorePanel: ScorePanel
+
+    /**
+     * The chat.
+     */
     private lateinit var messagePane: MessagePane
+
+    /**
+     * The maze visualization.
+     */
     private val mazePanel: MazePanel
+
+    /**
+     * Counts the number of connections the application has performed until now.
+     */
     private var connectionCounter: Int = 0
+
+    /**
+     * The leave button.
+     */
     private val leaveButton = JButton("Leave")
+
+    /**
+     * The [StatusBar] of the application, including certain information about the game. It also contains the control
+     * button.
+     */
     private val statusBar = StatusBar()
+
+    /**
+     * The control area on the right side.
+     */
     private val controlPane = JPanel()
+
+    /**
+     * The [JPanel] containing the bot control, if the strategy provides it.
+     */
     private val botControlPanel = JPanel()
+
+    /**
+     * The [ServerControlPanel] allowing for controlling the game server, if the control connection was established
+     * before connecting to the game.
+     */
     private var serverControlPanel: ServerControlPanel? = null
+
+    /**
+     * Flag indicating, if the control panel is active.
+     */
     private var controlPanelInPlace: Boolean = false
+
+    /**
+     * The glass pane containing the marker panel and the bot visualization if the strategy provides it.
+     */
     private val layeredGlassPane: JLayeredPane
 
+    /**
+     * This button is only visible, if the selected strategy provides a visualization. If it does, it is used to toggle
+     * it.
+     */
     private inner class VisualizationButton : JButton(VIS_BUTTON_TEXT_OFF) {
         val visualizationComponent: VisualizationComponent?
             get() = UiController.client.strategy.getVisualizationComponent()
@@ -59,6 +123,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
             }
         }
 
+        /**
+         * Activates the visualization.
+         */
         fun activate() {
             UiController.client.strategy.getVisualizationComponent()?.let { visualizationComponent ->
                 visualizationComponent.zoom = UiController.mazePanel.zoom
@@ -71,6 +138,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
             }
         }
 
+        /**
+         * Deactivates the visualization.
+         */
         fun deactivate() {
             UiController.visualizationComponent?.let {
                 it.visualizationEnabled = false
@@ -131,6 +201,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                 isOpaque = false
             }
 
+            /**
+             * Limits the visible area of the layered glass pane to the [mazePanel]'s visible area.
+             */
             override fun doLayout() {
                 val translatedMazePanelRectangle =
                     SwingUtilities.convertRectangle(mazePanel, Rectangle(0, 0, mazePanel.width, mazePanel.height), this)
@@ -203,6 +276,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         }
     }
 
+    /**
+     * Sets up the chat view.
+     */
     private fun createScrollableMessagePane(): JScrollPane {
         messagePane = MessagePane()
         messagePane.isEditable = false
@@ -210,6 +286,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         return JScrollPane(messagePane)
     }
 
+    /**
+     * Toggles the control panel.
+     */
     internal fun showOrHideControlPanel() {
         if (controlPanelInPlace) {
             contentPane.remove(controlPane)
@@ -236,6 +315,19 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         controlPane.removeAll()
     }
 
+    /**
+     * Reacts to connection status change events.
+     *
+     * - [ConnectionStatus.CONNECTED]: enables/activates visualization and bot control if the strategy provides it. Also
+     * enables the control button on the status bar.
+     * - [ConnectionStatus.LOGGED_IN]: replaces the connection panel with the score panel, activates the leave button,
+     * and counts a successful connection.
+     * - [ConnectionStatus.PLAYING]: tells the [UiController] that we are playing (effectively initializes the own
+     * player id in the [UiController]).
+     * - [ConnectionStatus.DEAD]: If we had at least one successful connection, the whole UI is reset into a state that
+     * it can establish a new connection. Only bad programs don't allow for reusing the UI and force the user to
+     * restart the whole application...
+     */
     override fun onConnectionStatusChange(
         oldStatus: ConnectionStatus,
         newStatus: ConnectionStatus
@@ -308,6 +400,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         leftSplitPane.resetToPreferredSizes()
     }
 
+    /**
+     * Loads the application icon in different sizes from the resources.
+     */
     private fun addIcons() {
         iconImages = buildList {
             add(ImageIO.read(this@MainFrame.javaClass.getResource("16x16.png")))

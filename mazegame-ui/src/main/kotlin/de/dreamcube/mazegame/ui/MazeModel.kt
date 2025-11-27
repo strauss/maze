@@ -14,26 +14,87 @@ import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+/**
+ * The maze representation required for rendering the maze. It is updated using client events. Whenever the content of a
+ * path field changes, the [UiController] is told to update the [MazePanel] at the corresponding field.
+ */
 class MazeModel() : MazeEventListener, BaitEventListener, PlayerMovementListener, ClientConnectionStatusListener {
 
     companion object {
         private val LOGGER: Logger = LoggerFactory.getLogger(MazeModel::class.java)
     }
 
+    /**
+     * Occupation status of a path.
+     */
     enum class PathOccupationStatus {
-        EMPTY, PLAYER, BAIT, CROWDED
+        /**
+         * The path is empty.
+         */
+        EMPTY,
+
+        /**
+         * The path contains a player.
+         */
+        PLAYER,
+
+        /**
+         * The path contains a bait.
+         */
+        BAIT,
+
+        /**
+         * The path contains a player and a bait simultaneously (forbidden).
+         */
+        CROWDED
     }
 
+    /**
+     * Interface defining a [MazeField], namely a single cell in the maze. Most of them are represented by singleton
+     * objects. Only the paths have actual objects that can change.
+     */
     sealed interface MazeField
+
+    /**
+     * An "unknown" maze field (the server would send a '?')
+     */
     object UnknownMazeField : MazeField
+
+    /**
+     * An "outside" maze field (the server would send a '-')
+     */
     object OutsideMazeField : MazeField
+
+    /**
+     * A "wall" maze field (the server would send a '#')
+     */
     object WallMazeField : MazeField
 
+    /**
+     * A path field may contain a bait or a player. The bait is represented by its [BaitType]. The player is represented
+     * by its current [PlayerSnapshot].
+     */
     class PathMazeField() : MazeField {
+        /**
+         * Bait on this path field, null if there is none.
+         */
         var bait: BaitType? = null
             internal set
+
+        /**
+         * Player on this path field, null if there is none.
+         */
         var player: PlayerSnapshot? = null
             internal set
+
+        /**
+         * Derived occupation status.
+         *
+         * - [PathOccupationStatus.EMPTY] if neither player nor bait are set
+         * - [PathOccupationStatus.BAIT] if the bait is set but the player is not
+         * - [PathOccupationStatus.PLAYER] if the player is set but the bait is not
+         * - [PathOccupationStatus.CROWDED] if both player and bait are set (forbidden)
+         */
         val occupationStatus
             get() =
                 when {
@@ -48,14 +109,32 @@ class MazeModel() : MazeEventListener, BaitEventListener, PlayerMovementListener
         UiController.prepareEventListener(this)
     }
 
+    /**
+     * Width of the maze.
+     */
     internal var width: Int = 0
         private set
+
+    /**
+     * Height of the maze.
+     */
     internal var height: Int = 0
         private set
+
+    /**
+     * Internal 1D-Array representation of the maze.
+     */
     var internalMaze: Array<MazeField> = Array(0) { UnknownMazeField }
+
+    /**
+     * Did we receive the maze?
+     */
     var mazeReceived: Boolean = false
         private set
 
+    /**
+     * Function for resetting this part of the UI.
+     */
     private fun reset() {
         width = 0
         height = 0
@@ -63,6 +142,9 @@ class MazeModel() : MazeEventListener, BaitEventListener, PlayerMovementListener
         mazeReceived = false
     }
 
+    /**
+     * Parses the received maze into the UI maze structure.
+     */
     override fun onMazeReceived(width: Int, height: Int, mazeLines: List<String>) {
         this.width = width
         this.height = height

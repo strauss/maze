@@ -24,29 +24,91 @@ import java.awt.EventQueue
 import java.util.*
 import javax.swing.JOptionPane
 
+/**
+ * The ui controller as singleton.
+ */
 object UiController {
     private val LOGGER: Logger = LoggerFactory.getLogger(UiController::class.java)
 
+    /**
+     * Coroutine scope for the EDT.
+     */
     val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Swing)
+
+    /**
+     * Coroutine scope for everything else.
+     */
     val bgScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /**
+     * The event listeners that will be registered to the client, whenever a new connection is established.
+     */
     private val uiEventListeners: MutableList<EventListener> = LinkedList()
+
+    /**
+     * The players with UI information.
+     */
     internal lateinit var uiPlayerCollection: UiPlayerCollection
 
+    /**
+     * The [MazeModel] containing the UI representation of the maze.
+     */
     val mazeModel = MazeModel()
+
+    /**
+     * The panel containing the maze visualization.
+     */
     internal lateinit var mazePanel: MazePanel
+
+    /**
+     * The part of the glass pane containing the marker for the selected player (and the highlighted maze cell).
+     */
     internal lateinit var markerPane: MarkerPane
+
+    /**
+     * The status bar.
+     */
     internal lateinit var statusBar: StatusBar
+
+    /**
+     * The main frame.
+     */
     internal lateinit var mainFrame: MainFrame
+
+    /**
+     * The chat area.
+     */
     internal lateinit var messagePane: MessagePane
+
+    /**
+     * The score table.
+     */
     internal lateinit var scoreTable: ScoreTable
+
+    /**
+     * The address string ... at least if there is an established connection.
+     */
     internal var completeServerAddressString: String = "-"
+
+    /**
+     * The strategy name ... after the connection is established.
+     */
     internal var strategyName: String? = null
+
+    /**
+     * The own flavor text ... after the connection is established.
+     */
     internal var flavorText: String? = null
 
+    /**
+     * The current game speed.
+     */
     internal val gameSpeed: Int
         get() = if (this::client.isInitialized) client.gameSpeed else -1
 
+    /**
+     * The id of the own client ... after the connection is established.
+     */
     internal var ownId: Int = -1
 
     /**
@@ -56,28 +118,49 @@ object UiController {
 
     private lateinit var clientTerminationHandle: Deferred<Unit>
 
+    /**
+     * If the server control is activated, this reference is set.
+     */
     internal var serverController: ServerCommandController? = null
 
+    /**
+     * The [UiController] acts as event handler for [PlayerSelectionListener]'s.
+     */
     private val playerSelectionListeners: MutableList<PlayerSelectionListener> = LinkedList()
 
+    /**
+     * The [UiController] acts as event handler for [MazeCellListener]'s.
+     */
     private val mazeCellListeners: MutableList<MazeCellListener> = LinkedList()
 
+    /**
+     * The strategy's [VisualizationComponent], if it provides one.
+     */
     internal var visualizationComponent: VisualizationComponent? = null
 
+    /**
+     * Indicates if the server control is active.
+     */
     internal val serverControllerActive: Boolean
         get() = serverController != null
 
+    /**
+     * Indicates if we are logged into the game.
+     */
     internal val isLoggedIn: Boolean
         get() = client.isLoggedIn
 
+    /**
+     * The current connection status.
+     */
     val connectionStatus: ConnectionStatus
         get() {
             return if (this::client.isInitialized) client.status else ConnectionStatus.NOT_CONNECTED
         }
 
     /**
-     * Collects [EventListener]s to be added to the [MazeClient] after it is created but before it is started. They are added when [connect] is
-     * called.
+     * Collects [EventListener]s to be added to the [MazeClient] after it is created but before it is started. They are
+     * added when [connect] is called.
      */
     fun prepareEventListener(eventListener: EventListener) {
         if (connectionStatus == ConnectionStatus.NOT_CONNECTED) {
@@ -91,6 +174,9 @@ object UiController {
         uiEventListeners.remove(eventListener)
     }
 
+    /**
+     * Establishes a connection to the server.
+     */
     internal fun connect(
         address: String,
         port: Int,
@@ -102,6 +188,10 @@ object UiController {
         client = MazeClient(config)
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
 
+        /**
+         * Internal temporary listener for connection problems. If an error occurs, a corresponding error message is
+         * displayed.
+         */
         val loginProblemListener: EventListener = object : ErrorInfoListener, ClientConnectionStatusListener {
             override fun onServerError(infoCode: InfoCode) {
                 when (infoCode) {
@@ -148,6 +238,8 @@ object UiController {
                 bgScope.launch {
                     delay(1_000L)
                     if (newStatus == ConnectionStatus.LOGGED_IN || newStatus == ConnectionStatus.DEAD) {
+                        // Either way we have to remove this listener, because they would stack and error messages would
+                        // multiply.
                         removeEventListener(eventListener)
                     }
                 }
@@ -332,8 +424,14 @@ object UiController {
 
 }
 
+/**
+ * Main function launching the whole application.
+ */
 fun main() {
+    // Find available strategies on the client side
     Strategy.scanAndAddStrategiesBlocking()
+    // Set up the fancy look and feel
     FlatLightLaf.setup()
+    // Create the main frame and let it take over the rest
     EventQueue.invokeLater { MainFrame() }
 }

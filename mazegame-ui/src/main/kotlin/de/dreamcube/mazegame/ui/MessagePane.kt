@@ -12,6 +12,9 @@ import javax.swing.text.BadLocationException
 import javax.swing.text.Style
 import javax.swing.text.StyleConstants
 
+/**
+ * The chat area. Reacts to chat messages and displays them.
+ */
 class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
 
     companion object {

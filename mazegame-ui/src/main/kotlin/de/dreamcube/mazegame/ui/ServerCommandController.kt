@@ -21,6 +21,9 @@ import kotlinx.coroutines.sync.withLock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+/**
+ * This class communicates with the server for sending server control commands using REST.
+ */
 class ServerCommandController(
     coroutineScope: CoroutineScope,
     private val serverAddress: String,
@@ -34,6 +37,9 @@ class ServerCommandController(
 
         private const val USER_NAME = "master"
 
+        /**
+         * Creates an HTTP client that is supposed to be used for a single call.
+         */
         private fun createDisposableHttpClient() = HttpClient(CIO) {
             this.expectSuccess = true
             install(ContentNegotiation) {
@@ -44,6 +50,10 @@ class ServerCommandController(
             }
         }
 
+        /**
+         * This function retrieves the game information from the server. It requires no login information, so we can
+         * place it in the companion object. Therefore, we don't need an instance of the class.
+         */
         internal suspend fun queryForGameInformation(address: String, port: Int): List<ReducedServerInformationDto> {
             val httpAddress = "http://$address:$port/server"
             val httpClient = createDisposableHttpClient()
@@ -61,6 +71,10 @@ class ServerCommandController(
     private val baseUrl
         get() = "http://$serverAddress:$serverPort"
 
+    /**
+     * This function performs a login or refreshes the token manually. If [autoRefresh] is set, a coroutine is launched
+     * with a delay time depending on the TTL of the token, that automatically refreshes the token after a while.
+     */
     suspend fun loginOrRefreshToken(autoRefresh: Boolean = true): String {
         val httpAddress = "$baseUrl/login"
         val httpClient: HttpClient = createDisposableHttpClient()
@@ -90,6 +104,9 @@ class ServerCommandController(
 
     internal suspend fun readToken(): String? = tokenMutex.withLock { authToken }
 
+    /**
+     * Double protection ... if we are not logged in, we automatically create a new token.
+     */
     private suspend fun ensureLoggedIn(): String {
         val token: String? = readToken()
         if (token == null) {
@@ -98,6 +115,9 @@ class ServerCommandController(
         return token
     }
 
+    /**
+     * Sends the "go" command. If the server is stopped, it will start generating baits again.
+     */
     suspend fun go() {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/go"
@@ -105,6 +125,9 @@ class ServerCommandController(
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
     }
 
+    /**
+     * Sends the "clear" command without stopping the server. This will just clear the scores.
+     */
     suspend fun clear() {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/clear"
@@ -119,6 +142,10 @@ class ServerCommandController(
         }
     }
 
+    /**
+     * Sends the "stop" command. Depending on the [now] flag the server will stop immediately or just stop generating
+     * new baits.
+     */
     suspend fun stop(now: Boolean = false) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/stop"
@@ -135,6 +162,9 @@ class ServerCommandController(
         }
     }
 
+    /**
+     * Changes the game speed to [speed].
+     */
     suspend fun changeSpeed(speed: GameSpeed) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/speed"
@@ -149,6 +179,9 @@ class ServerCommandController(
         }
     }
 
+    /**
+     * Transforms all baits to [BaitType].
+     */
     suspend fun baitTransform(baitType: BaitType) {
         val suffix: String = when (baitType) {
             BaitType.FOOD -> "all-food"
@@ -162,6 +195,9 @@ class ServerCommandController(
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
     }
 
+    /**
+     * Puts a new bait at the given location defined by [x] and [y].
+     */
     suspend fun baitPut(baitType: BaitType, x: Int, y: Int) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/put-bait"
@@ -176,6 +212,9 @@ class ServerCommandController(
         }
     }
 
+    /**
+     * Starts a bait rush (temporarily more baits).
+     */
     suspend fun baitRush() {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/bait-rush"
@@ -183,6 +222,9 @@ class ServerCommandController(
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
     }
 
+    /**
+     * Removes the player with [playerId] from the game.
+     */
     suspend fun kill(playerId: Int) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/kill/$playerId"
@@ -190,6 +232,9 @@ class ServerCommandController(
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
     }
 
+    /**
+     * Teleports the player with the given [playerId] to the location defined by [x] and [y].
+     */
     suspend fun teleport(playerId: Int, x: Int, y: Int) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/teleport"
@@ -204,6 +249,9 @@ class ServerCommandController(
         }
     }
 
+    /**
+     * Retrieves the player information for the player with the given [playerId].
+     */
     suspend fun playerInformation(playerId: Int): PlayerInformationDto {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/info/player/$playerId"
@@ -211,6 +259,10 @@ class ServerCommandController(
         return httpClient.use { it.get(httpAddress) { bearerAuth(token) }.body() }
     }
 
+    /**
+     * Retrieves the complete server information. It is used to retrieve the list of available strategy names for
+     * server-sided bots.
+     */
     suspend fun serverInformation(): ServerInformationDto {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/info"
@@ -218,6 +270,10 @@ class ServerCommandController(
         return httpClient.use { it.get(httpAddress) { bearerAuth(token) } }.body()
     }
 
+    /**
+     * Spawns a new server-sided bot instance with the given [nick] as strategy name. The actual nickname is selected by
+     * the server.
+     */
     suspend fun spawn(nick: String) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/spawn/$nick"

@@ -3,12 +3,17 @@ package de.dreamcube.mazegame.ui
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
 import de.dreamcube.mazegame.client.maze.events.ScoreChangeListener
+import de.dreamcube.mazegame.ui.UiPlayerInformation.Companion.MARKER_ALPHA
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import javax.swing.table.AbstractTableModel
 import kotlin.math.max
 
+/**
+ * Enriches the [snapshot] of a player with information that is required for rendering the player object, mainly the
+ * color(s).
+ */
 class UiPlayerInformation(
     initialPlayerSnapshot: PlayerSnapshot,
     initialColor: Color = Color.darkGray
@@ -18,15 +23,32 @@ class UiPlayerInformation(
         private const val MARKER_ALPHA = 192
     }
 
+    /**
+     * The [snapshot] of the player.
+     */
     var snapshot: PlayerSnapshot = initialPlayerSnapshot
         internal set
+
+    /**
+     * The player's color. The setter also determines the [markerColor] (more transparent) and the [bgColor] in the
+     * score table.
+     */
     var color: Color = initialColor
         internal set(value) {
             field = value
             bgColor = determineBgColorByLuminance(value)
             markerColor = field.changeAlpha(MARKER_ALPHA)
         }
+
+    /**
+     * The background color in the [ScoreTable]. See [determineBgColorByLuminance] on how it is determined.
+     */
     var bgColor: Color = determineBgColorByLuminance(initialColor)
+
+    /**
+     * The color that is used for the marker if the player is selected. It is derived from the [color] but with
+     * [MARKER_ALPHA] as alpha value.
+     */
     var markerColor: Color = initialColor.changeAlpha(MARKER_ALPHA)
 
     val id
@@ -36,6 +58,9 @@ class UiPlayerInformation(
 
 }
 
+/**
+ * Enum for the score representation.
+ */
 enum class ScoreRepresentationMode {
     /**
      * In this mode, the scores from the server are represented "as is".
@@ -55,7 +80,8 @@ enum class ScoreRepresentationMode {
 }
 
 /**
- * This collection serves as [AbstractTableModel] for the score view. It also serves as data structure for maintaining client-side player information.
+ * This collection serves as [AbstractTableModel] for the score view. It also serves as data structure for maintaining
+ * client-side player information.
  */
 class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, ScoreChangeListener {
 
@@ -88,8 +114,8 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
     fun getById(id: Int): UiPlayerInformation? = getIndex(id)?.let /*us*/ { get(it) }
 
     /**
-     * If the player represented by the [snapshot] is not included yet, it is added to the collection. Otherwise, it is just updated. The function
-     * should be called, whenever a new player joins or a player's score changes.
+     * If the player represented by the [snapshot] is not included yet, it is added to the collection. Otherwise, it is
+     * just updated. The function should be called, whenever a new player joins or a player's score changes.
      */
     internal fun addOrUpdate(snapshot: PlayerSnapshot) {
         val currentIndex: Int? = getIndex(snapshot.id)
@@ -236,15 +262,24 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
         UiController.scoreTable.repaint()
     }
 
+    /**
+     * Re-enables all hues.
+     */
     private fun configureFullSpectrum() {
         colorDistribution.forEach { it.activeByConfiguration = true }
     }
 
+    /**
+     * Allows all color hues.
+     */
     internal fun configureForNormal() {
         configureFullSpectrum()
         redistributePlayerColorsByDistribution()
     }
 
+    /**
+     * Disables certain hues for protan mode.
+     */
     internal fun configureForProtan() {
         configureFullSpectrum()
         for (degree in 350..<360) {
@@ -259,6 +294,9 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
         redistributePlayerColorsByDistribution()
     }
 
+    /**
+     * Disables certain hues for deutan mode.
+     */
     internal fun configureForDeutan() {
         configureFullSpectrum()
         for (degree in 350..<360) {
@@ -273,6 +311,9 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
         redistributePlayerColorsByDistribution()
     }
 
+    /**
+     * Disables certain hues for tritan mode.
+     */
     internal fun configureForTritan() {
         configureFullSpectrum()
         for (degree in 50..75) {

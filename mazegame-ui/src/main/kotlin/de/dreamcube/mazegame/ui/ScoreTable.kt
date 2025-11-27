@@ -10,6 +10,9 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 
+/**
+ * The actual score table.
+ */
 class ScoreTable() : JTable(), MazeCellListener {
 
     val scoreFont: Font = Font(font.name, Font.PLAIN, 16)

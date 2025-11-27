@@ -11,16 +11,55 @@ import java.awt.FlowLayout
 import java.awt.event.KeyEvent
 import javax.swing.*
 
+/**
+ * The status bar.
+ */
 class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListener, PlayerSelectionListener {
 
+    /**
+     * Displays the current connection status.
+     */
     private val connectionStatusLabel = JLabel()
+
+    /**
+     * Displays the current server address (including the port)
+     */
     private val serverAddressLabel = JLabel()
+
+    /**
+     * Displays the current strategy name.
+     */
     private val strategyLabel = JLabel()
+
+    /**
+     * The flavor text of the own bot or the selected player.
+     */
     private val botFlavorTextLabel = JLabel()
+
+    /**
+     * Displays the current game speed.
+     */
     private val gameSpeedLabel = JLabel()
+
+    /**
+     * Displays the current zoom factor.
+     */
     private val zoomLabel = JLabel()
+
+    /**
+     * Displays either the position of the currently selected player or the cell below the mouse, if no player is
+     * selected.
+     */
     private val positionLabel = JLabel()
+
+    /**
+     * The tiny button for opening the control panel on the right side.
+     */
     private val serverControlButton = JButton("⎈")
+
+    /**
+     * Hint text for teleport and put bait server command.
+     */
     private val hintLabel = JLabel()
 
     init {

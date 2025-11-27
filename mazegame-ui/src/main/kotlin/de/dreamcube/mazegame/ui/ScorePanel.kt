@@ -8,6 +8,9 @@ import java.awt.geom.Ellipse2D
 import java.awt.image.BufferedImage
 import javax.swing.*
 
+/**
+ * Contains the score table, the score toggle button and the color options.
+ */
 class ScorePanel() : JPanel() {
 
     private val scoreTable: ScoreTable
@@ -59,6 +62,9 @@ class ScorePanel() : JPanel() {
 
     }
 
+    /**
+     * The color options panel.
+     */
     private class ColorOptionPanel : JPanel() {
         init {
             layout = BorderLayout()
@@ -93,12 +99,14 @@ class ScorePanel() : JPanel() {
                                 }
                                 deg -= 1.0
                             }
+                            // draw a gray line to indicate 0 degree.
                             color = Color(0, 0, 128)
                             stroke = BasicStroke(2f)
                             drawLine(w / 2, h / 2, w, h / 2)
                         }
                     }
 
+                    // downscale the image for reducing moiré effect
                     g2.renderingHints[RenderingHints.KEY_INTERPOLATION] = RenderingHints.VALUE_INTERPOLATION_BICUBIC
                     g2.drawImage(hiResImage, 25, 25, w, h, null)
                 }
@@ -113,6 +121,7 @@ class ScorePanel() : JPanel() {
             headerLabel.font = headerLabel.font.deriveFont(Font.BOLD)
             colorWeaknessPanel.add(headerLabel)
 
+            // radio buttons for color options (color deficiency mode)
             val normalButton = JRadioButton("Normal")
             val protanButton = JRadioButton("Protan (red-weak)")
             val deutanButton = JRadioButton("Deutan (green-weak)")
@@ -157,6 +166,7 @@ class ScorePanel() : JPanel() {
             }
             normalButton.isSelected = true
 
+            // Label and button for manual color distribution
             val redistributionLabel = JLabel("Manual Color redistribution")
             redistributionLabel.font = redistributionLabel.font.deriveFont(Font.BOLD)
             colorWeaknessPanel.add(redistributionLabel)
@@ -170,6 +180,7 @@ class ScorePanel() : JPanel() {
 
             add(colorWeaknessPanel, BorderLayout.EAST)
 
+            // Slider for selecting the start hue at 0 degree
             val turnSlider = JSlider(SwingConstants.VERTICAL).apply {
                 minimum = 0
                 maximum = 360

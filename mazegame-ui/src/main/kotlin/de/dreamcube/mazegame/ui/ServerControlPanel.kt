@@ -24,6 +24,9 @@ import javax.swing.*
 private const val SG_UNITY = "sg unity"
 private const val SPAN_2 = "span 2"
 
+/**
+ * The server control panel containing all UI elements for the server control.
+ */
 class ServerControlPanel() : JPanel() {
 
     companion object {
@@ -41,11 +44,25 @@ class ServerControlPanel() : JPanel() {
         }
     }
 
+    /**
+     * The [ServerCommandController] for the "heavy lifting"
+     */
     private val serverController: ServerCommandController
         get() = UiController.serverController ?: throw IllegalStateException("The server controller vanished.")
 
+    /**
+     * Selector for selecting a server-sided bot strategy to spawn.
+     */
     private val selectableNicks = JComboBox<String>()
+
+    /**
+     * The spawn button.
+     */
     private val spawnButton = JButton("Spawn")
+
+    /**
+     * The list of server-side bots to spawn.
+     */
     lateinit var availableServersideNicks: List<String>
 
     init {
@@ -539,6 +556,9 @@ class ServerControlPanel() : JPanel() {
         )
     }
 
+    /**
+     * Info panel for the server-sided player information.
+     */
     private inner class PlayerInfoPanel() : JPanel(), PlayerSelectionListener {
         private val nickLabel = JLabel("Nick")
         private val nickText = JLabel(NO_TEXT)
