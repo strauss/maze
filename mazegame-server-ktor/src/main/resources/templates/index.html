@@ -1,6 +1,23 @@
+<!--
+  ~ Maze Game
+  ~ Copyright (c) 2025 Sascha Strauß
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-    <head>
+<head>
     <meta charset="UTF-8">
     <title>MazeGame – Login</title>
     <script src="/static/mazegame-web-ui.js" defer>
@@ -10,14 +27,16 @@
         //     .addEventListener('click', de.dreamcube.mazegame.web_ui.UiActions.onLoginClick)
     </script>
     <!-- Frontend-Bundle -->
-    </head>
-    <body>
-        <h1>Please log in (this time it has to work!)</h1>
+</head>
+<body>
+<h1>Please log in (this time it has to work!)</h1>
 
-        <form id="loginForm">
-            <label>Username: <input id="username" required></label><br>
-            <label>Password: <input type="password" id="password" required></label><br>
-            <button id="loginButton" type="button" onClick="mazegameWebUi.de.dreamcube.mazegame.web_ui.UiActions.onLoginClick()">Login</button>
-        </form>
-    </body>
+<form id="loginForm">
+    <label>Username: <input id="username" required></label><br>
+    <label>Password: <input type="password" id="password" required></label><br>
+    <button id="loginButton" type="button"
+            onClick="mazegameWebUi.de.dreamcube.mazegame.web_ui.UiActions.onLoginClick()">Login
+    </button>
+</form>
+</body>
 </html>
