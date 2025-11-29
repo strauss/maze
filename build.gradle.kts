@@ -35,7 +35,7 @@ publishing {
     publications {
         create<MavenPublication>("bom") {
             from(components["javaPlatform"])
-            artifactId = "mazegame"
+            artifactId = "maze-bom"
         }
     }
 }
