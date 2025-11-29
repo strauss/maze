@@ -34,10 +34,6 @@ publishing {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     // Ktor
     implementation(libs.ktor.network)

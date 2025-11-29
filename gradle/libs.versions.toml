@@ -30,6 +30,7 @@ reflections = "0.10.2"
 dokka = "1.9.20"
 flatlaf = "3.6.2"
 miglayout = "11.4.2"
+hornetQueen = "0.3.0"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -76,6 +77,7 @@ jwt = { module = "com.auth0:java-jwt", version.ref = "jwt" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+hornet_queen = { module = "de.dreamcube:hornet-queen", version.ref = "hornetQueen" }
 
 # --- Test-Libs
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.8.2" }

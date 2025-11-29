@@ -37,10 +37,6 @@ publishing {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     // HTTP-Client stuff
     implementation(libs.ktor.client.core)
@@ -58,6 +54,9 @@ dependencies {
     // Project stuff
     implementation(projects.mazegameCommon)
     implementation(projects.mazegameClientKtor)
+
+    // Other stuff
+    implementation(libs.hornet.queen)
 
     testImplementation(kotlin("test"))
 }

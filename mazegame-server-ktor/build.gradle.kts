@@ -36,10 +36,6 @@ publishing {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(platform(project(":")))
 

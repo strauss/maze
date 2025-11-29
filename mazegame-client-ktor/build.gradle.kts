@@ -37,10 +37,6 @@ publishing {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(platform(project(":")))        // <dependencyManagement> der Basis
 
@@ -52,6 +48,7 @@ dependencies {
 
     // External dependencies
     implementation(libs.reflections)
+    implementation(libs.hornet.queen)
 
     // Own stuff
     implementation(projects.mazegameCommon)

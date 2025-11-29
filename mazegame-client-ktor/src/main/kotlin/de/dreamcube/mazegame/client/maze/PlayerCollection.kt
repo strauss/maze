@@ -17,6 +17,7 @@
 
 package de.dreamcube.mazegame.client.maze
 
+import de.dreamcube.hornet_queen.set.PrimitiveIntSetB
 import de.dreamcube.mazegame.common.maze.Player
 import de.dreamcube.mazegame.common.maze.PlayerPositionChangeReason
 import de.dreamcube.mazegame.common.maze.ViewDirection
@@ -46,7 +47,7 @@ class PlayerCollection {
     /**
      * Internal set of player IDs that never received a score, ever. This is used to decide when to set the score offset.
      */
-    private val virginScorePlayerIds: MutableSet<Int> = HashSet()
+    private val virginScorePlayerIds: MutableSet<Int> = PrimitiveIntSetB()
 
     /**
      * Adds a new [Player] to this [PlayerCollection]. It should only be called whenever a player appears.

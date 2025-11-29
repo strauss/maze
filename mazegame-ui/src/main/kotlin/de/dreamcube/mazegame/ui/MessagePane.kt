@@ -17,6 +17,7 @@
 
 package de.dreamcube.mazegame.ui
 
+import de.dreamcube.hornet_queen.set.PrimitiveIntSetB
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.ChatInfoListener
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
@@ -53,7 +54,7 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     @Transient
     private val messageStyle: Style
 
-    private val playerIds: MutableSet<Int> = HashSet()
+    private val playerIds: MutableSet<Int> = PrimitiveIntSetB()
 
     init {
         UiController.messagePane = this

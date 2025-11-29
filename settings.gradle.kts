@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("UnstableApiUsage")
+
 rootProject.name = "mazegame"
 
 include("mazegame-common")
@@ -23,9 +25,18 @@ include("mazegame-server-ktor")
 include("mazegame-ui")
 // include("mazegame-web-ui") // it will become part of the game, but not just yet :-)
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         mavenCentral()
+        maven(url = "https://jitpack.io")
     }
 }
 
