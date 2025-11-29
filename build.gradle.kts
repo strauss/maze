@@ -35,6 +35,7 @@ publishing {
     publications {
         create<MavenPublication>("bom") {
             from(components["javaPlatform"])
+            groupId = "de.dreamcube.maze"
             artifactId = "maze-bom"
         }
     }
