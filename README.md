@@ -364,3 +364,8 @@ I learned enough to do that myself, but it really annoys me.
 In a nutshell: I try to use Chat-GPT in a way that I learn from it.
 I rarely copy and past its code.
 Sometimes I even force it to not generate any code and just tell me the concept.
+
+## License
+
+Unless otherwise noted, all contents of this repository (including documentation) are licensed under the Apache License
+2.0. See [LICENSE](LICENSE).

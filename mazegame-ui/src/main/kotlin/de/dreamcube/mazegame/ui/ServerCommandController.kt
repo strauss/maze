@@ -111,8 +111,10 @@ class ServerCommandController(
                 LOGGER.info("Attempting token refresh for server control.")
                 loginOrRefreshToken()
             } else {
-                authToken = null
-                LOGGER.warn("Server control token expired!")
+                tokenMutex.withLock {
+                    authToken = null
+                    LOGGER.warn("Server control token expired!")
+                }
             }
         }
 
