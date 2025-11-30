@@ -19,8 +19,6 @@ package de.dreamcube.mazegame.client.maze.commands
 
 import de.dreamcube.mazegame.client.maze.MazeClient
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * This command indicates that a player left the game.
@@ -47,10 +45,7 @@ class LeaveCommand(mazeClient: MazeClient, commandWithParameters: List<String>) 
      * Triggers a player logout event.
      */
     override suspend fun internalExecute() {
-        mazeClient.scope.launch {
-            delay(500L)
-            val removedPlayer: PlayerSnapshot? = mazeClient.players.removePlayerById(playerId)
-            removedPlayer?.let { player -> mazeClient.eventHandler.firePlayerLogout(player) }
-        }
+        val removedPlayer: PlayerSnapshot? = mazeClient.players.removePlayerById(playerId)
+        removedPlayer?.let { player -> mazeClient.eventHandler.firePlayerLogout(player) }
     }
 }

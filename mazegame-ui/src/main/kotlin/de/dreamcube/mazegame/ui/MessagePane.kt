@@ -21,7 +21,15 @@ import de.dreamcube.hornet_queen.set.PrimitiveIntSetB
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.ChatInfoListener
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.swing.Swing
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -46,6 +54,9 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     }
 
     @Transient
+    private val paragraphStyle: Style
+
+    @Transient
     private val clientStyle: Style
 
     @Transient
@@ -54,13 +65,24 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     @Transient
     private val messageStyle: Style
 
+    @Transient
+    private val appendMutex = Mutex()
+
     private val playerIds: MutableSet<Int> = PrimitiveIntSetB()
+
+    private val writeMessageChannel =
+        Channel<suspend () -> Unit>(capacity = 1024, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     init {
         UiController.messagePane = this
         val baseStyle = addStyle("base", null)
         StyleConstants.setFontFamily(baseStyle, "Arial")
         StyleConstants.setFontSize(baseStyle, 18)
+        paragraphStyle = addStyle("paragraph", baseStyle).also {
+            StyleConstants.setSpaceAbove(it, 0f)
+            StyleConstants.setSpaceBelow(it, 2f)
+        }
+
         val originStyle = addStyle("origin", baseStyle)
         StyleConstants.setBold(originStyle, true)
         clientStyle = addStyle("client", originStyle)
@@ -70,13 +92,20 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
         messageStyle = addStyle("message", baseStyle)
         StyleConstants.setForeground(messageStyle, MESSAGE_COLOR)
         UiController.prepareEventListener(this)
+        UiController.bgScope.launch {
+            for (writeMessage in writeMessageChannel) {
+                delay(10L) // just delay the processing of chat messages a bit
+                withContext(Dispatchers.Swing) {
+                    writeMessage()
+                }
+            }
+        }
     }
 
     override fun onClientInfo(message: String) {
-        UiController.uiScope.launch {
+        writeMessageChannel.trySend {
             try {
-                styledDocument.insertString(styledDocument.length, "Client: ", clientStyle)
-                appendChatMessage(message)
+                appendMessage("Client: ", clientStyle, message)
             } catch (ex: BadLocationException) {
                 LOGGER.error("Error while displaying client info message: ${ex.message}")
             }
@@ -84,10 +113,9 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     }
 
     override fun onServerInfo(message: String) {
-        UiController.uiScope.launch {
+        writeMessageChannel.trySend {
             try {
-                styledDocument.insertString(styledDocument.length, "Server: ", serverStyle)
-                appendChatMessage(message)
+                appendMessage("Server: ", serverStyle, message)
             } catch (ex: BadLocationException) {
                 LOGGER.error("Error while displaying server info message: ${ex.message}")
             }
@@ -95,7 +123,7 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     }
 
     override fun onPlayerChat(playerId: Int, playerNick: String, message: String, whisper: Boolean) {
-        UiController.uiScope.launch {
+        writeMessageChannel.trySend {
             try {
                 val otherClientStyle: Style = if (whisper) {
                     getWhisperStyle(playerId)
@@ -106,11 +134,21 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
                     otherClientStyle,
                     UiController.uiPlayerCollection.getById(playerId)?.color ?: Color.black
                 )
-                styledDocument.insertString(styledDocument.length, "$playerNick: ", otherClientStyle)
-                appendChatMessage(message)
+                appendMessage("$playerNick: ", otherClientStyle, message)
             } catch (ex: BadLocationException) {
                 LOGGER.error("Error while displaying player chat message: ${ex.message}")
             }
+        }
+    }
+
+    private suspend fun appendMessage(prefix: String, prefixStyle: Style, message: String) {
+        appendMutex.withLock {
+            val doc = this.styledDocument
+            val lineStart = doc.length
+            doc.insertString(lineStart, prefix, prefixStyle)
+            doc.insertString(doc.length, "$message\n", messageStyle)
+            doc.setParagraphAttributes(lineStart, 1, paragraphStyle, false)
+            caretPosition = doc.length
         }
     }
 
@@ -124,11 +162,6 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
         val styleKey = OTHER_CLIENT_STYLE_PREFIX + playerId
         val style: Style? = getStyle(styleKey)
         return style ?: addStyle(styleKey, clientStyle)
-    }
-
-    private fun appendChatMessage(message: String) {
-        this.styledDocument.insertString(this.styledDocument.length, "$message${System.lineSeparator()}", messageStyle)
-        caretPosition = styledDocument.length
     }
 
     override fun onPlayerLogin(playerSnapshot: PlayerSnapshot) {
@@ -149,8 +182,12 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     }
 
     internal fun clear() {
-        styledDocument.remove(0, styledDocument.length)
-        caretPosition = 0
+        writeMessageChannel.trySend {
+            appendMutex.withLock {
+                styledDocument.remove(0, styledDocument.length)
+                caretPosition = 0
+            }
+        }
     }
 
     private fun removeStyleForPlayer(playerId: Int) {
