@@ -1,0 +1,45 @@
+- connection:
+    port: 12345
+  maze:
+    generatorMode: template
+    generatorParameters:
+      mapFile: square.mzt
+  serverBots:
+    autoLaunch:
+      - dummy
+      - dummy
+      - dummy
+      - ninja_ng
+      - stubborn
+      - chopstick
+      - planestrider
+      - underdog
+      - mindripper
+      - bloodhound
+      - FrenzyFrede
+    specialBots:
+      trapeater: trapeater
+      frenzy: FrenzyFrede
+      spectator: commander
+    nickMappings:
+      dummyNames:
+        - aimless
+        - yanni
+        - le_dieter
+        - simon
+        - no_den
+        - eclair
+        - joe
+      trapeaterNames:
+        - müllschlucker
+        - wall-e
+        - pacman
+      frenzyNames: [ ]
+      freeNickMappings:
+        - botName: chopstick
+          additionalNames:
+            - philosopher
+  game:
+    initialSpeed: fast
+    events:
+      enabled: true

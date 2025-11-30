@@ -1,88 +1,20 @@
-#- connection:
-#    port: 12344
-#maxClients: 20
-#loginTimeout: 30000
-# If set, all messages are immediately flushed to the clients.
-#instantFlush: false
-#maze:
-# allowed values: random, template, map
-#generatorMode: random
-#generatorParameters:
-#width: 40
-#height: 30
-#mapFile: null
-#map-file: donut.mzt
-#map-file: contest.mzt
-#map-file: square.mzt
-# TODO: distinguish between resources and files
-#  serverBots:
-#    autoLaunch: #[]
-#      - dummy
-#      - dummy
-#      - dummy
-#    specialBots:
-#dummy: dummy
-#      trapeater: trapeater
-#frenzy: frenzy
-#      frenzy: FrenzyFrede
-#spectator: spectator
-#      spectator: commander
-#game:
-# allowed values: unlimited, ultra, fast, normal, slow, ultra-slow
-# unlimited is 1ms and should only be used if you know, what you are doing
-# in "unlimited" mode, delay-compensation is always off
-#initialSpeed: normal
-#generateBaitsAtStart: true
-#autoTrapeater: true
-#allowSpectator: true
-#delayCompensation: true
-#baitGenerator:
-#objectDivisor: 26
-#trapDivisor: 4
 - connection:
     port: 12345
   maze:
-    generatorMode: template
+    generatorMode: random
     generatorParameters:
-      mapFile: square.mzt
+      width: 40
+      height: 30
   serverBots:
-    autoLaunch:
-      - dummy
-      - dummy
-      - dummy
-      - ninja_ng
-      - stubborn
-      - chopstick
-      - planestrider
-      - underdog
-      - mindripper
-      - bloodhound
-      - FrenzyFrede
+    autoLaunch: [ ]
     specialBots:
       trapeater: trapeater
-      frenzy: FrenzyFrede
-      spectator: commander
-    nickMappings:
-      dummyNames:
-        - aimless
-        - yanni
-        - le_dieter
-        - simon
-        - no_den
-        - eclair
-        - joe
-      trapeaterNames:
-        - müllschlucker
-        - wall-e
-        - pacman
-      frenzyNames: [ ]
-      freeNickMappings:
-        - botName: chopstick
-          additionalNames:
-            - philosopher
+      spectator: spectator
   game:
-    initialSpeed: fast
+    initialSpeed: normal
+    generateBaitsAtStart: true
+    allowSpectator: true
+    delayCompensation: true
     events:
       enabled: true
-- connection:
-    port: 12344
+      allGemProbability: 0.0
