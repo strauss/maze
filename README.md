@@ -4,6 +4,8 @@ Welcome to this amazing maze game.
 This project is designed to be educational and entertaining at the same time.
 Here you find all you need for giving people, who want to learn either Java or Kotlin, a challenging exercise.
 
+![](maze.png)
+
 The objective is creating an automated bot that can navigate through a randomly generated maze and collect items
 (so-called "baits").
 There are different kinds of baits with different score values.
