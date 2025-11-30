@@ -97,12 +97,10 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
     override fun onPlayerChat(playerId: Int, playerNick: String, message: String, whisper: Boolean) {
         UiController.uiScope.launch {
             try {
-                val otherClientStyle: Style
-                if (whisper) {
-                    otherClientStyle = addStyle(OTHER_CLIENT_WHISPER_STYLE_PREFIX + playerId, clientStyle)
-                    StyleConstants.setItalic(otherClientStyle, true)
+                val otherClientStyle: Style = if (whisper) {
+                    getWhisperStyle(playerId)
                 } else {
-                    otherClientStyle = addStyle(OTHER_CLIENT_STYLE_PREFIX + playerId, clientStyle)
+                    getClientStyle(playerId)
                 }
                 StyleConstants.setForeground(
                     otherClientStyle,
@@ -116,8 +114,20 @@ class MessagePane() : JTextPane(), ChatInfoListener, PlayerConnectionListener {
         }
     }
 
+    private fun getWhisperStyle(playerId: Int): Style {
+        val styleKey = OTHER_CLIENT_WHISPER_STYLE_PREFIX + playerId
+        val style: Style? = getStyle(styleKey)
+        return style ?: addStyle(styleKey, clientStyle).apply { StyleConstants.setItalic(this, true) }
+    }
+
+    private fun getClientStyle(playerId: Int): Style {
+        val styleKey = OTHER_CLIENT_STYLE_PREFIX + playerId
+        val style: Style? = getStyle(styleKey)
+        return style ?: addStyle(styleKey, clientStyle)
+    }
+
     private fun appendChatMessage(message: String) {
-        this.styledDocument.insertString(this.styledDocument.length, "$message\n", messageStyle)
+        this.styledDocument.insertString(this.styledDocument.length, "$message${System.lineSeparator()}", messageStyle)
         caretPosition = styledDocument.length
     }
 
