@@ -10,6 +10,31 @@ There are different kinds of baits with different score values.
 The bots need to maximize their score in comparison to the other players in the maze.
 Bots are required to make "good" decisions on which bait they will go for next.
 
+## Latest version
+
+[![Release](https://jitpack.io/v/de.dreamcube.maze/Repo.svg)](https://jitpack.io/#de.dreamcube/maze)
+
+## Building the project
+
+This project uses Gradle.
+If you clone it into InteliJ, you don't have to think about it too much.
+The top-level task "shadow/shadowJar" will build everything and create complete jars into the `build` directories of
+your project.
+
+If you want to build it, using the command line, just run the following command:
+
+`./gradlew clean shadowJar`
+
+The `clean` is optional, it just ensures a build from scratch.
+
+In order to launch the server without the IDE, building the project is essential.
+This is the command that gives you the server jar.
+If you want to know how to configure and launch it, have a look at the
+[server documentation](mazegame-server-ktor/README.md).
+
+If you want to learn how to set dependencies to this project, scroll down to [Bots](#bots).
+But you might want to learn about the game first :-)
+
 ## Game rules
 
 When entering the game, a player is placed randomly in the maze.
@@ -89,10 +114,74 @@ The client also ships with two predefined "strategies".
 
 In order to create your own bot, you need a distinct project with dependencies to at least the client and the common
 module.
-***TODO: provide a repository that is forkable***
 
-Consult the [bot documentation](mazegame-client-ktor/doc/bot.md) and
-the [bot ui documentation](mazegame-client-ktor/doc/bot_ui.md) for further details.
+### The template repository
+
+The easiest way to achieve this is using [this repository](https://github.com/strauss/maze-bots-template) as template
+for your own new repository.
+It gives you a fully configured Gradle multi-module project, that allows you to develop your own bots in Java and
+Kotlin.
+It also contains a convenience wrapper for launching the UI containing your bots.
+
+### Setting up the dependencies manually
+
+You need to add Jitpack as repository and include the dependency to at least the client.
+
+The correct `${version}` can be found [above](#latest-version).
+
+In both cases, you want to have a main function/method for calling the UI.
+[Peek into the template repository](https://github.com/strauss/maze-bots-template/blob/main/ui-wrapper/src/main/java/de/dreamcube/mazegame/UiLauncher.java)
+on how this is done.
+
+#### Gradle
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("de.dreamcube.maze:mazegame-client-ktor:${version}")
+    implementation("de.dreamcube.maze:mazegame-common:${version}")
+}
+```
+
+#### Maven
+
+Be warned, Jitpack will not work everywhere.
+It highly depends on your Maven settings.
+If you do not want to deal with that, just stick to Gradle or fork the template repository,
+[as described above](#the-template-repository).
+
+```xml
+
+<project>
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.dreamcube.maze</groupId>
+            <artifactId>mazegame-client-ktor</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.dreamcube.maze</groupId>
+            <artifactId>mazegame-common</artifactId>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
+</project>
+```
+
+### Bot development
+
+In order to actually develop your own bot, consult the [bot documentation](mazegame-client-ktor/doc/bot.md) and the
+[bot ui documentation](mazegame-client-ktor/doc/bot_ui.md) for further details.
 
 If you already developed a bot for the "old client", you should consider reading
 the [bot migration documentation](mazegame-client-ktor/doc/bot_migration.md) if you want to incorporate it into the new
