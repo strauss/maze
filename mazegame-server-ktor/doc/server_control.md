@@ -459,23 +459,34 @@ Every contest can have the following events (`ContestEventType`):
 - `REPORT` reports the current status
 - `SPAWN_FRENZY` spawns the frenzy bot
 - `DESPAWN_FRENZY` despawns the frenzy bot
+- `SPEED_UP` increases the game speed
+- `SLOW_DOWN` decreases the game speed
+- `ALL_TRAPS`, `ALL_FOOD`, `ALL_COFFEE`, `ALL_GEMS` transforms all baits (comparable to the server commands)
+- `BAIT_RUSH` triggers a bait rush
+- `RE_BAIT` all baits are regenerated (they will all vanish and new ones will appear)
+- `SHUFFLE_PLAYERS` all players will be teleported randomly to a new position
 - `STOP` ends the event
-
-There are more to come, but that's the current state.
 
 Events can be configured with a `ContestConfiguration`.
 
-- `durationInMinutes: Int` how long will it run? Default is 30 minutes. Negative values are allowed, but meaningless.
+- `durationInMinutes: Double` how long will it run? Default is 30 minutes. Negative values are allowed, but meaningless.
   The contest will stop right after it was started.
-- `statusReportIntervalInMinutes: Int` when will status reports be sent out? Default is every 5 minutes.
+- `statusReportIntervalInMinutes: Double` when will status reports be sent out? Default is every 5 minutes.
 - `statusPositions: Int` how many positions will be reported? Default is 10 (for the classical top 10). If this value is
   0 or less or exceed
+- `initialGameSpeed: GameSpeed` the contest will start at that speed
+- `eventSets: Set<CuratedEventSet>` a set of predefined events; defaults to a set with only `DEFAULT_FRENZY_MODE`
+    - `DEFAULT_FRENZY_MODE` spawns a frenzy bot after 1/3 of the duration and despawns it after 2/3 of the duration. If
+      you don't have a frenzy bot, nothing will happen. If you don't want a frenzy bot, set the set to be at least an
+      empty set.
+    - `SPEED_UP` increases the speed after 1/3 of the duration and again after 2/3 of the duration
+    - `BAIT_RUSH` will trigger a bait rush in every third of the contest
+    - `SHUFFLE_AND_REBAIT` will shuffle all players after 1/3 of the duration and recreate all baits after 2/3 of the
+      duration
 - `additionalEvents: List<ContestEvent>` allows for configuring additional events. The list is not required to be sorted
-  in any way. The default configuration spawns the frenzy bot after 1/3 of the time and despawns it after 2/3 of the
-  time. If you don't have a frenzy bot, nothing will happen. If you don't want a frenzy bot, set this to be an empty
-  list.
+  in any way.
     - `type: ContestEventType` the type of event (see above)
-    - `delayInMinutes: Int` when shall the event occur? This number should not exceed the total event time. It is not
+    - `delayInMinutes: Double` when shall the event occur? This number should not exceed the total event time. It is not
       forbidden, but useless. If this value is zero or negative, those events will happen right after the event was
       started.
 
@@ -489,7 +500,7 @@ If it is configured correctly:
 
 - Several events of `ContestEventType.REPORT` with a delay depending on the configuration.
 
-In addition, the events from `additionalEvents` are also scheduled.
+In addition, the events from `eventSets` and `additionalEvents` are also scheduled.
 
 When the contest is started, at first all events are initialized.
 Then, all of them are started as coroutine whose first function is a `delay` of the configured time.

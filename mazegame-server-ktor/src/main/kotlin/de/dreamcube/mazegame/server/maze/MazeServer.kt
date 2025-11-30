@@ -68,7 +68,7 @@ class MazeServer(
      * The current game speed. Initially it is set by the configuration but can be changed at runtime.
      */
     var gameSpeed: GameSpeed = serverConfiguration.game.initialSpeed
-        internal set
+        private set
 
     /**
      * The server socket.
@@ -421,12 +421,16 @@ class MazeServer(
     /**
      * Teleports a [player] to a random position.
      */
-    suspend fun teleportPlayerRandomly(player: Player, causingId: Int? = null): Message {
+    suspend fun teleportPlayerRandomly(player: Player, causingId: Int? = null, trap: Boolean = true): Message {
         val newPosition: Position = positionProvider.randomPositionForTeleport()
         val newDirection: ViewDirection = ViewDirection.random()
         changePlayerPosition(player, newPosition, newDirection)
         return if (causingId == null) {
-            createPlayerTeleportByTrapMessage(player)
+            return if (trap) {
+                createPlayerTeleportByTrapMessage(player)
+            } else {
+                createPlayerTeleportMessage(player)
+            }
         } else {
             createPlayerTeleportByCollisionMessage(player, causingId)
         }
@@ -804,6 +808,11 @@ class MazeServer(
             } while (serverSideClient.clientId <= 0)
         }
         return null
+    }
+
+    internal suspend fun changeSpeed(newSpeed: GameSpeed) {
+        gameSpeed = newSpeed
+        sendToAllPlayers(createSpeedChangeInfoMessage(newSpeed))
     }
 
     internal fun contestRunning(): Boolean = contestController?.contestRunning ?: false

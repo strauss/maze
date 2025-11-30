@@ -26,7 +26,6 @@ import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.commands.control.*
 import de.dreamcube.mazegame.server.maze.commands.game.BaitRushCommand
 import de.dreamcube.mazegame.server.maze.commands.game.TransformBaitsCommand
-import de.dreamcube.mazegame.server.maze.createSpeedChangeInfoMessage
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -181,8 +180,7 @@ object ServerController {
             return
         }
         val server: MazeServer = getMazeServer(call, serverId) ?: return
-        server.gameSpeed = newSpeed
-        server.sendToAllPlayers(createSpeedChangeInfoMessage(newSpeed))
+        server.changeSpeed(newSpeed)
         call.respond(HttpStatusCode.NoContent)
     }
 
@@ -457,7 +455,6 @@ object ServerController {
             return call.respond(HttpStatusCode.PreconditionFailed, "Contest is not started (yet).")
         }
         server.stopContest()
-        server.contestController?.stop()
         call.respond(HttpStatusCode.Accepted)
     }
 

@@ -22,12 +22,20 @@ import de.dreamcube.mazegame.server.maze.MazeServer
 import de.dreamcube.mazegame.server.maze.commands.ServerSideCommand
 import de.dreamcube.mazegame.server.maze.createEmptyLastMessage
 import de.dreamcube.mazegame.server.maze.createServerInfoMessage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class BaitRushCommand(mazeServer: MazeServer, val causingPlayerId: Int? = null) : ServerSideCommand(mazeServer) {
+class BaitRushCommand(
+    mazeServer: MazeServer,
+    val causingPlayerId: Int? = null,
+    val duration: Long = mazeServer.serverConfiguration.game.events.eventCooldown / 2
+) :
+    ServerSideCommand(mazeServer) {
     override suspend fun execute() {
         val baseBaitCount: Int = mazeServer.baseBaitCount
         val desiredBaitCount: Int = mazeServer.desiredBaitCount.get()
         if (baseBaitCount == desiredBaitCount) {
+            // set up the bait rush
             mazeServer.desiredBaitCount.set(baseBaitCount * 2)
             val messages: List<Message> = buildList {
                 addAll(mazeServer.replaceBaits())
@@ -35,8 +43,19 @@ class BaitRushCommand(mazeServer: MazeServer, val causingPlayerId: Int? = null) 
                 add(createServerInfoMessage("Nice one! It seems $causingPlayerNick stepped on an invisible pressure plate and caused more baits to spawn ... at least temporarily."))
                 add(createEmptyLastMessage())
             }
-            mazeServer.desiredBaitCount.set(baseBaitCount)
             mazeServer.sendToAllPlayers(*messages.toTypedArray())
+
+            // prepare restore to normal
+            mazeServer.scope.launch {
+                delay(duration)
+                val currentDesiredBaitCount = mazeServer.desiredBaitCount.get()
+                // if we stopped, the desiredBaitCount will be 0. This condition will catch the 0 case and the "we are
+                // already normal" case.
+                if (currentDesiredBaitCount > baseBaitCount) {
+                    mazeServer.desiredBaitCount.set(baseBaitCount)
+                    mazeServer.sendToAllPlayers(createServerInfoMessage("Oh, it is over. The number of baits is normalizing."))
+                }
+            }
         }
     }
 }
