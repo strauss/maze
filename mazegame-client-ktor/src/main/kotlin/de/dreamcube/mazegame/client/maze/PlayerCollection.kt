@@ -154,4 +154,16 @@ class PlayerCollection {
                 .toList()
         }
     }
+
+    /**
+     * Sets the offset to the current score. This is done in the client for better score comparison after new players
+     * have joined the game.
+     */
+    suspend fun softResetAllPlayerScores() {
+        playerMutex.withLock {
+            playerIdToPlayerMap.values.forEach {
+                it.softResetScore()
+            }
+        }
+    }
 }

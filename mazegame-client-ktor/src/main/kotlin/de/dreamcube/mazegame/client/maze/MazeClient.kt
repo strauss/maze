@@ -355,6 +355,14 @@ class MazeClient @JvmOverloads constructor(
     }
 
     /**
+     * Sets the offset to the current score. This is done in the client for better score comparison after new players
+     * have joined the game. Should only be called by the UI.
+     */
+    suspend fun softResetScores() {
+        players.softResetAllPlayerScores()
+    }
+
+    /**
      * Gets a thread- and coroutine-safe snapshot of all [Bait]s. This function is intended for Kotlin callers.
      */
     suspend fun getBaits(): List<Bait> {

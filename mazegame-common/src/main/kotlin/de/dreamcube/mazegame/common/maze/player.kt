@@ -61,6 +61,16 @@ class Player(
     }
 
     /**
+     * Sets the offset to the current score. This is done in the client for better score comparison after new players
+     * have joined the game.
+     */
+    fun softResetScore() {
+        scoreOffset = score
+        moveCounter = 0
+        playStartTime = System.currentTimeMillis()
+    }
+
+    /**
      * Time since login in milliseconds.
      */
     val totalPlayTime: Long

@@ -21,6 +21,10 @@ import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
 import de.dreamcube.mazegame.client.maze.events.ScoreChangeListener
 import de.dreamcube.mazegame.ui.UiPlayerInformation.Companion.MARKER_ALPHA
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.swing.Swing
+import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -178,6 +182,20 @@ class UiPlayerCollection() : AbstractTableModel(), PlayerConnectionListener, Sco
     internal fun toggleScoreRepresentation() {
         scoreRepresentationMode = scoreRepresentationMode.toggle()
         fireTableDataChanged()
+    }
+
+    internal fun clearScoresLocally() {
+        UiController.bgScope.launch {
+            UiController.client.softResetScores()
+            uiPlayerInformationList.forEach {
+                // quick update of all players
+                it.snapshot = it.snapshot.view.takeSnapshot()
+            }
+            withContext(Dispatchers.Swing) {
+                scoreRepresentationMode = ScoreRepresentationMode.CLIENT
+                fireTableDataChanged()
+            }
+        }
     }
 
     internal fun reset() {

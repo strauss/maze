@@ -40,11 +40,19 @@ class ScorePanel() : JPanel() {
         val tableScrollPane = JScrollPane(scoreTable)
         add(tableScrollPane, BorderLayout.CENTER)
 
+        val scoreButtonPanel = JPanel()
+        scoreButtonPanel.layout = MigLayout("insets 5, wrap 2", "[grow,fill][grow,fill]")
+
+        val toggleButton = JButton("Toggle Score")
+        scoreButtonPanel.add(toggleButton, "sg unity")
+
+        val clearScoreButton = JButton("Clear Score")
+        scoreButtonPanel.add(clearScoreButton, "sg unity")
+
         val belowTablePanel = JPanel()
         belowTablePanel.layout = BorderLayout()
 
-        val toggleButton = JButton("Toggle Score")
-        belowTablePanel.add(toggleButton, BorderLayout.NORTH)
+        belowTablePanel.add(scoreButtonPanel, BorderLayout.NORTH)
 
         val dummyPanel = JPanel()
         dummyPanel.preferredSize = Dimension(50, 20)
@@ -75,6 +83,10 @@ class ScorePanel() : JPanel() {
 
         toggleButton.addActionListener {
             UiController.uiPlayerCollection.toggleScoreRepresentation()
+        }
+
+        clearScoreButton.addActionListener {
+            UiController.uiPlayerCollection.clearScoresLocally()
         }
 
     }
