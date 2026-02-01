@@ -165,6 +165,11 @@ It contains the following attributes that are explored one at a time.
     - `trapDivisor: Int`: The maximum number of traps is determined by the number of baits divided by this number. The
       default value is 4. The value is coerced in the range `1..baseBaitCount`, resulting in allowing for at least one
       trap.
+    - `invisibleGemProbability: Double`: Probability of invisible gems. The default is 0.15 (15%). If you want less
+      variance, set this to a lower value or 0.0.
+    - `invisibleTrapProbability: Double`: Probability of invisible traps. The default is 0.5 (50%). If you want less
+      variance, set this to a lower value or 0.0. If events are enabled (next section), disabling invisible traps
+      automatically disables bait rush events completely, because they can only happen on invisible trap collisions.
 - `events: SpecialEventsDto`: configures the probabilities of special events. All probabilities should be given between
   0.0 and 1.0.
     - `enabled: Boolean`: Ar events enabled in general. Default is `false`.
@@ -179,9 +184,9 @@ It contains the following attributes that are explored one at a time.
       The default value is 0.01 (1%).
     - `allGemProbability: Double`: Probability of transforming all baits into gems, whenever a food is collected. The
       default value is 0.005 (0.5%).
-    - `baitRushProbability: Double`: Probability for a "bait rush". Whenever this event occurs, the number of baits is
-      doubled. However, no new baits will be generated, until the usual level is reached. THe default value is 0.05
-      (5%).
+    - `baitRushProbability: Double`: Probability for a "bait rush", whenever an invisible trap is "collected". Whenever
+      this event occurs, the number of baits is doubled for a certain amount of time (half of cooldown time). After that
+      time, no new baits will be generated, until the usual level is reached. The default value is 0.05(5%).
     - `loseBaitProbability: Double`: Probability of losing a bait on player collision. The bait will be lost by the
       player who ran into the other player (this is always unambiguous). The affected player will also lose the points
       associated with the bait. The default value is 0.2 (20%).
