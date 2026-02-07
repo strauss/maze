@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import de.dreamcube.mazegame.common.maze.CompactMaze
 import de.dreamcube.mazegame.common.maze.PlayerPosition
 import de.dreamcube.mazegame.common.maze.TeleportType
 import de.dreamcube.mazegame.common.maze.ViewDirection
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.*
 import kotlin.math.abs
 
@@ -32,13 +35,17 @@ import kotlin.math.abs
  * AStar search for reaching a preselected target bait. A very bad foundation for "good" bots, but suitable for trapeaters and other shenanigans.
  */
 abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovementListener {
-    /**
-     * Internal representation of the maze.
-     */
-    protected lateinit var maze: CompactMaze
+
+
+    protected val accessMutex = Mutex()
 
     /**
-     * The selected target trap.
+     * Potential targets
+     */
+    protected val potentialTargets: MutableSet<Bait> = HashSet()
+
+    /**
+     * The selected target bait.
      */
     protected var currentTarget: Bait? = null
 
@@ -47,17 +54,44 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
      */
     protected val path: MutableList<PlayerPosition> = ArrayList()
 
-    override fun getNextMove(): Move {
-        if (currentTarget == null) {
-            return Move.DO_NOTHING
-        }
-        if (path.isNotEmpty()) {
-            return extractNextMoveFromPath()
-        }
-
-        // we have a target, but no path yet. A* baby!
-        return aStarSearch()
+    protected fun clearTarget() {
+        currentTarget = null
+        path.clear()
     }
+
+    protected fun lockOnTarget(newTarget: Bait) {
+        currentTarget = newTarget
+        path.clear()
+    }
+
+    /**
+     * Internal representation of the maze.
+     */
+    protected lateinit var maze: CompactMaze
+
+    final override fun getNextMove(): Move {
+        return runBlocking {
+            accessMutex.withLock {
+                if (currentTarget == null || targetInvalid() || path.isEmpty()) {
+                    selectTarget()
+                    path.clear()
+                }
+                if (currentTarget == null) {
+                    // if target selection fails, we can't do nothing
+                    return@withLock Move.DO_NOTHING
+                }
+                if (path.isNotEmpty()) {
+                    return@withLock extractNextMoveFromPath()
+                }
+                // we have a target, but no path yet. A* baby!
+                return@withLock aStarSearch()
+            }
+        }
+    }
+
+    protected open fun targetInvalid(): Boolean = currentTarget !in potentialTargets
+
+    protected abstract fun selectTarget()
 
     private fun aStarSearch(): Move {
         val marker = HashSet<PlayerPosition>()
@@ -67,7 +101,7 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
 
         val myPosition = mazeClient.ownPlayerSnapshot.position
         costs[myPosition] = 0
-        val target = currentTarget!!
+        val target: Bait = currentTarget ?: return Move.DO_NOTHING
         val estimatedCost = getManhattanDistance(myPosition.x, target.x, myPosition.y, target.y)
         queue.offer(SearchState(myPosition, 0, estimatedCost))
         var targetPosition: PlayerPosition? = null
@@ -161,10 +195,13 @@ abstract class SingleTargetAStar : Strategy(), MazeEventListener, PlayerMovement
         teleportType: TeleportType?,
         causingPlayerId: Int?
     ) {
-        // If we teleport, we drop the target and select a new one
-        if (newPlayerSnapshot.id == mazeClient.id) {
-            currentTarget = null
-            path.clear()
+        runBlocking {
+            accessMutex.withLock {
+                // If we teleport, we drop the target and select a new one
+                if (newPlayerSnapshot.id == mazeClient.id) {
+                    clearTarget()
+                }
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import de.dreamcube.mazegame.common.maze.TeleportType
 import de.dreamcube.mazegame.common.maze.ViewDirection
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.withLock
 import java.awt.*
 import java.awt.event.KeyEvent
 
@@ -251,10 +252,13 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
 
     override fun onMazeCellSelected(x: Int, y: Int, mazeField: MazeModel.MazeField) {
         if (mazeField is MazeModel.PathMazeField && mazeField.occupationStatus == MazeModel.PathOccupationStatus.BAIT) {
-            val bait: Bait? = runBlocking { mazeClient.getBaitAt(x, y) }
-            bait?.let {
-                currentTarget = it
-                path.clear()
+            runBlocking {
+                accessMutex.withLock {
+                    val bait: Bait? = mazeClient.getBaitAt(x, y)
+                    bait?.let {
+                        lockOnTarget(it)
+                    }
+                }
             }
         }
     }
@@ -268,6 +272,10 @@ class HumanPlayerLazy : SingleTargetAStar(), ClientConnectionStatusListener, Maz
             currentTarget = null
             path.clear()
         }
+    }
+
+    override fun selectTarget() {
+        // does nothing ... target selection is manual in this strategy
     }
 
     override fun onPlayerTeleport(

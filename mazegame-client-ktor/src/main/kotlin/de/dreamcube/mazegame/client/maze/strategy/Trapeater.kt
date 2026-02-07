@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import de.dreamcube.mazegame.client.maze.Bait
 import de.dreamcube.mazegame.client.maze.PlayerSnapshot
 import de.dreamcube.mazegame.client.maze.events.BaitEventListener
 import de.dreamcube.mazegame.common.maze.BaitType
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.withLock
 
 /**
  * [Trapeater] strategy. Uses A* for pathfinding. Target selection happens through manhattan distance. Players and other baits are completely ignored.
@@ -31,47 +33,45 @@ import de.dreamcube.mazegame.common.maze.BaitType
 @Suppress("unused")
 class Trapeater : SingleTargetAStar(), BaitEventListener {
 
-    /**
-     * The bait object for all traps currently in the maze.
-     */
-    private val traps: MutableSet<Bait> = HashSet()
-
-    override fun getNextMove(): Move {
-        if (currentTarget == null || currentTarget !in traps || path.isEmpty()) {
-            selectTarget()
-            path.clear()
-        }
-        return super.getNextMove()
-    }
-
-    private fun selectTarget() {
+    override fun selectTarget() {
         val mySnapshot: PlayerSnapshot = mazeClient.ownPlayerSnapshot
         var currentMinDistance: Int = Integer.MAX_VALUE
-        for (bait in traps) {
+        var target = currentTarget
+        for (bait in potentialTargets) {
             val manhattanDistance: Int = getManhattanDistance(mySnapshot.x, bait.x, mySnapshot.y, bait.y)
-            if (currentTarget == null) {
-                currentTarget = bait
+            if (target == null) {
+                target = bait
                 currentMinDistance = manhattanDistance
                 continue
             }
             if (manhattanDistance < currentMinDistance) {
-                currentTarget = bait
+                target = bait
                 currentMinDistance = manhattanDistance
             }
+        }
+        if (target != null) {
+            lockOnTarget(target)
         }
     }
 
     override fun onBaitAppeared(bait: Bait) {
-        if (bait.type == BaitType.TRAP) {
-            traps.add(bait)
+        runBlocking {
+            accessMutex.withLock {
+                if (bait.type == BaitType.TRAP) {
+                    potentialTargets.add(bait)
+                }
+            }
         }
     }
 
     override fun onBaitVanished(bait: Bait) {
-        traps.remove(bait)
-        if (currentTarget == bait) {
-            currentTarget = null
-            path.clear()
+        runBlocking {
+            accessMutex.withLock {
+                potentialTargets.remove(bait)
+                if (currentTarget == bait) {
+                    clearTarget()
+                }
+            }
         }
     }
 }
