@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,12 @@ import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Dimension
+import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.event.ItemEvent
 import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
 import javax.swing.*
 import kotlin.io.encoding.Base64
 
@@ -186,6 +188,8 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     private val nickLabel = JLabel("Nick")
     private val nickField = JTextField(TEXT_FIELD_COLUMNS)
 
+    private val discordCheckBox =
+        JCheckBox(null, null, DiscordPresenceController.DISCORD_INTEGRATION_ENABLED_BY_DEFAULT)
     private val connectButton = JButton("Connect")
 
     init {
@@ -394,7 +398,27 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(nickLabel)
         add(nickField)
 
-        add(JPanel())
+        val toolTipText = "Share status in local Discord App"
+        discordCheckBox.toolTipText = toolTipText
+        val discordIcon: BufferedImage? = ImageIO.read(this.javaClass.getResource("discord-fill.png"))
+        val discordLabel = JLabel()
+        discordLabel.icon = ImageIcon(discordIcon)
+        discordLabel.toolTipText = toolTipText
+        val discordPanel = JPanel()
+        discordPanel.toolTipText = toolTipText
+        discordPanel.layout = FlowLayout()
+        discordPanel.add(discordLabel)
+        discordPanel.add(discordCheckBox)
+        add(discordPanel)
+
+        // Action listener for discord checkbox
+        discordCheckBox.addActionListener { _ ->
+            val selected = discordCheckBox.isSelected
+            UiController.bgScope.launch {
+                DiscordPresenceController.enabled.set(selected)
+            }
+        }
+
         connectButton.preferredSize = Dimension(portField.preferredSize.width, connectButton.preferredSize.height)
         add(connectButton)
 

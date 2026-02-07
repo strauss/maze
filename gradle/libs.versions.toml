@@ -31,6 +31,7 @@ dokka = "1.9.20"
 flatlaf = "3.6.2"
 miglayout = "11.4.2"
 hornetQueen = "0.3.0"
+kpresence = "0.6.6"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -78,6 +79,7 @@ jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-d
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 hornet_queen = { module = "de.dreamcube:hornet-queen", version.ref = "hornetQueen" }
+kpresence = { module = "io.github.vyfor:kpresence", version.ref = "kpresence" }
 
 # --- Test-Libs
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-engine", version = "5.8.2" }
