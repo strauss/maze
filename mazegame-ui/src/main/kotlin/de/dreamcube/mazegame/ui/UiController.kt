@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ object UiController {
     /**
      * Establishes a connection to the server.
      */
-    internal fun connect(
+    internal suspend fun connect(
         address: String,
         port: Int,
         strategyName: String,
@@ -271,9 +271,7 @@ object UiController {
         sendClientChatMessage("Connection established")
         completeServerAddressString = "@$address:$port"
         this.strategyName = strategyName
-        runBlocking {
-            flavorText = strategyName.flavorText()
-        }
+        flavorText = strategyName.flavorText()
     }
 
     internal fun disconnect() {

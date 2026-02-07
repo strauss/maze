@@ -109,6 +109,9 @@ It contains the following attributes that are explored one at a time.
   Strategies are determined using the `@Bot` annotation on a class implementing the `Strategy` interface. The annotation
   requires a bot name to be given and this bot name can be referred in thes list. The default value is an empty list. If
   you want multiple instances of the same but (such as a "dummy"), just list them multiple times.
+- `autoLaunchDelay: Long`: A number in milliseconds. Determines the server's wait time until the server-side client
+  connection has been established. Lower values speed up the server startup, especially if many clients are started.
+  Higher values increase the server startup stability. The value is capped between 100 and 5000.
 - `specialBots: SpecialBotsDto`: A configuration for special bots. Those bots won't receive any delay compensation. Some
   of them can be
   accelerated and decelerated by the server.

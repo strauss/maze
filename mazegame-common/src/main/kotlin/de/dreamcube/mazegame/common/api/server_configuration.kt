@@ -118,10 +118,12 @@ data class NickMappingsDto(
 
 /**
  * Server bot configuration. [autoLaunch] contains a list of all bot names that should automatically spawn when the
- * server starts.
+ * server starts. [autoLaunchDelay] specifies the time a server waits for the client connection to be established. The
+ * value is given in milliseconds and capped between 100 and 5000.
  */
 data class ServerBotsDto(
     val autoLaunch: List<String> = listOf(),
+    val autoLaunchDelay: Long = 1000L,
     val specialBots: SpecialBotsDto = SpecialBotsDto(),
     val nickMappings: NickMappingsDto = NickMappingsDto(
         setOf(specialBots.dummy),
@@ -129,6 +131,10 @@ data class ServerBotsDto(
         setOf(specialBots.frenzy)
     )
 ) {
+
+    @JsonIgnore
+    val actualAutoLaunchDelay: Long = autoLaunchDelay.coerceIn(100L..5000L)
+
     /**
      * Convenience attribute, containing all special bot names.
      */

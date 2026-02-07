@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ fun main() {
 
     mazeClient.eventHandler.fireClientInfo("The game is about to start!")
     try {
-        val start: Deferred<Unit> = mazeClient.start()
         runBlocking {
+            val start: Deferred<Unit> = mazeClient.start()
             launch {
                 delay(5000L)
                 mazeClient.logout()

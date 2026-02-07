@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,14 @@ interface ServerSideClient {
     val clientId: Int
 
     /**
+     * Allows the server to decide when the client should be started.
+     */
+    suspend fun start()
+
+    /**
      * Allows the server to terminate the client from the server side.
      */
-    fun terminate()
+    suspend fun terminate()
 
     /**
      * Allows the server to check if the bot has its "special mode" active. Currently, this can only be the frenzy mode of the frenzy bot. The special

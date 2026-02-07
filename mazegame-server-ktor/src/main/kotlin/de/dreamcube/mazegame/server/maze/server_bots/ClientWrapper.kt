@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,23 +27,25 @@ import de.dreamcube.mazegame.common.maze.InfoCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 
 class ClientWrapper(val client: MazeClient) : ServerSideClient, ErrorInfoListener {
 
-    val clientDeferred: Deferred<Unit>
+    lateinit var clientDeferred: Deferred<Unit>
 
     init {
         client.eventHandler.addEventListener(this)
         client.eventHandler.addEventListener(DuplicateNickHandler(client))
-        clientDeferred = client.start()
     }
 
     override val clientId: Int
         get() = client.id
 
-    override fun terminate() {
-        runBlocking { client.logout() }
+    override suspend fun start() {
+        clientDeferred = client.start()
+    }
+
+    override suspend fun terminate() {
+        client.logout()
     }
 
     override val specialModeActive: Boolean

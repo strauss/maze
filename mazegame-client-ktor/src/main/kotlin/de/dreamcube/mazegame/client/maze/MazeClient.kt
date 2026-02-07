@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,14 +154,14 @@ class MazeClient @JvmOverloads constructor(
      * Starts the client ... Java edition.
      */
     @Suppress("kotlin:S6508") // This function is intended for Java callers and therefore requires Void instead of Unit
-    fun startAndWait(): CompletableFuture<Void> = start().asCompletableFuture().thenApply { null }
+    fun startAndWait(): CompletableFuture<Void> = runBlocking { start().asCompletableFuture().thenApply { null } }
 
     /**
      * Starts the client ... Kotlin edition. Creates the strategy object and establishes the connection in a coroutine.
      */
-    fun start(): Deferred<Unit> {
+    suspend fun start(): Deferred<Unit> {
         // We have to get the strategy somewhere ... this is one way to do it.
-        strategy = Strategy.createStrategyBlocking(clientConfiguration.strategyName)
+        strategy = Strategy.createStrategy(clientConfiguration.strategyName)
             ?: throw ClassNotFoundException("Could not find strategy with name '${clientConfiguration.strategyName}'")
         strategy.initClient(this)
         val result = CompletableDeferred<Unit>()

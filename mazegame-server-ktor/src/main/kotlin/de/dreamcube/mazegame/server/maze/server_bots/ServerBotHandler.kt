@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ abstract class ServerBotHandler(protected val mazeServer: MazeServer) {
     internal suspend fun spawn(associateInBackground: Boolean = true) {
         mutex.withLock {
             if (client == null) {
-                client = mazeServer.internalSpawnServerSideBot(botAlias)
+                client = mazeServer.createServerSideClient(botAlias)
+                client?.start()
                 if (associateInBackground) {
                     mazeServer.associateBotWithClientConnectionInTheBackground(client)
                 } else {
