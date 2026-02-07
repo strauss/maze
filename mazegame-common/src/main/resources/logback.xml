@@ -1,6 +1,6 @@
 <!--
   ~ Maze Game
-  ~ Copyright (c) 2025 Sascha Strauß
+  ~ Copyright (c) 2025-2026 Sascha Strauß
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,13 +16,40 @@
   -->
 
 <configuration>
+    <timestamp key="startTs" datePattern="yyyy-MM-dd_HH-mm-ss"/>
+    <property name="LOG_DIR" value="log"/>
+    <property name="CONSOLE_PATTERN" value="%highlight(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%-15.15thread] %highlight(%-5level) %cyan(%-24.24logger{24}) - %msg %X%n%ex"/>
+    <property name="FILE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-15.15thread] %-5level %-24.24logger{24} - %msg %X%n%ex"/>"/>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%highlight(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%-15.15thread] %highlight(%-5level) %cyan(%-24.24logger{24}) - %msg %X%n%ex</pattern>
+            <pattern>${CONSOLE_PATTERN}</pattern>
         </encoder>
     </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/${startTs}_maze-main.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CHAT_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/${startTs}_maze-chat.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="de.dreamcube.mazegame.server.maze.commands.client.ChatCommand" level="INFO" additivity="false">
+        <appender-ref ref="CHAT_FILE"/>
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>

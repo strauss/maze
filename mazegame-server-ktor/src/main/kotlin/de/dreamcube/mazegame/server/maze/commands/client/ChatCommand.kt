@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,15 @@ package de.dreamcube.mazegame.server.maze.commands.client
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.MAX_CHAT_LENGTH
 import de.dreamcube.mazegame.server.maze.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ChatCommand(clientConnection: ClientConnection, mazeServer: MazeServer, commandWithParameters: List<String>) :
     ClientCommand(mazeServer, clientConnection) {
+
+    companion object {
+        private val LOGGER: Logger = LoggerFactory.getLogger(ChatCommand::class.java)
+    }
 
     val infoCode: Int = if (commandWithParameters.size > 1) {
         commandWithParameters[1].toInt()
@@ -78,10 +84,16 @@ class ChatCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
         }
         if (clientConnection.chatControl.onSendMessage()) {
             if (infoCode == InfoCode.CLIENT_MESSAGE.code) {
+                LOGGER.info("${clientConnection.nick}(${clientConnection.id}): $message")
                 mazeServer.sendToAllPlayers(createClientInfoMessage(message, clientConnection.id))
             } else if (infoCode == InfoCode.CLIENT_WHISPER.code) {
-                mazeServer.getClientConnection(targetId)
-                    ?.sendMessage(createClientWhisperInfoMessage(message, clientConnection.id))
+                val target = mazeServer.getClientConnection(targetId)
+                if (target != null) {
+                    LOGGER.info("${clientConnection.nick}(${clientConnection.id}) -> ${target.nick}(${target.id}): $message")
+                    target.sendMessage(createClientWhisperInfoMessage(message, clientConnection.id))
+                } else {
+                    LOGGER.warn("${clientConnection.nick}(${clientConnection.id}) -> $targetId (FAILED): $message")
+                }
             }
         } else {
             clientConnection.sendMessage(ClientChatControl.FAILURE_MESSAGE)
