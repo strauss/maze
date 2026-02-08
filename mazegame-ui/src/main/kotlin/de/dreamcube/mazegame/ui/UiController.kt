@@ -343,6 +343,7 @@ object UiController {
     internal fun deactivateServerController() {
         serverController?.cancel()
         serverController = null
+        mainFrame.removeServerControlPanel()
     }
 
     internal suspend fun activateServerController(

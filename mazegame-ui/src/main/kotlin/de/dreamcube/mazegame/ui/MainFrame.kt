@@ -329,9 +329,16 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         controlPane.add(serverControlPanel!!, BorderLayout.NORTH)
     }
 
-    internal fun clearControlPanel() {
+    internal fun removeServerControlPanel() {
+        serverControlPanel?.let { controlPane.remove(it) }
+    }
+
+    internal fun resetControlPane() {
         botControlPanel.removeAll()
         controlPane.removeAll()
+        if (UiController.serverControllerActive) {
+            initServerControlPanel()
+        }
     }
 
     /**
@@ -399,7 +406,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                         leftSplitPane.remove(scorePanel)
                         leftSplitPane.add(connectionSettingsPanel, JSplitPane.TOP)
                         leaveButton.isVisible = false
-                        clearControlPanel()
+                        resetControlPane()
                         if (controlPanelInPlace) {
                             showOrHideControlPanel()
                         }
