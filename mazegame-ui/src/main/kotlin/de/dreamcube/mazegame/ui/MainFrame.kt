@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.VisualizationComponent
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Rectangle
@@ -327,9 +329,16 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         controlPane.add(serverControlPanel!!, BorderLayout.NORTH)
     }
 
-    internal fun clearControlPanel() {
+    internal fun removeServerControlPanel() {
+        serverControlPanel?.let { controlPane.remove(it) }
+    }
+
+    internal fun resetControlPane() {
         botControlPanel.removeAll()
         controlPane.removeAll()
+        if (UiController.serverControllerActive) {
+            initServerControlPanel()
+        }
     }
 
     /**
@@ -381,6 +390,9 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
 
                 ConnectionStatus.PLAYING -> {
                     UiController.startPlaying()
+                    withContext(Dispatchers.Default) {
+                        DiscordPresenceController.enable(UiController.client.ownPlayerSnapshot.nick)
+                    }
                 }
 
                 ConnectionStatus.DEAD -> {
@@ -394,11 +406,14 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                         leftSplitPane.remove(scorePanel)
                         leftSplitPane.add(connectionSettingsPanel, JSplitPane.TOP)
                         leaveButton.isVisible = false
-                        clearControlPanel()
+                        resetControlPane()
                         if (controlPanelInPlace) {
                             showOrHideControlPanel()
                         }
                         repaint()
+                    }
+                    withContext(Dispatchers.Default) {
+                        DiscordPresenceController.disable()
                     }
                 }
 

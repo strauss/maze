@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import kotlin.random.Random
 class BaitGenerator(private val server: MazeServer) {
 
     private val random = Random.Default
+
+    private val baitGeneratorConfiguration
+        get() = server.serverConfiguration.game.baitGenerator
 
     companion object {
         const val FOOD_TH = 0.4
@@ -97,8 +100,8 @@ class BaitGenerator(private val server: MazeServer) {
     private suspend fun createRandomGem(): ServerBait {
         val p: Position = server.positionProvider.randomPositionForGem()
         val gem = ServerBait(BaitType.GEM, p.x, p.y)
-        // approx 15% of the gems spawn invisible
-        val spawnInvisible: Boolean = random.nextDouble() > 0.85
+        // by default, approx 15% of the gems spawn invisible
+        val spawnInvisible: Boolean = random.nextDouble() <= baitGeneratorConfiguration.invisibleGemProbability
         if (spawnInvisible) {
             gem.makeInvisible(5_000L)
         }
@@ -111,8 +114,8 @@ class BaitGenerator(private val server: MazeServer) {
     private suspend fun createRandomTrap(): ServerBait {
         val p: Position = server.positionProvider.randomPositionForTrap()
         val trap = ServerBait(BaitType.TRAP, p.x, p.y)
-        // approx 50% of the traps spawn invisible
-        val spawnInvisible: Boolean = random.nextDouble() > 0.5
+        // by default, approx 50% of the traps spawn invisible
+        val spawnInvisible: Boolean = random.nextDouble() <= baitGeneratorConfiguration.invisibleTrapProbability
         if (spawnInvisible) {
             trap.makeInvisible(20_000L)
         }

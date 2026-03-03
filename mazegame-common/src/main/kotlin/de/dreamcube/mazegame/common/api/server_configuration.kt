@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,10 +118,12 @@ data class NickMappingsDto(
 
 /**
  * Server bot configuration. [autoLaunch] contains a list of all bot names that should automatically spawn when the
- * server starts.
+ * server starts. [autoLaunchDelay] specifies the time a server waits for the client connection to be established. The
+ * value is given in milliseconds and capped between 100 and 5000.
  */
 data class ServerBotsDto(
     val autoLaunch: List<String> = listOf(),
+    val autoLaunchDelay: Long = 1000L,
     val specialBots: SpecialBotsDto = SpecialBotsDto(),
     val nickMappings: NickMappingsDto = NickMappingsDto(
         setOf(specialBots.dummy),
@@ -129,6 +131,10 @@ data class ServerBotsDto(
         setOf(specialBots.frenzy)
     )
 ) {
+
+    @JsonIgnore
+    val actualAutoLaunchDelay: Long = autoLaunchDelay.coerceIn(100L..5000L)
+
     /**
      * Convenience attribute, containing all special bot names.
      */
@@ -144,15 +150,24 @@ data class ServerBotsDto(
 }
 
 /**
- * Allows some control on how baits are generated. The [objectDivisor] determines the maximum number of baits in
- * relation to the number of walkable fields. The [trapDivisor] determines how many traps are allowed on the field.
+ * Allows some control on how baits are generated.
+ * - The [objectDivisor] determines the maximum number of baits in relation to the number of walkable fields. The
+ * default value is 26.
+ * - The [trapDivisor] determines how many traps are allowed on the field. The default value is 4.
+ * - The [invisibleGemProbability] determines, how often a gem spawns invisible. The default is 0.15 (15%)
+ * - The [invisibleTrapProbability] determines, how often a trap spawns invisible. The default is 0.5 (50%)
  */
-data class BaitGeneratorDto(val objectDivisor: Int = 26, val trapDivisor: Int = 4)
+data class BaitGeneratorDto(
+    val objectDivisor: Int = 26,
+    val trapDivisor: Int = 4,
+    val invisibleGemProbability: Double = 0.15,
+    val invisibleTrapProbability: Double = 0.5
+)
 
 /**
  * With this, it is possible to control the random events. Only if [enabled], the events occur at all. The
  * [eventCooldown] is given in milliseconds. The default corresponds to 90 seconds. When an event occurs, at least that
- * amount of time will not contain further random events. The other values are probabilities:
+ * amount of time will not contain further random events. The other values are probabilities (between 0 and 1):
  * - [allTrapProbability]: Whenever a gem is collected, it could be a "blood diamond", causing all baits to become
  * traps. The default probability is 1%.
  * - [allFoodProbability]: Whenever a coffee is collected, it could be a "coffee from the office machine", causing all

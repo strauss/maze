@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,8 @@
 
 package de.dreamcube.mazegame.server.maze
 
-import de.dreamcube.mazegame.common.api.FreeNickMapping
-import de.dreamcube.mazegame.common.api.GameSpeed
-import de.dreamcube.mazegame.common.api.MazeServerConfigurationDto
-import de.dreamcube.mazegame.common.api.NickMappingsDto
+import de.dreamcube.mazegame.common.api.*
 import de.dreamcube.mazegame.common.maze.*
-import de.dreamcube.mazegame.server.contest.ContestConfiguration
 import de.dreamcube.mazegame.server.contest.ContestController
 import de.dreamcube.mazegame.server.maze.commands.control.GoCommand
 import de.dreamcube.mazegame.server.maze.commands.control.OccupationResult
@@ -766,14 +762,15 @@ class MazeServer(
             frenzyHandler.spawnManually(false)
             return getClientConnection(frenzyHandler.client?.clientId)
         }
-        val serverSideClient: ServerSideClient? = internalSpawnServerSideBot(currentAlias)
+        val serverSideClient: ServerSideClient? = createServerSideClient(currentAlias)
+        serverSideClient?.start()
         return associateBotWithClientConnection(serverSideClient)
     }
 
     /**
      * Spawns a server-side bot.
      */
-    internal fun internalSpawnServerSideBot(alias: String): ServerSideClient? {
+    internal fun createServerSideClient(alias: String): ServerSideClient? {
         if (availableBotNames.contains(alias)) {
             val possibleNickNames: Set<String> = botNamesToPossibleNickNameMap[alias] ?: setOf(alias)
             return ClientWrapper.createServerSideClient(alias, port, possibleNickNames.random())
@@ -794,7 +791,7 @@ class MazeServer(
     internal suspend fun associateBotWithClientConnection(serverSideClient: ServerSideClient?): ClientConnection? {
         if (serverSideClient != null) {
             do {
-                delay(gameSpeed.delay) // unlimited could be a problem...
+                delay(serverConfiguration.serverBots.actualAutoLaunchDelay)
                 if (serverSideClient.connectionFailed) {
                     LOGGER.error("Server side client could not connect.")
                     return null

@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package de.dreamcube.mazegame.server.contest
-
-import de.dreamcube.mazegame.common.api.GameSpeed
+package de.dreamcube.mazegame.common.api
 
 enum class ContestEventType {
     /**
@@ -114,7 +112,7 @@ enum class CuratedEventSet {
      */
     SHUFFLE_AND_REBAIT;
 
-    internal fun toEventList(durationInMinutes: Double): List<ContestEvent> = when (this) {
+    fun toEventList(durationInMinutes: Double): List<ContestEvent> = when (this) {
         DEFAULT_FRENZY_MODE -> defaultFrenzyEventList(durationInMinutes)
         SPEED_UP -> speedUpEventList(durationInMinutes)
         BAIT_RUSH -> baitRushEventList(durationInMinutes)

@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ class MazeQueryCommand(
             clientConnection.sendMessage(createServerInfoMessage("$otherPlayers players are already having fun.").thereIsMore())
         }
         clientConnection.sendMessage(ClientChatControl.FIRST_CHAT_HINT)
+        
     }
 
     private suspend fun sendWelcomeMessages() {

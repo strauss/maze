@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,15 @@ import net.miginfocom.swing.MigLayout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.awt.Dimension
+import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.event.ItemEvent
 import java.awt.event.KeyEvent
 import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
 import javax.swing.*
 import kotlin.io.encoding.Base64
+import kotlin.math.max
 
 private const val LOCALHOST = "localhost"
 private const val DREAMCUBE = "dreamcube.de"
@@ -186,6 +189,8 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
     private val nickLabel = JLabel("Nick")
     private val nickField = JTextField(TEXT_FIELD_COLUMNS)
 
+    private val discordCheckBox =
+        JCheckBox(null, null, DiscordPresenceController.DISCORD_INTEGRATION_ENABLED_BY_DEFAULT)
     private val connectButton = JButton("Connect")
 
     init {
@@ -258,6 +263,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                                 gameSelection.isEnabled = true
                                 portField.isEnabled = false
                                 addressFieldComboBox.isEnabled = false
+                                gameSelection.selectedIndex = max(0, gameSelection.itemCount - 1)
                             }
                         }
                     } catch (ex: Exception) {
@@ -331,6 +337,9 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         serverControlPasswordField.isEnabled = false
         add(serverControlPasswordLabel)
         add(serverControlPasswordField)
+        serverControlPasswordField.addActionListener { _ ->
+            serverControlActivateButton.doClick()
+        }
 
         serverControlActivateButton.preferredSize =
             Dimension(portField.preferredSize.width, serverControlActivateButton.preferredSize.height)
@@ -338,33 +347,11 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(JPanel()) // Dummy panel without content
         add(serverControlActivateButton)
         serverControlActivateButton.addActionListener { _ ->
-            serverControlActivateButton.isEnabled = false
             UiController.bgScope.launch {
-                try {
-                    UiController.activateServerController(
-                        addressFieldComboBox.selectedItem as String,
-                        portField.text.toInt(),
-                        String(serverControlPasswordField.password),
-                        gamePortField.text.toInt()
-                    )
-                    withContext(Dispatchers.Swing) {
-                        gameSelection.isEnabled = false
-                        serverControlPasswordField.text = "..."
-                        serverControlPasswordField.isEnabled = false
-                    }
-                } catch (ex: ClientRequestException) {
-                    LOGGER.error("Connection to server failed: ${ex.message}")
-                    UiController.deactivateServerController()
-                    UiController.deactivateControlButton()
-                    withContext(Dispatchers.Swing) {
-                        serverControlActivateButton.isEnabled = true
-                        JOptionPane.showMessageDialog(
-                            this@ConnectionSettingsPanel,
-                            "Error while activating the server control. Check the server password and try again.",
-                            "Connection Error",
-                            JOptionPane.ERROR_MESSAGE
-                        )
-                    }
+                if (UiController.serverControllerActive) {
+                    deactivateServerControl()
+                } else {
+                    activateServerControl()
                 }
             }
         }
@@ -394,7 +381,27 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(nickLabel)
         add(nickField)
 
-        add(JPanel())
+        val toolTipText = "Share status in local Discord App"
+        discordCheckBox.toolTipText = toolTipText
+        val discordIcon: BufferedImage? = ImageIO.read(this.javaClass.getResource("discord-fill.png"))
+        val discordLabel = JLabel()
+        discordLabel.icon = ImageIcon(discordIcon)
+        discordLabel.toolTipText = toolTipText
+        val discordPanel = JPanel()
+        discordPanel.toolTipText = toolTipText
+        discordPanel.layout = FlowLayout()
+        discordPanel.add(discordLabel)
+        discordPanel.add(discordCheckBox)
+        add(discordPanel)
+
+        // Action listener for discord checkbox
+        discordCheckBox.addActionListener { _ ->
+            val selected = discordCheckBox.isSelected
+            UiController.bgScope.launch {
+                DiscordPresenceController.enabled.set(selected)
+            }
+        }
+
         connectButton.preferredSize = Dimension(portField.preferredSize.width, connectButton.preferredSize.height)
         add(connectButton)
 
@@ -432,6 +439,45 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
         add(JPanel(), "growy")
 
         UiController.prepareEventListener(this)
+    }
+
+    private suspend fun activateServerControl() {
+        try {
+            UiController.activateServerController(
+                addressFieldComboBox.selectedItem as String,
+                portField.text.toInt(),
+                String(serverControlPasswordField.password),
+                gamePortField.text.toInt()
+            )
+            withContext(Dispatchers.Swing) {
+                gameSelection.isEnabled = false
+                serverControlPasswordField.text = "..."
+                serverControlPasswordField.isEnabled = false
+                serverControlActivateButton.text = "Deactivate"
+            }
+        } catch (ex: ClientRequestException) {
+            LOGGER.error("Connection to server failed: ${ex.message}")
+            UiController.deactivateServerController()
+            UiController.deactivateControlButton()
+            withContext(Dispatchers.Swing) {
+                serverControlActivateButton.isEnabled = true
+                JOptionPane.showMessageDialog(
+                    this@ConnectionSettingsPanel,
+                    "Error while activating the server control. Check the server password and try again.",
+                    "Connection Error",
+                    JOptionPane.ERROR_MESSAGE
+                )
+            }
+        }
+    }
+
+    private fun deactivateServerControl() {
+        UiController.deactivateServerController()
+        UiController.deactivateControlButton()
+        serverControlPasswordField.text = ""
+        serverControlPasswordField.isEnabled = true
+        serverControlActivateButton.text = "Activate"
+        gameSelection.isEnabled = true
     }
 
     /**
@@ -589,12 +635,7 @@ class ConnectionSettingsPanel() : JPanel(), ClientConnectionStatusListener {
                 ConnectionStatus.DEAD -> {
                     this@ConnectionSettingsPanel.isEnabled = true
                     connectButton.isEnabled = true
-                    UiController.deactivateServerController()
-                    UiController.deactivateControlButton()
-                    serverControlPasswordField.text = ""
-                    serverControlPasswordField.isEnabled = true
-                    serverControlActivateButton.isEnabled = true
-                    gameSelection.isEnabled = true
+//                    deactivateServerControl()
                 }
 
                 else -> {

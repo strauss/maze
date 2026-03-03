@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ class ClientChatControl {
         val FAILURE_MESSAGE: Message =
             createServerInfoMessage("Your chat tokens have all been consumed. You have to wait for $NEW_TOKEN_PERIOD milliseconds to get a new one.")
         val FIRST_CHAT_HINT: Message =
-            createServerInfoMessage("Be aware: every chat and whisper message costs you a move. Use that power wisely!")
+            createServerInfoMessage("Be aware: every chat and whisper message is logged and costs you a move. Use that power wisely! ")
         val MESSAGE_TOO_LONG: Message =
             createServerInfoMessage("Your last chat message was too long. Chat messages may only have at most $MAX_CHAT_LENGTH characters. Your chat tokens are set to 0.")
     }

@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@
 package de.dreamcube.mazegame.ui
 
 import de.dreamcube.mazegame.client.maze.events.ClientConnectionStatusListener
-import de.dreamcube.mazegame.common.api.GameSpeed
-import de.dreamcube.mazegame.common.api.PlayerInformationDto
-import de.dreamcube.mazegame.common.api.ServerInformationDto
+import de.dreamcube.mazegame.common.api.*
 import de.dreamcube.mazegame.common.maze.BaitType
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.util.Disposer
 import io.ktor.client.plugins.*
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
@@ -37,6 +36,8 @@ import java.awt.KeyEventDispatcher
 import java.awt.KeyboardFocusManager
 import java.awt.event.KeyEvent
 import javax.swing.*
+import kotlin.math.round
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val SG_UNITY = "sg unity"
 private const val SPAN_2 = "span 2"
@@ -87,7 +88,7 @@ class ServerControlPanel() : JPanel() {
         initGameControlElements()
         initBaitControlElements()
         initPlayerControlElements()
-        // TODO: contest control
+        initConstestControlElements()
 
         isOpaque = true
         spawnButton.isEnabled = false
@@ -208,14 +209,7 @@ class ServerControlPanel() : JPanel() {
         add(speedLabel, SPAN_2)
 
         // speed selection
-        val speedSelection = JComboBox<GameSpeed>()
-        val model: DefaultComboBoxModel<GameSpeed?> = speedSelection.model as DefaultComboBoxModel
-        if (model.size > 0) {
-            model.removeAllElements()
-        }
-        model.addAll(GameSpeed.entries)
-        speedSelection.selectedItem = GameSpeed.NORMAL
-        speedSelection.isEditable = false
+        val speedSelection = speedSelection()
         add(speedSelection, SPAN_2)
 
         // speed selection button
@@ -237,6 +231,18 @@ class ServerControlPanel() : JPanel() {
             }
         }
         add(selectSpeedButton, SPAN_2)
+    }
+
+    private fun speedSelection(): JComboBox<GameSpeed> {
+        val speedSelection = JComboBox<GameSpeed>()
+        val model: DefaultComboBoxModel<GameSpeed?> = speedSelection.model as DefaultComboBoxModel
+        if (model.size > 0) {
+            model.removeAllElements()
+        }
+        model.addAll(GameSpeed.entries)
+        speedSelection.selectedItem = GameSpeed.NORMAL
+        speedSelection.isEditable = false
+        return speedSelection
     }
 
     private fun initBaitControlElements() {
@@ -563,11 +569,232 @@ class ServerControlPanel() : JPanel() {
         add(spawnButton, SPAN_2)
     }
 
+    private fun initConstestControlElements() {
+        val contestControlButton = JButton("Contest Control")
+        add(contestControlButton)
+
+        contestControlButton.addActionListener {
+
+            serverController.launch {
+                var contestConfiguration: ContestConfiguration? = null
+                try {
+                    contestConfiguration = serverController.contestInfo()
+
+                } catch (ex: ResponseException) {
+                    if (ex.response.status != HttpStatusCode.NotFound) {
+                        withContext(Dispatchers.Swing) {
+                            showErrorMessage(ex)
+                        }
+                        return@launch
+                    }
+                }
+                withContext(Dispatchers.Swing) {
+                    if (contestConfiguration == null) {
+                        showContestLauncherDialog()
+                    } else {
+                        showRunningContestConfiguration(contestConfiguration)
+                    }
+                }
+            }
+        }
+
+        val contestReportButton = JButton("Contest Report")
+        contestReportButton.addActionListener {
+            serverController.launch {
+                try {
+                    serverController.contestReport()
+                } catch (ex: ResponseException) {
+                    withContext(Dispatchers.Swing) {
+                        showErrorMessage(ex)
+                    }
+                }
+            }
+        }
+
+        add(contestReportButton)
+    }
+
+    private fun showContestLauncherDialog() {
+        val setupContestDialog = JDialog(UiController.mainFrame, "Setup new Contest", true)
+        setupContestDialog.run {
+            layout = MigLayout("insets 5, wrap 2", "[grow,fill][grow,fill]")
+
+            add(JLabel("Duration (minutes)"), SG_UNITY)
+            val durationInMinutesField = JTextField("30.0")
+            add(durationInMinutesField, SG_UNITY)
+
+            add(JLabel("Show positions"), SG_UNITY)
+            val showPositionsField = JTextField("10")
+            add(showPositionsField, SG_UNITY)
+
+            add(JLabel("Initial speed"), SG_UNITY)
+            val speedSelection = speedSelection()
+            add(speedSelection, SG_UNITY)
+
+            val frenzyBot = JCheckBox("Frenzy bot", true)
+            add(frenzyBot, SPAN_2)
+
+            val speedUp = JCheckBox("Speed up", true)
+            add(speedUp, SPAN_2)
+
+            val baitRush = JCheckBox("Bait rush", true)
+            add(baitRush, SPAN_2)
+
+            val shuffleAndReBait = JCheckBox("Shuffle and re-bait", true)
+            add(shuffleAndReBait, SPAN_2)
+
+            val cancelButton = JButton("Cancel")
+            cancelButton.addActionListener {
+                this.dispose()
+            }
+            add(cancelButton, SG_UNITY)
+
+            val startButton = JButton("Start")
+            startButton.addActionListener {
+                serverController.launch {
+                    try {
+                        val configuration = ContestConfiguration(
+                            durationInMinutes = durationInMinutesField.text.toDouble(),
+                            statusPositions = showPositionsField.text.toInt(),
+                            initialGameSpeed = speedSelection.selectedItem as GameSpeed,
+                            eventSets = buildSet {
+                                if (frenzyBot.isSelected) {
+                                    add(CuratedEventSet.DEFAULT_FRENZY_MODE)
+                                }
+                                if (speedUp.isSelected) {
+                                    add(CuratedEventSet.SPEED_UP)
+                                }
+                                if (baitRush.isSelected) {
+                                    add(CuratedEventSet.BAIT_RUSH)
+                                }
+                                if (shuffleAndReBait.isSelected) {
+                                    add(CuratedEventSet.SHUFFLE_AND_REBAIT)
+                                }
+                            }
+                        )
+                        serverController.startContest(configuration)
+                        withContext(Dispatchers.Swing) {
+                            this@run.dispose()
+                        }
+                    } catch (ex: ResponseException) {
+                        withContext(Dispatchers.Swing) {
+                            showErrorMessage(ex)
+                            this@run.dispose()
+                        }
+                    } catch (ex: NumberFormatException) {
+                        showErrorMessage(ex)
+                        // do not dispose in this case
+                    }
+                }
+            }
+            add(startButton, SG_UNITY)
+
+            pack()
+            setLocationRelativeTo(UiController.mainFrame)
+            isVisible = true
+        }
+    }
+
+    private fun showRunningContestConfiguration(configuration: ContestConfiguration) {
+        val runningContestDialog = JDialog(UiController.mainFrame, "Running Contest", true)
+        fun readOnlyTextFieldWithContent(content: String) = JTextField(content).apply { isEnabled = false }
+        fun yesOrNo(flag: Boolean) = if (flag) "Yes" else "No"
+        runningContestDialog.run {
+            layout = MigLayout("insets 5, wrap 2", "[grow,fill][grow,fill]")
+
+            add(JLabel("Duration"), SG_UNITY)
+            val durationString = round(configuration.durationInMinutes * 60.0 * 1000.0).milliseconds.toString()
+            add(readOnlyTextFieldWithContent(durationString), SG_UNITY)
+
+            add(JLabel("Report interval"), SG_UNITY)
+            val reportIntervalString =
+                round(configuration.statusReportIntervalInMinutes * 60.0 * 1000.0).milliseconds.toString()
+            add(readOnlyTextFieldWithContent(reportIntervalString), SG_UNITY)
+
+            add(JLabel("Show positions"), SG_UNITY)
+            add(readOnlyTextFieldWithContent(configuration.statusPositions.toString()), SG_UNITY)
+
+            add(JLabel("Initial speed"), SG_UNITY)
+            add(readOnlyTextFieldWithContent(configuration.initialGameSpeed.shortName), SG_UNITY)
+
+            add(JLabel("Frenzy bot"), SG_UNITY)
+            add(
+                readOnlyTextFieldWithContent(yesOrNo(CuratedEventSet.DEFAULT_FRENZY_MODE in configuration.eventSets)),
+                SG_UNITY
+            )
+
+            add(JLabel("Speed up"), SG_UNITY)
+            add(readOnlyTextFieldWithContent(yesOrNo(CuratedEventSet.SPEED_UP in configuration.eventSets)), SG_UNITY)
+
+            add(JLabel("Bait rush"), SG_UNITY)
+            add(readOnlyTextFieldWithContent(yesOrNo(CuratedEventSet.BAIT_RUSH in configuration.eventSets)), SG_UNITY)
+
+            add(JLabel("Shuffle and re-bait"), SG_UNITY)
+            add(
+                readOnlyTextFieldWithContent(yesOrNo(CuratedEventSet.SHUFFLE_AND_REBAIT in configuration.eventSets)),
+                SG_UNITY
+            )
+
+            add(JLabel("Additional events"), SG_UNITY)
+            add(readOnlyTextFieldWithContent(yesOrNo(configuration.additionalEvents.isNotEmpty())), SG_UNITY)
+
+            val okButton = JButton("OK")
+            okButton.addActionListener {
+                this.dispose()
+            }
+            add(okButton, SG_UNITY)
+
+            val stopButton = JButton("Stop")
+            stopButton.addActionListener {
+                val result: Int = JOptionPane.showConfirmDialog(
+                    this,
+                    "Do you really want to stop the running contest?",
+                    "Question",
+                    JOptionPane.YES_NO_CANCEL_OPTION
+                )
+
+                if (result == JOptionPane.YES_OPTION) {
+                    serverController.launch {
+                        try {
+                            serverController.stopContest()
+                            withContext(Dispatchers.Swing) {
+                                this@run.dispose()
+                            }
+                        } catch (ex: ResponseException) {
+                            withContext(Dispatchers.Swing) {
+                                showErrorMessage(ex)
+                            }
+                        }
+                    }
+                } else if (result == JOptionPane.NO_OPTION) {
+                    this.dispose()
+                }
+                // in case of CANCEL_OPTION we just leave the dialog open ... effectively doing nothing at this point
+            }
+            add(stopButton, SG_UNITY)
+
+            pack()
+            setLocationRelativeTo(UiController.mainFrame)
+            isVisible = true
+        }
+
+    }
+
     private fun showErrorMessage(ex: ResponseException) {
-        LOGGER.error(ex.message)
+        val message = ex.message
+        showErrorMessage(message)
+    }
+
+    private fun showErrorMessage(ex: NumberFormatException) {
+        val message = "Malformed number ${ex.message}"
+        showErrorMessage(message)
+    }
+
+    private fun showErrorMessage(message: String?) {
+        LOGGER.error(message)
         JOptionPane.showMessageDialog(
             this@ServerControlPanel,
-            ex.message,
+            message,
             "Command failed",
             JOptionPane.ERROR_MESSAGE
         )
