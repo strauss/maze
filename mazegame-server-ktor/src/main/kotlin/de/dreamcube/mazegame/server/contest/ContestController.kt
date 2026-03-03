@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 
 package de.dreamcube.mazegame.server.contest
 
+import de.dreamcube.mazegame.common.api.ContestConfiguration
+import de.dreamcube.mazegame.common.api.ContestEvent
+import de.dreamcube.mazegame.common.api.ContestEventType
 import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.api.GameSpeed.*
 import de.dreamcube.mazegame.common.maze.BaitType

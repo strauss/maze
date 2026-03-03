@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -296,6 +296,53 @@ class ServerCommandController(
     suspend fun spawn(nick: String) {
         val token: String = ensureLoggedIn()
         val httpAddress = "$baseUrl/server/$gamePort/control/spawn/$nick"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
+    }
+
+    /**
+     * Retrieves the information of a currently running contest. The server will yield a 404 if no contest is running.
+     */
+    suspend fun contestInfo(): ContestConfiguration {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/contest"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        return httpClient.use { it.get(httpAddress) { bearerAuth(token) } }.body()
+    }
+
+    /**
+     * Starts a contest with the given [contestConfiguration]. The server will yield a 412 if there is already an active
+     * contest.
+     */
+    suspend fun startContest(contestConfiguration: ContestConfiguration) {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/contest"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        httpClient.use {
+            it.post(httpAddress) {
+                bearerAuth(token)
+                contentType(ContentType.Application.Json)
+                setBody(contestConfiguration)
+            }
+        }
+    }
+
+    /**
+     * Stops a currently running contest. The server will yield a 412 if no contest is running.
+     */
+    suspend fun stopContest() {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/contest"
+        val httpClient: HttpClient = createDisposableHttpClient()
+        httpClient.use { it.delete(httpAddress) { bearerAuth(token) } }
+    }
+
+    /**
+     * Triggers a contest report if a contest is running. The server yields a 412 if no contest is running.
+     */
+    suspend fun contestReport() {
+        val token: String = ensureLoggedIn()
+        val httpAddress = "$baseUrl/server/$gamePort/contest/report"
         val httpClient: HttpClient = createDisposableHttpClient()
         httpClient.use { it.post(httpAddress) { bearerAuth(token) } }
     }
