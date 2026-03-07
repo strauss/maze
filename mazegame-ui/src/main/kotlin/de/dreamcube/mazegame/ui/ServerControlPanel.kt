@@ -643,13 +643,14 @@ class ServerControlPanel() : JPanel() {
             val shuffleAndReBait = JCheckBox("Shuffle and re-bait", true)
             add(shuffleAndReBait, SPAN_2)
 
-            val cancelButton = JButton("Cancel")
+            val cancelButton = JButton("Close")
             cancelButton.addActionListener {
                 this.dispose()
             }
             add(cancelButton, SG_UNITY)
 
             val startButton = JButton("Start")
+            startButton.font = startButton.font.deriveFont(Font.BOLD)
             startButton.addActionListener {
                 serverController.launch {
                     try {
@@ -738,13 +739,14 @@ class ServerControlPanel() : JPanel() {
             add(JLabel("Additional events"), SG_UNITY)
             add(readOnlyTextFieldWithContent(yesOrNo(configuration.additionalEvents.isNotEmpty())), SG_UNITY)
 
-            val okButton = JButton("OK")
+            val okButton = JButton("Close")
             okButton.addActionListener {
                 this.dispose()
             }
             add(okButton, SG_UNITY)
 
             val stopButton = JButton("Stop")
+            stopButton.font = stopButton.font.deriveFont(Font.BOLD)
             stopButton.addActionListener {
                 val result: Int = JOptionPane.showConfirmDialog(
                     this,
