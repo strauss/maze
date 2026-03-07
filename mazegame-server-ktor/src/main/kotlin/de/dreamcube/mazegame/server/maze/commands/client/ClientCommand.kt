@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ fun createCommand(clientConnection: ClientConnection, mazeServer: MazeServer, ra
         when (command) {
             "STEP" -> StepCommand(clientConnection, mazeServer, commandWithParameters)
             "TURN" -> TurnCommand(clientConnection, mazeServer, commandWithParameters)
+            "BACK" -> BackStepCommand(clientConnection, mazeServer, commandWithParameters)
             "INFO" -> ChatCommand(clientConnection, mazeServer, commandWithParameters)
             "HELO" -> HelloCommand(clientConnection, mazeServer, commandWithParameters)
             "MAZ?" -> MazeQueryCommand(clientConnection, mazeServer, commandWithParameters)

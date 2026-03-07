@@ -17,10 +17,7 @@
 
 package de.dreamcube.mazegame.client.maze.strategy
 
-import de.dreamcube.mazegame.client.maze.MazeClient
-import de.dreamcube.mazegame.client.maze.createStepMessage
-import de.dreamcube.mazegame.client.maze.createTurnLeftMessage
-import de.dreamcube.mazegame.client.maze.createTurnRightMessage
+import de.dreamcube.mazegame.client.maze.*
 import de.dreamcube.mazegame.client.maze.events.*
 import de.dreamcube.mazegame.client.maze.events.EventListener
 import de.dreamcube.mazegame.common.maze.isNickValid
@@ -247,6 +244,7 @@ abstract class Strategy : NoEventListener {
         }
         when (move) {
             Move.STEP -> mazeClient.sendMessage(createStepMessage())
+            Move.BACK -> mazeClient.sendMessage(createBackstepMessage())
             Move.TURN_L -> mazeClient.sendMessage(createTurnLeftMessage())
             Move.TURN_R -> mazeClient.sendMessage(createTurnRightMessage())
             Move.DO_NOTHING -> {

@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ fun createPlayerPositionVanishMessage(player: Player) =
 fun createPlayerPositionTurnMessage(player: Player) =
     createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.TURN).asMessage()
 
-fun createPlayerPositionStepMessage(player: Player) =
+fun createPlayerPositionMoveMessage(player: Player) =
     createPlayerPositionChangeMessage(player, PlayerPositionChangeReason.MOVE).asMessage()
 
 fun createPlayerTeleportMessage(player: Player) =

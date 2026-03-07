@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,19 @@ enum class Move {
     /**
      * Step forward.
      */
-    STEP;
+    STEP,
+
+    /**
+     * Step backwords.
+     */
+    BACK;
 
     /**
      * Determines the new [ViewDirection], if this [Move] is applied, while being in [viewDirectionBefore].
      */
     fun getViewDirectionAfter(viewDirectionBefore: ViewDirection) {
         when (this) {
-            DO_NOTHING, STEP -> viewDirectionBefore
+            DO_NOTHING, STEP, BACK -> viewDirectionBefore
             TURN_R -> viewDirectionBefore.turnRight()
             TURN_L -> viewDirectionBefore.turnLeft()
         }

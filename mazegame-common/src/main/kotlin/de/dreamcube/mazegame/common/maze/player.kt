@@ -152,6 +152,14 @@ enum class ViewDirection(val shortName: String) {
             SOUTH -> EAST
             WEST -> SOUTH
         }
+
+    fun backwards(): ViewDirection =
+        when (this) {
+            NORTH -> SOUTH
+            EAST -> WEST
+            SOUTH -> NORTH
+            WEST -> EAST
+        }
 }
 
 /**

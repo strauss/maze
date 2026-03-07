@@ -37,10 +37,10 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
     init {
         if (commandWithParameters.size != 1) {
             errorCode = InfoCode.WRONG_PARAMETER_VALUE
-        } else @Suppress("kotlin:S6518") // WTF? you serious?
-        if (!clientConnection.isReady.get()) {
-            errorCode = InfoCode.ACTION_WITHOUT_READY
-        }
+        } else
+            if (!clientConnection.isReady.get()) {
+                errorCode = InfoCode.ACTION_WITHOUT_READY
+            }
         checkLoggedIn()
     }
 
@@ -49,27 +49,23 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
         if (!movementAllowed) {
             return
         }
-        val messagesForAll: MutableList<Message> = ArrayList()
-        var gameEvent: GameEvent? = null
         val player: Player = clientConnection.player
         if (!mazeServer.maze.isWalkable(player.x, player.y, player.viewDirection)) {
             errorCode = InfoCode.WALL_CRASH
             return
         }
-        var nX: Int = player.x
-        var nY: Int = player.y
-        val dir: ViewDirection = player.viewDirection
-        when (dir) {
-            ViewDirection.NORTH -> nY -= 1
-            ViewDirection.EAST -> nX += 1
-            ViewDirection.SOUTH -> nY += 1
-            ViewDirection.WEST -> nX -= 1
-        }
 
-        suspend fun stepForward() {
+        val messagesForAll: MutableList<Message> = ArrayList()
+        var gameEvent: GameEvent? = null
+
+        val currentPosition = PlayerPosition(player.x, player.y, player.viewDirection)
+        val nextPosition = currentPosition.whenStep()
+        val (nX, nY, dir) = nextPosition
+
+        suspend fun move() {
             mazeServer.changePlayerPosition(player, nX, nY, dir)
             player.incrementMoveCounter()
-            messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
+            messagesForAll.add(createPlayerPositionMoveMessage(player).thereIsMore())
         }
 
         if (mazeServer.maze.isOccupied(nX, nY)) {
@@ -110,7 +106,6 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                             disarm()
                         } else {
                             // we try to place the trap behind the player
-                            val currentPosition = PlayerPosition(player.x, player.y, player.viewDirection)
                             val behindPosition = currentPosition.whenBackStep()
                             val (x, y, _) = behindPosition
                             val (result, message) = mazeServer.putBait(BaitType.TRAP, x, y, true, 0L)
@@ -125,14 +120,14 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                                 disarm()
                             }
                         }
-                        stepForward()
+                        move()
                         // give them 1 tick of penalty ... disarming takes its time
                         mazeServer.getClientConnection(player.id)?.additionalTickPenalty?.incrementAndGet()
                     } else {
                         messagesForAll.add(mazeServer.teleportPlayerRandomly(player).thereIsMore())
                     }
                 } else {
-                    stepForward()
+                    move()
                 }
                 // replace consumed bait
                 val newBaitMessages: List<Message> = mazeServer.replaceBaits()
@@ -151,11 +146,11 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                     // step forward
                     mazeServer.changePlayerPosition(player, nX, nY, dir)
                     player.incrementMoveCounter()
-                    messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
+                    messagesForAll.add(createPlayerPositionMoveMessage(player).thereIsMore())
                 }
             }
         } else {
-            stepForward()
+            move()
         }
         if (messagesForAll.isNotEmpty()) {
             messagesForAll.add(createEmptyLastMessage())
