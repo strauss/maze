@@ -627,7 +627,7 @@ class MazeServer(
             if (bait.visibleToClients) {
                 add(createBaitCollectedMessage(bait).thereIsMore())
             } else {
-                bait.makeVisible()
+                bait.uncover()
                 if (bait.type == BaitType.TRAP) {
                     visibleTrapCount.incrementAndGet()
                 }
@@ -697,6 +697,17 @@ class MazeServer(
             }
             if (isNotEmpty()) {
                 add(createEmptyLastMessage())
+            }
+        }
+    }
+
+    /**
+     * Internal function for uncovering all invisible baits in the game.
+     */
+    internal suspend fun uncoverAllBaits() {
+        baitMutex.withLock {
+            baitsById.values.forEach { bait ->
+                bait.uncover()
             }
         }
     }

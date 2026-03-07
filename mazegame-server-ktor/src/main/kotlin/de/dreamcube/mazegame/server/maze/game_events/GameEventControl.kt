@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ class GameEventControl(private val server: MazeServer, private val parentScope: 
 
     companion object {
         private val LOGGER = LoggerFactory.getLogger(GameEventControl::class.java)
+        internal val rng = Random.Default
     }
 
     private val gameEventChannel = Channel<GameEvent>(Channel.UNLIMITED)
-    private val rng = Random.Default
     private val earliestNextEvent: AtomicLong = AtomicLong(0L)
 
     fun start() = launch {
@@ -130,6 +130,7 @@ class GameEventControl(private val server: MazeServer, private val parentScope: 
                     optionalMessage = "While ${causingPlayer.nick} ran into ${playerCollisionEvent.otherPlayer.nick}, they dropped a ${baitType.baitName}."
                 )
             )
+            activateCooldown()
         }
     }
 

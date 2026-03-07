@@ -188,8 +188,15 @@ data class SpecialEventsDto(
  * Contains the whole game configuration. The [initialSpeed] can be determined here. The default is [GameSpeed.NORMAL].
  * It can be specified whether baits should be generated right away with [generateBaitsAtStart]. The automatic trapeater
  * will only spawn if [autoTrapeater] is set. If [allowSpectator] is not set, the spectator mode is completely off.
- * The [delayCompensation] feature can also be configured here. For the other two configurations see [BaitGeneratorDto]
- * and [SpecialEventsDto].
+ * The [delayCompensation] feature can also be configured here.
+ *
+ * The following two are no special game events. They are tightly bound to invisible gems and invisible traps.
+ * - [uncoverInvisibleBaitsOnInvisibleGemProbability]: probability if all invisible baits should be uncovered if an
+ * invisible gem is collected. The default value is 0%.
+ * - [disarmInvisibleTrapProbability]: probability of bots being able to disarm invisible traps. They then either
+ * destroy them or place them behind themselves (this is always a 50:50 coin flip). The default value is 0%.
+ *
+ * For the other two configurations see [BaitGeneratorDto] and [SpecialEventsDto].
  */
 data class GameDto(
     val initialSpeed: GameSpeed = GameSpeed.NORMAL,
@@ -197,6 +204,8 @@ data class GameDto(
     val autoTrapeater: Boolean = true,
     val allowSpectator: Boolean = true,
     val delayCompensation: Boolean = true,
+    val uncoverInvisibleBaitsOnInvisibleGemProbability: Double = 0.0,
+    val disarmInvisibleTrapProbability: Double = 0.0,
     val baitGenerator: BaitGeneratorDto = BaitGeneratorDto(),
     val events: SpecialEventsDto = SpecialEventsDto()
 )

@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,6 +234,20 @@ data class PlayerPosition(val x: Int, val y: Int, val viewDirection: ViewDirecti
             ViewDirection.NORTH -> y - 1
             ViewDirection.EAST, ViewDirection.WEST -> y
             ViewDirection.SOUTH -> y + 1
+        }
+        return PlayerPosition(newX, newY, viewDirection)
+    }
+
+    fun whenBackStep(): PlayerPosition {
+        val newX = when (viewDirection) {
+            ViewDirection.NORTH, ViewDirection.SOUTH -> x
+            ViewDirection.EAST -> x - 1
+            ViewDirection.WEST -> x + 1
+        }
+        val newY = when (viewDirection) {
+            ViewDirection.NORTH -> y + 1
+            ViewDirection.EAST, ViewDirection.WEST -> y
+            ViewDirection.SOUTH -> y - 1
         }
         return PlayerPosition(newX, newY, viewDirection)
     }

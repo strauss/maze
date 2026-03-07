@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This class represents a client connection. It contains coroutines for reading commands from and sending messages to a single client.
@@ -103,6 +104,11 @@ class ClientConnection(
      * Spam protection for the chat function.
      */
     val chatControl: ClientChatControl = ClientChatControl()
+
+    /**
+     * Allows for additional penalties caused by certain events.
+     */
+    val additionalTickPenalty = AtomicInteger(0)
 
     /**
      * This flag is set, whenever a ready-message is sent to the client.
@@ -330,7 +336,12 @@ class ClientConnection(
         if (performDelayCompensation) {
             delayCompensator.stopTimer()
         }
-        val movementAllowed: Boolean = chatControl.onMove()
+        val movementAllowedByChatControl: Boolean = chatControl.onMove()
+        val currentPenalty = additionalTickPenalty.get()
+        val movementAllowedByPenalty: Boolean = currentPenalty <= 0
+        if (currentPenalty > 0) {
+            additionalTickPenalty.decrementAndGet()
+        }
         if (server.frenzyHandler.active) {
             server.frenzyHandler.handle()
         }
@@ -339,7 +350,7 @@ class ClientConnection(
             delay(delayTime)
             ready()
         }
-        return movementAllowed
+        return movementAllowedByChatControl && movementAllowedByPenalty
     }
 }
 

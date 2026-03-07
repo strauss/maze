@@ -161,6 +161,17 @@ It contains the following attributes that are explored one at a time.
   crafted approach for compensating the ping (and unfortunately also the computation time) of the bots. It has some
   "cheating potential", but if it is overdone, the mechanism resets and penalizes the cheater slightly. The current
   offset for each player can be queried using the server controls.
+- `uncoverInvisibleBaitsOnInvisibleGemProbability: Double`: Probability of uncovering all invisible baits when
+  collecting an invisible gem. The default is 0.0 (0%). If you set this value too high, you implicitly reduce the number
+  of invisible traps. Values up to 0.5 (50%) should be fine. Depending on the probability for invisible gems and the
+  placement of them, collecting them is fairly rare. If you configure this value too low, the event might not happen at
+  all.
+- `disarmInvisibleTrapProbability: Double`: Probability of bots disarming an invisible trap instead of falling for it.
+  The default is 0.0 (0%). If a trap is disarmed, another decision is made based on a 50:50 coin flip. The invisible
+  trap is either disarmed (destroyed) or "uncovered". Uncovering the trap places it behind the player, if this is
+  possible. If not, disarming is the fallback. In both cases the player loses 1 tick. Activating this mechanism slightly
+  reduces the variance of the game, while still having invisible traps around. Values up to 0.25 (25%) should be
+  acceptable. Higher values might defeat the purpose of invisible traps.
 - `baitGenerator: BaitGeneratorDto`: Configuration for the bait generation.
     - `objectDivisor: Int`: The number of baits is determined by the number of walkable fields divided by this number.
       The default value is 26. The value is coerced in the range `1..walkableFields`, resulting in having at least one
