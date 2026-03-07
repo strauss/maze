@@ -221,11 +221,11 @@ class MazeServer(
         botNamesToPossibleNickNameMap = buildMap {
             val nickNameMappings: NickMappingsDto = serverConfiguration.serverBots.nickMappings
             val specialBots = serverConfiguration.serverBots.specialBots
-            put(specialBots.dummy, nickNameMappings.dummyNames + specialBots.dummy)
-            put(specialBots.trapeater, nickNameMappings.trapeaterNames + specialBots.trapeater)
-            put(specialBots.frenzy, nickNameMappings.frenzyNames + specialBots.frenzy)
+            this[specialBots.dummy] = nickNameMappings.dummyNames.ifEmpty { setOf(specialBots.dummy) }
+            this[specialBots.trapeater] = nickNameMappings.trapeaterNames.ifEmpty { setOf(specialBots.trapeater) }
+            this[specialBots.frenzy] = nickNameMappings.frenzyNames.ifEmpty { setOf(specialBots.frenzy) }
             for (currentMapping: FreeNickMapping in nickNameMappings.freeNickMappings) {
-                put(currentMapping.botName, currentMapping.nickNames)
+                this[currentMapping.botName] = currentMapping.nickNames.ifEmpty { setOf(currentMapping.botName) }
             }
         }
     }
@@ -770,10 +770,14 @@ class MazeServer(
     /**
      * Spawns a server-side bot.
      */
-    internal fun createServerSideClient(alias: String): ServerSideClient? {
+    internal suspend fun createServerSideClient(alias: String): ServerSideClient? {
         if (availableBotNames.contains(alias)) {
-            val possibleNickNames: Set<String> = botNamesToPossibleNickNameMap[alias] ?: setOf(alias)
-            return ClientWrapper.createServerSideClient(alias, port, possibleNickNames.random())
+            val configuredPossibleNickNames: Set<String> = botNamesToPossibleNickNameMap[alias] ?: setOf(alias)
+            // we filter out all nicknames that are not taken yet
+            val possibleNicknamesNotTakenYet = configuredPossibleNickNames.filter { !containsNick(it) }
+            // if all are taken, we go back to "totally random" and rely on the client to fallback on attaching numbers
+            val nicknamesToChooseFrom = possibleNicknamesNotTakenYet.ifEmpty { configuredPossibleNickNames }
+            return ClientWrapper.createServerSideClient(alias, port, nicknamesToChooseFrom.random())
         }
         return null
     }

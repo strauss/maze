@@ -98,21 +98,17 @@ data class SpecialBotsDto(
 )
 
 /**
- * Can be used to map arbitrary server-sided bots to different additional nicknames. Their original strategy name is
- * always part of the internal set for determining the nickname.
+ * Can be used to map arbitrary server-sided bots to different additional nicknames.
  */
-data class FreeNickMapping(val botName: String, private val additionalNames: Set<String> = setOf()) {
-    val nickNames: Set<String>
-        get() = additionalNames + botName
-}
+data class FreeNickMapping(val botName: String, val nickNames: Set<String> = setOf())
 
 /**
  * Contains nickname mappings for server-sided bots. The original bot name is always implicitly included.
  */
 data class NickMappingsDto(
-    val dummyNames: Set<String>,
-    val trapeaterNames: Set<String>,
-    val frenzyNames: Set<String>,
+    val dummyNames: Set<String> = setOf(),
+    val trapeaterNames: Set<String> = setOf(),
+    val frenzyNames: Set<String> = setOf(),
     val freeNickMappings: List<FreeNickMapping> = listOf()
 )
 
@@ -125,11 +121,7 @@ data class ServerBotsDto(
     val autoLaunch: List<String> = listOf(),
     val autoLaunchDelay: Long = 1000L,
     val specialBots: SpecialBotsDto = SpecialBotsDto(),
-    val nickMappings: NickMappingsDto = NickMappingsDto(
-        setOf(specialBots.dummy),
-        setOf(specialBots.trapeater),
-        setOf(specialBots.frenzy)
-    )
+    val nickMappings: NickMappingsDto = NickMappingsDto()
 ) {
 
     @JsonIgnore

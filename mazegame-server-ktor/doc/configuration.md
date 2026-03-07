@@ -128,17 +128,17 @@ It contains the following attributes that are explored one at a time.
       will be considered a spectator and never enter the maze and never receive a "RDY." command. This information is
       also part of the meta information to the client. Clients that can query for this information can automatically set
       the nickname correctly if the user just wants to spectate the game.
-- `nickMappings: NickMappingsDto`: Allows for custom nicknames for all server-sided bots. Defaults to "all bots should
-  only have their strategy name as nickname". The strategy name is always included. This option is also more of a "fun
-  option".
-    - `dummyNames: Set<String>`: Alternative names for dummy bots.
-    - `trapeaterNames: Set<String>`: Alternative names for the trapeater.
-    - `frenzyNames: Set<String>`: Alternative names for the frenzy bot.
+- `nickMappings: NickMappingsDto`: Allows for custom nicknames for all server-sided bots. If the corresponding
+  collection is empty, only the strategy name is used as nickname. If any of the sets is filled with at least one
+  nickname, the strategy name is not used as nickname, unless explicitly added. This option is more of a "fun option".
+    - `dummyNames: Set<String>`: Names for dummy bots.
+    - `trapeaterNames: Set<String>`: Names for the trapeater.
+    - `frenzyNames: Set<String>`: Names for the frenzy bot.
     - `freeNickMappings: List<FreeNickMapping>`: Mappings for all other bots, that are no "special" server bots. The
       default value is an empty list.
         - `botName`: The name of the strategy. Has to be set for every entry.
-        - `additionalNames`: besides the strategy names, this set contains all alternative names that might be used for
-          this bot strategy. The default value is an empty set.
+        - `nickNames`: This set contains all nicknames that should be used for the strategy. If you configure it empty,
+          the fallback is the strategy name, similarly to the special bots.
 
 ### Game configuration (`GameDto`)
 
