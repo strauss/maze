@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import de.dreamcube.mazegame.client.maze.events.NoEventListener
 import java.awt.Color
 import java.awt.Graphics
 import java.awt.Point
+import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JComponent
 
 /**
@@ -42,9 +43,17 @@ abstract class VisualizationComponent : JComponent(), NoEventListener {
     var visualizationEnabled = activateImmediately
 
     /**
-     * This map contains the color distribution for all player ids. Should only be set by the UI.
+     * This map contains the color distribution for all player ids. Should only be set by the UI. If you want to use it,
+     * use [colorDistributionMap] instead.
      */
-    var colorDistributionMap: Map<Int, Color> = mapOf()
+    var internalColorDistributionMap = AtomicReference<Map<Int, Color>>(mapOf())
+
+    /**
+     * This map contains the color distribution for all player ids. It refers to the atomic reference from
+     * [internalColorDistributionMap].
+     */
+    val colorDistributionMap: Map<Int, Color>
+        get() = internalColorDistributionMap.get()
 
     /**
      * The id of the selected player. Can be used for reacting to player selections in the visualization. Should only be

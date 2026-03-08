@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ class ScorePanel() : JPanel() {
         get() = UiController.scoreTable
 
     var colorOptionsVisible = false
+    var labelsVisible = true
 
     init {
         layout = BorderLayout()
@@ -48,6 +49,21 @@ class ScorePanel() : JPanel() {
 
         val clearScoreButton = JButton("Clear Score")
         scoreButtonPanel.add(clearScoreButton, "sg unity")
+
+        val toggleLabelsButton = JButton("Hide labels")
+        toggleLabelsButton.addActionListener {
+            if (labelsVisible) {
+                labelsVisible = false
+                toggleLabelsButton.text = "Show labels"
+                UiController.labelPane.isVisible = false
+            } else {
+                labelsVisible = true
+                toggleLabelsButton.text = "Hide labels"
+                UiController.labelPane.isVisible = true
+            }
+        }
+        scoreButtonPanel.add(toggleLabelsButton, "span 2")
+
 
         val belowTablePanel = JPanel()
         belowTablePanel.layout = BorderLayout()

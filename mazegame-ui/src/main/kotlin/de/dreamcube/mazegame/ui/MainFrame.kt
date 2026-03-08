@@ -23,6 +23,7 @@ import de.dreamcube.mazegame.client.maze.events.PlayerConnectionListener
 import de.dreamcube.mazegame.client.maze.strategy.Strategy
 import de.dreamcube.mazegame.client.maze.strategy.VisualizationComponent
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
+import de.dreamcube.mazegame.ui.UiController.labelPane
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -45,6 +46,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         private const val VIS_BUTTON_TEXT_OFF = "Visualization: OFF"
         private const val VIS_POS = 1
         private const val MARK_POS = 2
+        private const val LABEL_POS = 3
     }
 
     /**
@@ -263,6 +265,13 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
         UiController.markerPane = markerPane
         UiController.addPlayerSelectionListener(markerPane)
         layeredGlassPane.add(markerPane, MARK_POS)
+
+        val labelPane = LabelPane()
+        labelPane.isVisible = false
+        UiController.labelPane = labelPane
+        UiController.prepareEventListener(labelPane)
+        layeredGlassPane.add(labelPane, LABEL_POS)
+
         this.glassPane = layeredGlassPane
         glassPane.isVisible = true
 
@@ -386,6 +395,7 @@ class MainFrame() : JFrame(TITLE), ClientConnectionStatusListener, PlayerConnect
                     leftSplitPane.add(scorePanel, JSplitPane.TOP)
                     connectionCounter += 1
                     leaveButton.isVisible = true
+                    labelPane.isVisible = true
                 }
 
                 ConnectionStatus.PLAYING -> {

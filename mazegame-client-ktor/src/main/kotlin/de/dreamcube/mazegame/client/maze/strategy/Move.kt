@@ -41,7 +41,7 @@ enum class Move {
     STEP,
 
     /**
-     * Step backwords.
+     * Step backwards.
      */
     BACK;
 
