@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,19 @@ import com.fasterxml.jackson.annotation.JsonValue
  */
 enum class GameSpeed(val delay: Long, @get:JsonValue val shortName: String) {
     UNLIMITED(1L, "unlimited"),
-    ULTRA(50L, "ultra"),
+    RIDICULOUS(13L, "ridiculous"),
+    ULTRA(42L, "ultra"),
     FAST(100L, "fast"),
     NORMAL(150L, "normal"),
     SLOW(200, "slow"),
-    ULTRA_SLOW(300, "ultra-slow");
+    ULTRA_SLOW(314, "ultra-slow");
 
     companion object {
         @JvmStatic
         @JsonCreator
         fun fromShortName(shortName: String): GameSpeed? = when (shortName) {
             UNLIMITED.shortName -> UNLIMITED
+            RIDICULOUS.shortName -> RIDICULOUS
             ULTRA.shortName -> ULTRA
             FAST.shortName -> FAST
             NORMAL.shortName -> NORMAL
