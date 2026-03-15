@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package de.dreamcube.mazegame.common.maze
 import java.text.Normalizer
 
 private val NICK_REGEX = """^[\p{L}&&\p{sc=Latin}](?:[\p{L}&&\p{sc=Latin}]|[0-9_-])*$""".toRegex()
-private val CHAT_BLACKLIST = """[^0-9_\-\p{Zs}[\p{L}&&\p{sc=Latin}][\p{Punct}&&[^;]]]""".toRegex()
+private val CHAT_BLACKLIST = """[^0-9_\-\p{Zs}[\p{L}&&\p{sc=Latin}][\p{Punct}&&[^;<>]]]""".toRegex()
 private const val FLAVOR_TEXT_MAX_LENGTH = 255
 
 /**

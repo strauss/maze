@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class StatusBar() : JPanel(), ClientConnectionStatusListener, SpeedChangedListen
     /**
      * The flavor text of the own bot or the selected player.
      */
-    private val botFlavorTextLabel = JLabel()
+    private val botFlavorTextLabel = JLabel().also { it.putClientProperty("html.disable", true) }
 
     /**
      * Displays the current game speed.
