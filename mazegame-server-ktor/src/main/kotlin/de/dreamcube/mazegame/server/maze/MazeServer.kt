@@ -824,6 +824,8 @@ class MazeServer(
 
     internal suspend fun changeSpeed(newSpeed: GameSpeed) {
         gameSpeed = newSpeed
+        val allConnections = getAllPlayingPlayerConnections()
+        allConnections.forEach { connection -> connection.delayCompensator.resetTimer() }
         sendToAllPlayers(createSpeedChangeInfoMessage(newSpeed))
     }
 

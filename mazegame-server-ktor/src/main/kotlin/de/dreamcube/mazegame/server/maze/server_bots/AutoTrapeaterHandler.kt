@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import de.dreamcube.mazegame.server.maze.MazeServer
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.math.max
 import kotlin.math.round
 import kotlin.random.Random
 
@@ -147,7 +148,10 @@ class AutoTrapeaterHandler(mazeServer: MazeServer) : ServerBotHandler(mazeServer
      * Determines the new penalty time of the trapeater based on the currently visible fields.
      */
     private fun computeTrapeaterPenaltyTime(): Long {
-        val currentDelay = mazeServer.gameSpeed.delay
+        val currentDelay = max(
+            mazeServer.gameSpeed.delay,
+            1L // ensures at least 1ms delay ... important for "ludicrous", which is at 0
+        )
         val normalTrapeaterPenalty: Long = round(currentDelay.toDouble() * NORMAL_PENALTY_FRACTION).toLong()
         val penaltyDecreasePerTrap: Long = round(currentDelay.toDouble() * PENALTY_REDUCTION_PER_TRAP).toLong()
         return normalTrapeaterPenalty - (penaltyDecreasePerTrap * mazeServer.visibleTrapCount.get())

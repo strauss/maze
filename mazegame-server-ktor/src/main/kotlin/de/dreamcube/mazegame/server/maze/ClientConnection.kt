@@ -17,6 +17,7 @@
 
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.Message
@@ -147,7 +148,9 @@ class ClientConnection(
     val performDelayCompensation: Boolean
         get() {
             val serverConfiguration = server.serverConfiguration
-            return serverConfiguration.game.delayCompensation && !(isServerSided && isSpecialNick(nick))
+            return serverConfiguration.game.delayCompensation &&
+                    server.gameSpeed != GameSpeed.LUDICROUS &&
+                    !(isServerSided && isSpecialNick(nick))
         }
 
     private fun isSpecialNick(nick: String): Boolean {
@@ -347,7 +350,9 @@ class ClientConnection(
         }
         val delayTime: Long = server.gameSpeed.delay + getDelayOffset()
         launch {
-            delay(delayTime)
+            if (delayTime > 0L) {
+                delay(delayTime)
+            }
             ready()
         }
         return movementAllowedByChatControl && movementAllowedByPenalty
