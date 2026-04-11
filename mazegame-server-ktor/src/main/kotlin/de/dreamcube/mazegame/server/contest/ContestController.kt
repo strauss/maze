@@ -288,7 +288,7 @@ class ContestController(
     }
 
     private fun GameSpeed.speedUp(): GameSpeed = when (this) {
-        UNLIMITED -> UNLIMITED
+        LUDICROUS -> LUDICROUS
         RIDICULOUS -> RIDICULOUS
         ULTRA -> RIDICULOUS
         FAST -> ULTRA
@@ -298,7 +298,7 @@ class ContestController(
     }
 
     private fun GameSpeed.slowDown(): GameSpeed = when (this) {
-        UNLIMITED -> RIDICULOUS
+        LUDICROUS -> RIDICULOUS
         RIDICULOUS -> ULTRA
         ULTRA -> FAST
         FAST -> NORMAL
