@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.*
 import de.dreamcube.mazegame.server.maze.*
+import de.dreamcube.mazegame.server.maze.commands.control.OccupationResult
 import de.dreamcube.mazegame.server.maze.game_events.BaitCollectedEvent
 import de.dreamcube.mazegame.server.maze.game_events.GameEvent
+import de.dreamcube.mazegame.server.maze.game_events.GameEventControl
 import de.dreamcube.mazegame.server.maze.game_events.PlayerCollisionEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,10 +37,10 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
     init {
         if (commandWithParameters.size != 1) {
             errorCode = InfoCode.WRONG_PARAMETER_VALUE
-        } else @Suppress("kotlin:S6518") // WTF? you serious?
-        if (!clientConnection.isReady.get()) {
-            errorCode = InfoCode.ACTION_WITHOUT_READY
-        }
+        } else
+            if (!clientConnection.isReady.get()) {
+                errorCode = InfoCode.ACTION_WITHOUT_READY
+            }
         checkLoggedIn()
     }
 
@@ -47,21 +49,23 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
         if (!movementAllowed) {
             return
         }
-        val messagesForAll: MutableList<Message> = ArrayList()
-        var gameEvent: GameEvent? = null
         val player: Player = clientConnection.player
         if (!mazeServer.maze.isWalkable(player.x, player.y, player.viewDirection)) {
             errorCode = InfoCode.WALL_CRASH
             return
         }
-        var nX: Int = player.x
-        var nY: Int = player.y
-        val dir: ViewDirection = player.viewDirection
-        when (dir) {
-            ViewDirection.NORTH -> nY -= 1
-            ViewDirection.EAST -> nX += 1
-            ViewDirection.SOUTH -> nY += 1
-            ViewDirection.WEST -> nX -= 1
+
+        val messagesForAll: MutableList<Message> = ArrayList()
+        var gameEvent: GameEvent? = null
+
+        val currentPosition = PlayerPosition(player.x, player.y, player.viewDirection)
+        val nextPosition = currentPosition.whenStep()
+        val (nX, nY, dir) = nextPosition
+
+        suspend fun move() {
+            mazeServer.changePlayerPosition(player, nX, nY, dir)
+            player.incrementMoveCounter()
+            messagesForAll.add(createPlayerPositionMoveMessage(player).thereIsMore())
         }
 
         if (mazeServer.maze.isOccupied(nX, nY)) {
@@ -76,15 +80,54 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                 player.score += bait.type.score
                 messagesForAll.add(createPlayerScoreChangedMessage(player).thereIsMore())
                 if (!bait.visibleToClients && bait.type != BaitType.TRAP) {
-                    messagesForAll.add(createServerInfoMessage("${player.nick} found an invisible ${bait.type.baitName}.").thereIsMore())
+                    val roll: Double = GameEventControl.rng.nextDouble()
+                    if (bait.type == BaitType.GEM && roll < 0.5) {
+                        messagesForAll.add(createServerInfoMessage("${player.nick} found an invisible ${bait.type.baitName} and uncovered all other invisible baits.").thereIsMore())
+                        mazeServer.uncoverAllBaits()
+                    } else {
+                        messagesForAll.add(createServerInfoMessage("${player.nick} found an invisible ${bait.type.baitName}.").thereIsMore())
+                    }
                 }
+
                 if (bait.type == BaitType.TRAP) {
-                    messagesForAll.add(mazeServer.teleportPlayerRandomly(player).thereIsMore())
+                    val roll: Double = GameEventControl.rng.nextDouble()
+                    if (!bait.visibleToClients && roll < mazeServer.serverConfiguration.game.disarmInvisibleTrapProbability) {
+                        // give them back the lost points ... it's clunky, but it will work
+                        player.score -= bait.type.score
+                        messagesForAll.add(createPlayerScoreChangedMessage(player).thereIsMore())
+
+                        fun disarm() {
+                            messagesForAll.add(createServerInfoMessage("${player.nick} successfully disarmed an invisible trap.").thereIsMore())
+                        }
+
+                        // We do a 50:50 coin flip. We either go for disarming or try to place the trap behind the player
+                        val reuseRoll: Double = GameEventControl.rng.nextDouble()
+                        if (reuseRoll < 0.5) {
+                            disarm()
+                        } else {
+                            // we try to place the trap behind the player
+                            val behindPosition = currentPosition.whenBackStep()
+                            val (x, y, _) = behindPosition
+                            val (result, message) = mazeServer.putBait(BaitType.TRAP, x, y, true, 0L)
+
+                            if (result == OccupationResult.SUCCESS) {
+                                if (message != null) {
+                                    messagesForAll.add(message.thereIsMore())
+                                    messagesForAll.add(createServerInfoMessage("${player.nick} successfully uncovered an invisible trap.").thereIsMore())
+                                }
+                            } else {
+                                // If placing did not work, we go for disarming as fallback
+                                disarm()
+                            }
+                        }
+                        move()
+                        // give them 1 tick of penalty ... disarming takes its time
+                        mazeServer.getClientConnection(player.id)?.additionalTickPenalty?.incrementAndGet()
+                    } else {
+                        messagesForAll.add(mazeServer.teleportPlayerRandomly(player).thereIsMore())
+                    }
                 } else {
-                    // step forward
-                    mazeServer.changePlayerPosition(player, nX, nY, dir)
-                    player.incrementMoveCounter()
-                    messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
+                    move()
                 }
                 // replace consumed bait
                 val newBaitMessages: List<Message> = mazeServer.replaceBaits()
@@ -103,14 +146,11 @@ class StepCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                     // step forward
                     mazeServer.changePlayerPosition(player, nX, nY, dir)
                     player.incrementMoveCounter()
-                    messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
+                    messagesForAll.add(createPlayerPositionMoveMessage(player).thereIsMore())
                 }
             }
         } else {
-            // step forward
-            mazeServer.changePlayerPosition(player, nX, nY, dir)
-            player.incrementMoveCounter()
-            messagesForAll.add(createPlayerPositionStepMessage(player).thereIsMore())
+            move()
         }
         if (messagesForAll.isNotEmpty()) {
             messagesForAll.add(createEmptyLastMessage())

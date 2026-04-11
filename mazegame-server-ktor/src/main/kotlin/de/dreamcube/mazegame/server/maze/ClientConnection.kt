@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 package de.dreamcube.mazegame.server.maze
 
+import de.dreamcube.mazegame.common.api.GameSpeed
 import de.dreamcube.mazegame.common.maze.ConnectionStatus
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.Message
@@ -31,6 +32,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This class represents a client connection. It contains coroutines for reading commands from and sending messages to a single client.
@@ -105,6 +107,11 @@ class ClientConnection(
     val chatControl: ClientChatControl = ClientChatControl()
 
     /**
+     * Allows for additional penalties caused by certain events.
+     */
+    val additionalTickPenalty = AtomicInteger(0)
+
+    /**
      * This flag is set, whenever a ready-message is sent to the client.
      */
     val isReady = AtomicBoolean(false)
@@ -141,7 +148,9 @@ class ClientConnection(
     val performDelayCompensation: Boolean
         get() {
             val serverConfiguration = server.serverConfiguration
-            return serverConfiguration.game.delayCompensation && !(isServerSided && isSpecialNick(nick))
+            return serverConfiguration.game.delayCompensation &&
+                    server.gameSpeed != GameSpeed.LUDICROUS &&
+                    !(isServerSided && isSpecialNick(nick))
         }
 
     private fun isSpecialNick(nick: String): Boolean {
@@ -330,16 +339,23 @@ class ClientConnection(
         if (performDelayCompensation) {
             delayCompensator.stopTimer()
         }
-        val movementAllowed: Boolean = chatControl.onMove()
+        val movementAllowedByChatControl: Boolean = chatControl.onMove()
+        val currentPenalty = additionalTickPenalty.get()
+        val movementAllowedByPenalty: Boolean = currentPenalty <= 0
+        if (currentPenalty > 0) {
+            additionalTickPenalty.decrementAndGet()
+        }
         if (server.frenzyHandler.active) {
             server.frenzyHandler.handle()
         }
         val delayTime: Long = server.gameSpeed.delay + getDelayOffset()
         launch {
-            delay(delayTime)
+            if (delayTime > 0L) {
+                delay(delayTime)
+            }
             ready()
         }
-        return movementAllowed
+        return movementAllowedByChatControl && movementAllowedByPenalty
     }
 }
 

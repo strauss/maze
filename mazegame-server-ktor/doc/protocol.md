@@ -141,6 +141,21 @@ The client sends this message after `RDY.` if it wants to turn left or right.
 
 Example: `TURN;r`
 
+### Backstep (BACK)
+
+```
+Backstep ::= "BACK"
+```
+
+The client sends this message after `RDY.` if it wants to move one step opposite of the current view direction. This is
+effectively a backstep. Backsteps are only allowed, if the path behind the player is unoccupied. Visible baits and
+players are considered a wall and result in `INFO;453` (wall crash). Invisible traps are "collected". All other baits
+are uncovered, but the player has to turn around to collect them.
+
+#### Extensions
+
+The whole command is an extension.
+
 ### Bye (BYE!)
 
 ```
@@ -244,7 +259,7 @@ The following changes are possible and reflected by the reasons:
 - `tel` (teleport): The player is teleported to the given coordinates in the given view direction
 - `app` (appear): The player spawned at the given coordinates in the given view direction (after JOIN)
 - `van` (vanish): The player has vanished (after LEAVE)
-- `mov` (move): The player has moved to the given coordinates (after STEP)
+- `mov` (move): The player has moved to the given coordinates (after STEP or BACK)
 - `trn` (turn): The player has turned into the given view direction (after TURN)
 
 #### Extensions

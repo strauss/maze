@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import de.dreamcube.mazegame.common.maze.Message
 internal fun String.asMessage() = Message(this)
 
 private val stepMessage = "STEP".asMessage()
+private val backstepMessage = "BACK".asMessage()
 private val turnLeftMessage = "TURN;l".asMessage()
 private val turnRightMessage = "TURN;r".asMessage()
 
@@ -40,6 +41,7 @@ fun createByeMessage() = "BYE!".asMessage()
 
 // Movement
 fun createStepMessage() = stepMessage
+fun createBackstepMessage() = backstepMessage
 fun createTurnLeftMessage() = turnLeftMessage
 fun createTurnRightMessage() = turnRightMessage
 

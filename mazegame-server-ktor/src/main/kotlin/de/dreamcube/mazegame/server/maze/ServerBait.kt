@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class ServerBait(var type: BaitType, val x: Int, val y: Int) {
         reappearTime = System.currentTimeMillis() + reappearOffset
     }
 
-    internal fun makeVisible() {
+    internal fun uncover() {
         visibleToClients = true
         reappearTime = 0L
     }
@@ -79,7 +79,7 @@ class ServerBait(var type: BaitType, val x: Int, val y: Int) {
         }
         val now = System.currentTimeMillis()
         if (now > reappearTime) {
-            makeVisible()
+            uncover()
         }
     }
 

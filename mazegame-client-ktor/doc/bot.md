@@ -26,12 +26,12 @@ This function also gives the dimensions of the maze.
 
 Let your strategy implement this interface and use the function to create your own data structure for the maze map.
 The length of the lines list should be identical to the parameter `height`.
-The length of each line should be identical to the parameter `with`.
+The length of each line should be identical to the parameter `width`.
 
 * Each `.` character is considered a "path" and therefore walkable.
 * Each `#` character is considered a "wall" and not walkable.
 * Each `-` character is considered "outside" and not walkable. Sometimes the outside fields are used inside for artistic
-  reasons. Just treat is as a different kind of "wall" and you will be fine.
+  reasons. Just treat it as a different kind of "wall" and you will be fine.
 * Every other character is considered "unknown" and not walkable. This should not be contained in the map data, but if
   it is, just treat it as outside or wall.
     * It is possible to get question marks. This is a sign for a badly configured server.
@@ -49,7 +49,7 @@ Here are some ideas/examples:
     * Might use an array as index structure
     * Used by more advanced bots (yes, there are also advanced bots, that use an array)
 * Something more exotic/eccentric
-    * Here your phantasy is the only limit
+    * Here your fantasy is the only limit
 
 ## React to game events
 
@@ -77,8 +77,9 @@ It also gives a Bait object, but in this case you want to remove it from your in
 
 Unlike baits, the corresponding
 [Player](../../mazegame-common/src/main/kotlin/de/dreamcube/mazegame/common/maze/player.kt) object is not immutable.
-The most important (literal) variables are the coordinates and the view direction.
-The mentioned object is the one that is internally used.
+The most important properties are the coordinates and the view direction.
+They change constantly while the player is moving.
+This is the internal object used by the client.
 
 The interface `PlayerMovementListener` handles events that are associated with the movement of players.
 The functions in this interface give you a so-called
@@ -88,13 +89,13 @@ This object is immutable and gives you a literal snapshot of the player's positi
 The player snapshot also contains a [PlayerView](../src/main/kotlin/de/dreamcube/mazegame/client/maze/PlayerView.kt).
 This is a read-only view of the above-mentioned internal player object.
 It gives you the current player information.
-The access, however, is not thread-safe.
+Access to it, however, is not thread-safe.
 Use it carefully.
 
 The function `onPlayerAppear` is only called once per player.
 When you log into the game, it is called once for all players that are currently playing for telling you their current
 position.
-When another player logs into the game, it is called once for telling your, where the server initially placed them.
+When another player logs into the game, it is called once for telling you, where the server initially placed them.
 It just contains the snapshot.
 The most important information are the id, the coordinates, and the view direction.
 If you include other players into your strategy, this function is very important to keep track of all players that are
@@ -153,7 +154,7 @@ This is a possibility that has not been explored yet.
 If you want to send a chat message yourself, just call the function `broadcast` or `whisper` on the `MazeClient`
 reference, which is part of your strategy object (super class).
 
-The server has two spam protection mechanism, an explicit and an implicit one.
+The server has two spam protection mechanisms, an explicit and an implicit one.
 The explicit spam protection limits the number of chat messages you can send.
 Every few milliseconds you get a "chat token" (you start with some), allowing you to send one message (chat or whisper).
 If your chat tokens are used up, you have to wait.
@@ -171,7 +172,7 @@ There are several event listener interfaces that provide you with information be
 The `PlayerConnectionListener` includes functions that inform you about new players joining and players leaving.
 The function `onPlayerLogin` is called right before the corresponding player appears in the maze.
 It is mostly used by the ui and for strategies it actually does not really matter if you react to this event or the
-player appear event from above.
+player appearance event from above.
 
 The function `onPlayerLogout` is called right after the corresponding player vanishes from the maze.
 Here the same reasoning applies.
@@ -196,7 +197,7 @@ If your strategy uses other classes that want to act as event listeners, this mi
 
 ### `beforeGoodbye`
 
-This function is called, right before your client sends logs out.
+This function is called, right before your client logs out.
 It is less useful but can be funny.
 
 ### `getNextMove`

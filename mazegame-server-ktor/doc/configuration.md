@@ -128,17 +128,17 @@ It contains the following attributes that are explored one at a time.
       will be considered a spectator and never enter the maze and never receive a "RDY." command. This information is
       also part of the meta information to the client. Clients that can query for this information can automatically set
       the nickname correctly if the user just wants to spectate the game.
-- `nickMappings: NickMappingsDto`: Allows for custom nicknames for all server-sided bots. Defaults to "all bots should
-  only have their strategy name as nickname". The strategy name is always included. This option is also more of a "fun
-  option".
-    - `dummyNames: Set<String>`: Alternative names for dummy bots.
-    - `trapeaterNames: Set<String>`: Alternative names for the trapeater.
-    - `frenzyNames: Set<String>`: Alternative names for the frenzy bot.
+- `nickMappings: NickMappingsDto`: Allows for custom nicknames for all server-sided bots. If the corresponding
+  collection is empty, only the strategy name is used as nickname. If any of the sets is filled with at least one
+  nickname, the strategy name is not used as nickname, unless explicitly added. This option is more of a "fun option".
+    - `dummyNames: Set<String>`: Names for dummy bots.
+    - `trapeaterNames: Set<String>`: Names for the trapeater.
+    - `frenzyNames: Set<String>`: Names for the frenzy bot.
     - `freeNickMappings: List<FreeNickMapping>`: Mappings for all other bots, that are no "special" server bots. The
       default value is an empty list.
         - `botName`: The name of the strategy. Has to be set for every entry.
-        - `additionalNames`: besides the strategy names, this set contains all alternative names that might be used for
-          this bot strategy. The default value is an empty set.
+        - `nickNames`: This set contains all nicknames that should be used for the strategy. If you configure it empty,
+          the fallback is the strategy name, similarly to the special bots.
 
 ### Game configuration (`GameDto`)
 
@@ -161,6 +161,19 @@ It contains the following attributes that are explored one at a time.
   crafted approach for compensating the ping (and unfortunately also the computation time) of the bots. It has some
   "cheating potential", but if it is overdone, the mechanism resets and penalizes the cheater slightly. The current
   offset for each player can be queried using the server controls.
+- `uncoverInvisibleBaitsOnInvisibleGemProbability: Double`: Probability of uncovering all invisible baits when
+  collecting an invisible gem. The default is 0.25 (25%). If you set this value too high, you implicitly reduce the
+  number
+  of invisible traps. Values up to 0.5 (50%) should be fine. Depending on the probability for invisible gems and the
+  placement of them, collecting them is fairly rare. If you configure this value too low, the event might not happen at
+  all.
+- `disarmInvisibleTrapProbability: Double`: Probability of bots disarming an invisible trap instead of falling for it.
+  The default is 0.3 (30%). If a trap is disarmed, another decision is made based on a 50:50 coin flip. The invisible
+  trap is either disarmed (destroyed) or "uncovered". Uncovering the trap places it behind the player, if this is
+  possible. If not, disarming is the fallback. In both cases the player loses 1 tick. Activating this mechanism slightly
+  reduces the variance of the game, while still having invisible traps around. Values up to 0.5 (50%) should be
+  acceptable. Higher values might defeat the purpose of invisible traps. However, if set too low, it encourages players
+  to "spam" backsteps. Disarming is only possible when stepping forwards. So this value should be higher than 0%.
 - `baitGenerator: BaitGeneratorDto`: Configuration for the bait generation.
     - `objectDivisor: Int`: The number of baits is determined by the number of walkable fields divided by this number.
       The default value is 26. The value is coerced in the range `1..walkableFields`, resulting in having at least one
@@ -179,17 +192,17 @@ It contains the following attributes that are explored one at a time.
     - `eventCooldown: Long`: Number of milliseconds in which no events will occur after an event happened. The default
       value is 90K, resulting in at lesat 90 seconds without events after each event.
     - `allTrapsProbability: Double`: Probability of transforming all baits into traps, whenever a gem is collected. The
-      default value is 0.01 (1%). If this happens, a trapeater is forced to spawn. If no trapeater exists, this event
+      default value is 0.005 (0.5%). If this happens, a trapeater is forced to spawn. If no trapeater exists, this event
       will not occur at all.
     - `allFoodProbability: Double`: Probabililty of transforming all baits into food, whenever a coffee is collected.
-      The default value is 0.01 (1%).
+      The default value is 0.005 (0.5%).
     - `allCoffeeProbability: Double`: Probability of transforming all baits into coffee, whenever two players collide.
-      The default value is 0.01 (1%).
+      The default value is 0.005 (0.5%).
     - `allGemProbability: Double`: Probability of transforming all baits into gems, whenever a food is collected. The
-      default value is 0.005 (0.5%).
+      default value is 0.001 (0.1%).
     - `baitRushProbability: Double`: Probability for a "bait rush", whenever an invisible trap is "collected". Whenever
       this event occurs, the number of baits is doubled for a certain amount of time (half of cooldown time). After that
-      time, no new baits will be generated, until the usual level is reached. The default value is 0.05(5%).
+      time, no new baits will be generated, until the usual level is reached. The default value is 0.025 (2.5%).
     - `loseBaitProbability: Double`: Probability of losing a bait on player collision. The bait will be lost by the
       player who ran into the other player (this is always unambiguous). The affected player will also lose the points
       associated with the bait. The default value is 0.2 (20%).

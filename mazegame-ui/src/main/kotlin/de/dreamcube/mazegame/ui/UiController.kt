@@ -156,6 +156,11 @@ object UiController {
     internal var visualizationComponent: VisualizationComponent? = null
 
     /**
+     * Part of the glass pane for drawing the labels.
+     */
+    internal lateinit var labelPane: LabelPane
+
+    /**
      * Indicates if the server control is active.
      */
     internal val serverControllerActive: Boolean
@@ -289,10 +294,11 @@ object UiController {
         }
     }
 
-    internal fun reset() {
+    internal suspend fun reset() {
         mazePanel.reset()
         messagePane.reset()
         scoreTable.reset()
+        labelPane.reset()
     }
 
     internal fun triggerMazeUpdate(x: Int, y: Int) {
@@ -373,7 +379,8 @@ object UiController {
     }
 
     internal fun colorDistributionChanged(colorDistributionMap: Map<Int, Color>) {
-        visualizationComponent?.colorDistributionMap = colorDistributionMap
+        visualizationComponent?.internalColorDistributionMap?.set(colorDistributionMap)
+        labelPane.colorDistributionMap.set(colorDistributionMap)
     }
 
     internal fun activateControlButton() {

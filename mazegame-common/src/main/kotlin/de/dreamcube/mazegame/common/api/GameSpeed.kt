@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import com.fasterxml.jackson.annotation.JsonValue
  * Enum class for the game speed. The values contain a [delay], indicating how much time should pass between the last
  * received move and the next "RDY." command. The [shortName] is used in DTO classes.
  */
-enum class GameSpeed(val delay: Long, @get:JsonValue val shortName: String) {
-    UNLIMITED(1L, "unlimited"),
-    ULTRA(50L, "ultra"),
+enum class GameSpeed(val delay: Long, @get:JsonValue val shortName: String, val maxCompensation: Long = delay - 25L) {
+    LUDICROUS(0L, "ludicrous", 0L),
+    RIDICULOUS(25L, "ridiculous", 10L),
+    ULTRA(50L, "ultra", 40L),
     FAST(100L, "fast"),
     NORMAL(150L, "normal"),
     SLOW(200, "slow"),
@@ -36,7 +37,8 @@ enum class GameSpeed(val delay: Long, @get:JsonValue val shortName: String) {
         @JvmStatic
         @JsonCreator
         fun fromShortName(shortName: String): GameSpeed? = when (shortName) {
-            UNLIMITED.shortName -> UNLIMITED
+            LUDICROUS.shortName -> LUDICROUS
+            RIDICULOUS.shortName -> RIDICULOUS
             ULTRA.shortName -> ULTRA
             FAST.shortName -> FAST
             NORMAL.shortName -> NORMAL

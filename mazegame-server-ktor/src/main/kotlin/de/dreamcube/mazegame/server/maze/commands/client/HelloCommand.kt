@@ -1,6 +1,6 @@
 /*
  * Maze Game
- * Copyright (c) 2025 Sascha Strauß
+ * Copyright (c) 2025-2026 Sascha Strauß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.InfoCode
-import de.dreamcube.mazegame.common.maze.MAX_FLAVOR_LENGTH
 import de.dreamcube.mazegame.common.maze.MAX_NICK_LENGTH
 import de.dreamcube.mazegame.common.maze.isNickValid
+import de.dreamcube.mazegame.common.maze.sanitizeAsFlavorText
 import de.dreamcube.mazegame.server.maze.ClientConnection
 import de.dreamcube.mazegame.server.maze.MazeServer
 
@@ -41,12 +41,9 @@ class HelloCommand(clientConnection: ClientConnection, mazeServer: MazeServer, c
         } else {
             nick = commandWithParameters[1]
             flavor =
-                if (commandWithParameters.size > 2) commandWithParameters[2].trimToSize(MAX_FLAVOR_LENGTH) else null
+                if (commandWithParameters.size > 2) commandWithParameters[2].sanitizeAsFlavorText() else null
         }
     }
-
-    private fun String.trimToSize(maxLength: Int): String = if (this.length <= maxLength) this else
-        "${this.take(maxLength - 3)}..."
 
     override suspend fun internalExecute() {
         // we can't check the nick in the constructor, so we do it here

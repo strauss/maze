@@ -46,6 +46,7 @@ There are three different moves a player can make.
 - "step" just steps forward
 - "turn left" turns the player counterclockwise
 - "turn right" turns the player clockwise
+- "step back" ... well, does a backstep
 
 The player is only allowed to make a move, when it gets a signal to do so.
 Those signals will be sent out at fixed intervals.
@@ -67,6 +68,23 @@ and randomly placed on the map.
 Baits can be invisible.
 However, they will appear after a while.
 When "collecting" a trap, the player also gets teleported randomly to a different location on the map.
+
+Depending on the server configuration, invisible traps can be disarmed/uncovered by players.
+This happens randomly and depends on the configured probabilities.
+Also, collecting invisible gems can uncover all invisible baits.
+This is also a configurable probability.
+
+Forward steps are always allowed, if there is no wall.
+Otherwise, a "wall crash" happens, resulting in an error code and the client has to wait for the next signal.
+
+Backsteps, on the other hand, are only allowed, if there really is nothing behind.
+Baits can only be collected when stepping forward into them.
+The same is true for player collisions.
+When performing a backstep, while a player or bait is behind the player, a wall crash is triggered.
+
+When backstepping into an invisible trap, it is always "collected" and never disarmed/uncovered.
+When backstepping into any other bait, the bait in question is uncovered, but also a wall crash is triggered.
+The player has to turn around for actually collecting it.
 
 ### Game events
 
@@ -344,13 +362,13 @@ However, the techniques are pretty interesting and I will use that bot to furthe
 
 "mindripper" is not migrated yet, but I just postponed it to after I released this project.
 
-### "planewalker"
+### "planestrider"
 
 This is just an "underdog" without the mindreading ... or a "chopstick" that searches forwards ... or my very own
 "ninja", but not that "cool".
 
 It is actually a "new" bot, based on, what I now call, my "advanced bot family".
-In fact, "chopstick", "planewalker", "underdog", and "mindripper" all use the very same evaluation function.
+In fact, "chopstick", "planestrider", "underdog", and "mindripper" all use the very same evaluation function.
 "chopstick" would then be the "black sheep" of the family, because it uses its own maze structure and is implemented in
 Java.
 

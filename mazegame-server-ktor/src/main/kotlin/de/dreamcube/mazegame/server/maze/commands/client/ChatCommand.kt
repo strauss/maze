@@ -19,6 +19,7 @@ package de.dreamcube.mazegame.server.maze.commands.client
 
 import de.dreamcube.mazegame.common.maze.InfoCode
 import de.dreamcube.mazegame.common.maze.MAX_CHAT_LENGTH
+import de.dreamcube.mazegame.common.maze.sanitizeAsChatMessage
 import de.dreamcube.mazegame.server.maze.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -51,7 +52,7 @@ class ChatCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                         message = ""
                         targetId = -1
                     } else {
-                        message = commandWithParameters[2]
+                        message = commandWithParameters[2].sanitizeAsChatMessage()
                         targetId = -1
                     }
                 }
@@ -62,7 +63,7 @@ class ChatCommand(clientConnection: ClientConnection, mazeServer: MazeServer, co
                         message = ""
                         targetId = -1
                     } else {
-                        message = commandWithParameters[2]
+                        message = commandWithParameters[2].sanitizeAsChatMessage()
                         targetId = commandWithParameters[3].toInt()
                     }
                 }
