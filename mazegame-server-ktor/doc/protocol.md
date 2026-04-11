@@ -150,7 +150,7 @@ Backstep ::= "BACK"
 The client sends this message after `RDY.` if it wants to move one step opposite of the current view direction. This is
 effectively a backstep. Backsteps are only allowed, if the path behind the player is unoccupied. Visible baits and
 players are considered a wall and result in `INFO;453` (wall crash). Invisible traps are "collected". All other baits
-are uncovered, but the player has to turn around to collect it.
+are uncovered, but the player has to turn around to collect them.
 
 #### Extensions
 

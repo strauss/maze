@@ -161,26 +161,26 @@ data class BaitGeneratorDto(
  * [eventCooldown] is given in milliseconds. The default corresponds to 90 seconds. When an event occurs, at least that
  * amount of time will not contain further random events. The other values are probabilities (between 0 and 1):
  * - [allTrapProbability]: Whenever a gem is collected, it could be a "blood diamond", causing all baits to become
- * traps. The default probability is 1%.
+ * traps. The default probability is 0.5%.
  * - [allFoodProbability]: Whenever a coffee is collected, it could be a "coffee from the office machine", causing all
- * baits to become food. The default probability is 1%.
+ * baits to become food. The default probability is 0.5%.
  * - [allCoffeeProbability]: Whenever a player collision happens, there is a chance, that all baits transform into
- * coffee, because the causing player was "too tired" to pay attention. The default probability is 1%.
+ * coffee, because the causing player was "too tired" to pay attention. The default probability is 0.5%.
  * - [allGemProbability]: Whenever a food is collected, it could be an "enchanted golden apple" causing all baits to
- * be transformed into gems. The default probability is 0.5%.
+ * be transformed into gems. The default probability is 0.1%.
  * - [baitRushProbability]: Whenever an invisible trap is stepped on, there is a chance that a bait rush happens. The
- * default probability is 5%.
+ * default probability is 2,5%.
  * - [loseBaitProbability]: Whenever a player collision happens, there is also a chance that the causing player loses a
  * random bait at the collision location (and the corresponding points).
  */
 data class SpecialEventsDto(
     val enabled: Boolean = false,
     val eventCooldown: Long = 90_000,
-    val allTrapProbability: Double = 0.01,
-    val allFoodProbability: Double = 0.01,
-    val allCoffeeProbability: Double = 0.01,
-    val allGemProbability: Double = 0.005,
-    val baitRushProbability: Double = 0.05,
+    val allTrapProbability: Double = 0.005,
+    val allFoodProbability: Double = 0.005,
+    val allCoffeeProbability: Double = 0.005,
+    val allGemProbability: Double = 0.001,
+    val baitRushProbability: Double = 0.025,
     val loseBaitProbability: Double = 0.20
 )
 
@@ -192,9 +192,9 @@ data class SpecialEventsDto(
  *
  * The following two are no special game events. They are tightly bound to invisible gems and invisible traps.
  * - [uncoverInvisibleBaitsOnInvisibleGemProbability]: probability if all invisible baits should be uncovered if an
- * invisible gem is collected. The default value is 0%.
+ * invisible gem is collected. The default value is 50%.
  * - [disarmInvisibleTrapProbability]: probability of bots being able to disarm invisible traps. They then either
- * destroy them or place them behind themselves (this is always a 50:50 coin flip). The default value is 0%.
+ * destroy them or place them behind themselves (this is always a 50:50 coin flip). The default value is 30%.
  *
  * For the other two configurations see [BaitGeneratorDto] and [SpecialEventsDto].
  */
@@ -204,8 +204,8 @@ data class GameDto(
     val autoTrapeater: Boolean = true,
     val allowSpectator: Boolean = true,
     val delayCompensation: Boolean = true,
-    val uncoverInvisibleBaitsOnInvisibleGemProbability: Double = 0.0,
-    val disarmInvisibleTrapProbability: Double = 0.0,
+    val uncoverInvisibleBaitsOnInvisibleGemProbability: Double = 0.25,
+    val disarmInvisibleTrapProbability: Double = 0.3,
     val baitGenerator: BaitGeneratorDto = BaitGeneratorDto(),
     val events: SpecialEventsDto = SpecialEventsDto()
 )
