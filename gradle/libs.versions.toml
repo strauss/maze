@@ -25,7 +25,7 @@ kotlinxSerialization = "1.6.3"
 kotlinxHtml = "0.12.0"
 kotlinxExtensions = "1.0.1-pre.823"
 kotlinxCoroutines = "1.10.2"
-shadow = "8.1.1"
+shadow = "9.4.1"
 reflections = "0.10.2"
 dokka = "1.9.20"
 flatlaf = "3.6.2"
@@ -37,7 +37,7 @@ kpresence = "0.6.6"
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-shadow-jar = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+shadow-jar = { id = "com.gradleup.shadow", version.ref = "shadow" }
 jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
 # --- Bibliotheken ------------------------------------------------------
